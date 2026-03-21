@@ -124,20 +124,15 @@ app.onError((err, c) => {
     );
 });
 
+import { handleScheduled } from "./scheduled.js";
+import { handleQueue } from "./queue.js";
+
 export default {
     fetch: app.fetch,
-    scheduled: async (
-        _event: ScheduledEvent,
-        _env: Bindings,
-        _ctx: ExecutionContext,
-    ) => {
-        // Will be implemented in scheduled.ts
+    async scheduled(event: ScheduledEvent, env: Bindings, ctx: ExecutionContext) {
+        ctx.waitUntil(handleScheduled(env));
     },
-    queue: async (
-        _batch: MessageBatch,
-        _env: Bindings,
-        _ctx: ExecutionContext,
-    ) => {
-        // Will be implemented in queue.ts
+    async queue(batch: MessageBatch, env: Bindings, ctx: ExecutionContext) {
+        ctx.waitUntil(handleQueue(batch, env));
     },
 };

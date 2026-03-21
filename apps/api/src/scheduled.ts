@@ -1,8 +1,9 @@
 /**
  * Cloudflare Workers Cron Trigger handler.
  *
- * Runs on a schedule (configured in wrangler.toml) and enqueues a scan job
- * for every municipality whose scan frequency threshold has been exceeded.
+ * Runs daily and enqueues TWO types of scan jobs:
+ *   1. SHORT-TERM (daily): compare today vs yesterday → catches sudden changes
+ *   2. LONG-TERM (biweekly): compare today vs ~90 days ago → catches gradual construction
  */
 
 import { drizzle } from "drizzle-orm/d1";
@@ -15,6 +16,8 @@ import type { Bindings } from "./types.js";
 // Queue message shape
 // ---------------------------------------------------------------------------
 
+export type ComparisonMode = "short_term" | "long_term";
+
 export interface ScanJobMessage {
     jobId: string;
     municipalityId: string;
@@ -24,21 +27,17 @@ export interface ScanJobMessage {
         east: number;
         west: number;
     };
+    comparisonMode: ComparisonMode;
 }
 
 // ---------------------------------------------------------------------------
 // handleScheduled
 // ---------------------------------------------------------------------------
 
-/**
- * Evaluate all municipalities that have scanning enabled and enqueue a
- * detection job for those whose scan frequency threshold has been exceeded.
- */
 export async function handleScheduled(env: Bindings): Promise<void> {
     const db = drizzle(env.DB);
-    const now = Math.floor(Date.now() / 1_000); // Unix epoch seconds
+    const now = Math.floor(Date.now() / 1_000);
 
-    // Fetch all municipalities with scanning enabled
     const rows = await db
         .select()
         .from(municipalities)
@@ -49,100 +48,67 @@ export async function handleScheduled(env: Bindings): Promise<void> {
     let enqueued = 0;
 
     for (const municipality of rows) {
-        if (!shouldScan(municipality.scanFrequency, municipality.lastScanAt, now)) {
-            continue;
-        }
-
-        // Parse bounds from the JSON column
+        // Parse bounds
         let bounds: ScanJobMessage["bounds"] | null = null;
         if (municipality.bounds) {
             try {
                 bounds = JSON.parse(municipality.bounds) as ScanJobMessage["bounds"];
             } catch {
-                console.warn(
-                    `[scheduler] Could not parse bounds for municipality ${municipality.id}, skipping.`,
-                );
+                console.warn(`[scheduler] Could not parse bounds for ${municipality.id}, skipping.`);
                 continue;
             }
         }
-
         if (!bounds) {
-            console.warn(
-                `[scheduler] Municipality ${municipality.id} has no bounds defined, skipping.`,
-            );
+            console.warn(`[scheduler] Municipality ${municipality.id} has no bounds, skipping.`);
             continue;
         }
 
-        // Create the scan_jobs row
-        const jobId = ulid();
+        // --- Always enqueue a SHORT-TERM (daily) job ---
+        const shortJobId = ulid();
         await db.insert(scanJobs).values({
-            id: jobId,
+            id: shortJobId,
             municipalityId: municipality.id,
             status: "pending",
             createdAt: now,
         });
-
-        // Enqueue the message
-        const message: ScanJobMessage = {
-            jobId,
+        await env.DETECTION_QUEUE.send({
+            jobId: shortJobId,
             municipalityId: municipality.id,
             bounds,
-        };
-        await env.DETECTION_QUEUE.send(message);
+            comparisonMode: "short_term",
+        } satisfies ScanJobMessage);
+        enqueued++;
 
-        // Update last_scan_at on the municipality
+        console.log(`[scheduler] Enqueued SHORT-TERM job ${shortJobId} for ${municipality.name}`);
+
+        // --- Enqueue a LONG-TERM job every 14 days ---
+        const lastScan = municipality.lastScanAt ?? 0;
+        const daysSinceLastLongTerm = (now - lastScan) / 86_400;
+        if (daysSinceLastLongTerm >= 14 || lastScan === 0) {
+            const longJobId = ulid();
+            await db.insert(scanJobs).values({
+                id: longJobId,
+                municipalityId: municipality.id,
+                status: "pending",
+                createdAt: now,
+            });
+            await env.DETECTION_QUEUE.send({
+                jobId: longJobId,
+                municipalityId: municipality.id,
+                bounds,
+                comparisonMode: "long_term",
+            } satisfies ScanJobMessage);
+            enqueued++;
+
+            console.log(`[scheduler] Enqueued LONG-TERM job ${longJobId} for ${municipality.name}`);
+        }
+
+        // Update last_scan_at
         await db
             .update(municipalities)
             .set({ lastScanAt: now })
             .where(eq(municipalities.id, municipality.id));
-
-        console.log(
-            `[scheduler] Enqueued job ${jobId} for municipality ${municipality.id} (${municipality.name}).`,
-        );
-        enqueued++;
     }
 
     console.log(`[scheduler] Done — ${enqueued} job(s) enqueued.`);
-}
-
-// ---------------------------------------------------------------------------
-// Internal helpers
-// ---------------------------------------------------------------------------
-
-const SECONDS_IN_DAY = 86_400;
-
-/**
- * Determine whether a municipality is due for a new scan based on its
- * configured frequency and the timestamp of its last scan.
- *
- * @param frequency  - "daily" | "weekly" | "biweekly" | "monthly"
- * @param lastScanAt - Unix epoch seconds of the last scan, or null / undefined.
- * @param now        - Current Unix epoch seconds.
- */
-function shouldScan(
-    frequency: string,
-    lastScanAt: number | null | undefined,
-    now: number,
-): boolean {
-    if (lastScanAt === null || lastScanAt === undefined) {
-        // Never scanned — always eligible
-        return true;
-    }
-
-    const elapsedDays = (now - lastScanAt) / SECONDS_IN_DAY;
-
-    switch (frequency) {
-        case "daily":
-            return true;
-        case "weekly":
-            return elapsedDays > 7;
-        case "biweekly":
-            return elapsedDays > 14;
-        case "monthly":
-            return elapsedDays > 30;
-        default:
-            // Unknown frequency — default to daily behaviour
-            console.warn(`[scheduler] Unknown scan frequency "${frequency}", defaulting to daily.`);
-            return true;
-    }
 }

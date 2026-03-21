@@ -3,7 +3,7 @@
  *
  * Each message in the batch represents a pending scan job.  The handler:
  *   1. Fetches the latest Sentinel-2 imagery for the municipality's bbox.
- *   2. Compares it against the previous baseline image via the AI detection API.
+ *   2. Compares it against the OLDEST baseline image (not yesterday's) via AI.
  *   3. Persists any detections as alerts and notifications in D1.
  *   4. Emails managers via Resend.
  *   5. Marks the scan job completed (or failed on error).
@@ -15,7 +15,7 @@
  */
 
 import { drizzle } from "drizzle-orm/d1";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, asc, desc, lte, isNotNull, ne } from "drizzle-orm";
 import {
     scanJobs,
     alerts,
@@ -42,10 +42,13 @@ import type { Bindings } from "./types.js";
 // Queue message shape  (must match the shape produced by scheduled.ts)
 // ---------------------------------------------------------------------------
 
+type ComparisonMode = "short_term" | "long_term";
+
 interface ScanJobMessage {
     jobId: string;
     municipalityId: string;
     bounds: BBox;
+    comparisonMode?: ComparisonMode; // undefined treated as "short_term" for backward compat
 }
 
 // ---------------------------------------------------------------------------
@@ -84,8 +87,10 @@ async function processMessage(
     env: Bindings,
     db: ReturnType<typeof drizzle>,
 ): Promise<void> {
-    const { jobId, municipalityId, bounds } = body;
+    const { jobId, municipalityId, bounds, comparisonMode = "short_term" } = body;
     const now = Math.floor(Date.now() / 1_000);
+
+    console.log(`[queue] Processing job ${jobId} (mode: ${comparisonMode})`);
 
     console.log(`[queue] Processing job ${jobId} for municipality ${municipalityId}.`);
 
@@ -143,23 +148,61 @@ async function processMessage(
     const { imageKey: afterImageKey, imageryDate } = afterResult;
 
     // ------------------------------------------------------------------
-    // 3. Find the previous completed scan job to use as the baseline
+    // 3. Select baseline image based on comparison mode:
+    //    SHORT-TERM: most recent completed scan (yesterday) → sudden changes
+    //    LONG-TERM:  oldest scan ≥90 days ago → gradual construction
     // ------------------------------------------------------------------
-    const [previousJob] = await db
-        .select({
-            afterImageKey: scanJobs.afterImageKey,
-        })
-        .from(scanJobs)
-        .where(
-            and(
-                eq(scanJobs.municipalityId, municipalityId),
-                eq(scanJobs.status, "completed"),
-            ),
-        )
-        .orderBy(desc(scanJobs.completedAt))
-        .limit(1);
+    let beforeImageKey: string | null = null;
 
-    const beforeImageKey = previousJob?.afterImageKey ?? null;
+    if (comparisonMode === "long_term") {
+        // LONG-TERM: find an image from ~90+ days ago
+        const ninetyDaysAgo = now - 90 * 24 * 60 * 60;
+        let [baselineJob] = await db
+            .select({ afterImageKey: scanJobs.afterImageKey })
+            .from(scanJobs)
+            .where(
+                and(
+                    eq(scanJobs.municipalityId, municipalityId),
+                    eq(scanJobs.status, "completed"),
+                    isNotNull(scanJobs.afterImageKey),
+                    lte(scanJobs.completedAt, ninetyDaysAgo),
+                ),
+            )
+            .orderBy(asc(scanJobs.completedAt))
+            .limit(1);
+
+        // Fallback: oldest available if nothing ≥90 days
+        if (!baselineJob) {
+            [baselineJob] = await db
+                .select({ afterImageKey: scanJobs.afterImageKey })
+                .from(scanJobs)
+                .where(
+                    and(
+                        eq(scanJobs.municipalityId, municipalityId),
+                        eq(scanJobs.status, "completed"),
+                        isNotNull(scanJobs.afterImageKey),
+                    ),
+                )
+                .orderBy(asc(scanJobs.completedAt))
+                .limit(1);
+        }
+        beforeImageKey = baselineJob?.afterImageKey ?? null;
+    } else {
+        // SHORT-TERM: most recent completed scan (yesterday's image)
+        const [recentJob] = await db
+            .select({ afterImageKey: scanJobs.afterImageKey })
+            .from(scanJobs)
+            .where(
+                and(
+                    eq(scanJobs.municipalityId, municipalityId),
+                    eq(scanJobs.status, "completed"),
+                    isNotNull(scanJobs.afterImageKey),
+                ),
+            )
+            .orderBy(desc(scanJobs.completedAt))
+            .limit(1);
+        beforeImageKey = recentJob?.afterImageKey ?? null;
+    }
 
     if (!beforeImageKey) {
         // No previous image — store this as the new baseline and exit
@@ -236,8 +279,35 @@ async function processMessage(
         name: municipalityRow.name,
     };
 
+    // Pre-fetch existing open alerts for deduplication (within ~50m radius)
+    const existingAlerts = await db
+        .select({ latitude: alerts.latitude, longitude: alerts.longitude })
+        .from(alerts)
+        .where(
+            and(
+                eq(alerts.municipalityId, municipalityId),
+                ne(alerts.status, "cloturee"),
+            ),
+        );
+
+    function isDuplicate(lat: number, lng: number): boolean {
+        // ~0.00045 degrees ≈ 50 meters at Quebec's latitude
+        const threshold = 0.00045;
+        return existingAlerts.some(
+            (a) => Math.abs(a.latitude - lat) < threshold && Math.abs(a.longitude - lng) < threshold,
+        );
+    }
+
+    let skippedDuplicates = 0;
+
     for (const detection of detections) {
-        // 6a. Create alert
+        // 6a. Deduplication — skip if an open alert already exists nearby
+        if (isDuplicate(detection.latitude, detection.longitude)) {
+            skippedDuplicates++;
+            continue;
+        }
+
+        // 6b. Create alert
         const alertId = ulid();
         await db.insert(alerts).values({
             id: alertId,
@@ -259,7 +329,7 @@ async function processMessage(
             createdAt: now,
         });
 
-        // 6b. Create notifications for all managers and inspectors
+        // 6c. Create notifications for all managers and inspectors
         for (const user of notifyUsers) {
             const notifId = ulid();
             const typeLabel = formatTypeLabel(detection.type);
@@ -279,7 +349,7 @@ async function processMessage(
             });
         }
 
-        // 6c. Send email to managers only
+        // 6d. Send email to managers only
         if (managers.length > 0) {
             const alertSummary: AlertSummary = {
                 id: alertId,
@@ -316,12 +386,16 @@ async function processMessage(
         .update(scanJobs)
         .set({
             status: "completed",
-            detectionsCount: detections.length,
+            detectionsCount: detections.length - skippedDuplicates,
             completedAt: now,
         })
         .where(eq(scanJobs.id, jobId));
 
-    console.log(`[queue] Job ${jobId} completed with ${detections.length} detection(s).`);
+    console.log(
+        `[queue] Job ${jobId} completed: ${detections.length} detection(s), ` +
+        `${skippedDuplicates} duplicate(s) skipped, ` +
+        `${detections.length - skippedDuplicates} new alert(s) created.`,
+    );
 }
 
 // ---------------------------------------------------------------------------
