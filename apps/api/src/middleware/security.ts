@@ -47,7 +47,4 @@ export async function securityHeaders(c: Context, next: Next): Promise<Response 
             "interest-cohort=()",
         ].join(", "),
     );
-
-    // Remove the X-Powered-By header if present
-    c.header("X-Powered-By", "");
 }

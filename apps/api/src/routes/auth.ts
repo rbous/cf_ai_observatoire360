@@ -4,7 +4,6 @@ import { drizzle } from "drizzle-orm/d1";
 import { eq } from "drizzle-orm";
 import {
     loginSchema,
-    registerSchema,
     forgotPasswordSchema,
     resetPasswordSchema,
 } from "@observatoire360/shared";
@@ -16,13 +15,18 @@ import {
     hashRefreshToken,
 } from "../lib/auth.js";
 import { ulid } from "../lib/ulid.js";
-import { users, refreshTokens, municipalities } from "../db/schema.js";
+import { users, refreshTokens } from "../db/schema.js";
 import type { Bindings } from "../types.js";
 
 const ACCESS_TOKEN_TTL  = 60 * 15;           // 15 minutes
 const REFRESH_TOKEN_TTL = 60 * 60 * 24 * 30; // 30 days
 
 const REFRESH_COOKIE = "refresh_token";
+
+// Dummy hash used for constant-time comparison when user is not found.
+// Iteration count matches PBKDF2_ITERATIONS in lib/auth.ts (100,000).
+const DUMMY_HASH =
+    "pbkdf2:100000:AAAAAAAAAAAAAAAAAAAAAA==:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -48,107 +52,20 @@ function refreshCookieOptions(env: string) {
 
 const auth = new Hono<{ Bindings: Bindings }>();
 
-// POST /auth/register
-auth.post("/register", async (c) => {
-    const body = await c.req.json().catch(() => null);
-    const parsed = registerSchema.safeParse(body);
-    if (!parsed.success) {
-        return c.json(
-            {
-                error: "VALIDATION_ERROR",
-                message: "Données invalides.",
-                details: parsed.error.flatten().fieldErrors,
-                statusCode: 422,
-            },
-            422,
-        );
-    }
-
-    const { email, password, name, municipalityId } = parsed.data;
-    const db = drizzle(c.env.DB);
-
-    // Verify municipality exists
-    const [muni] = await db
-        .select({ id: municipalities.id })
-        .from(municipalities)
-        .where(eq(municipalities.id, municipalityId))
-        .limit(1);
-
-    if (!muni) {
-        return c.json(
-            { error: "NOT_FOUND", message: "Municipalité introuvable.", statusCode: 404 },
-            404,
-        );
-    }
-
-    // Check email uniqueness
-    const [existing] = await db
-        .select({ id: users.id })
-        .from(users)
-        .where(eq(users.email, email.toLowerCase()))
-        .limit(1);
-
-    if (existing) {
-        return c.json(
-            { error: "CONFLICT", message: "Cette adresse courriel est déjà utilisée.", statusCode: 409 },
-            409,
-        );
-    }
-
-    const ts = now();
-    const newUser = {
-        id: ulid(),
-        municipalityId,
-        email: email.toLowerCase(),
-        passwordHash: await hashPassword(password),
-        name,
-        role: "inspector" as const,
-        isActive: true,
-        createdAt: ts,
-        updatedAt: ts,
-    };
-
-    await db.insert(users).values(newUser);
-
-    // Issue tokens
-    const jwtPayload = {
-        sub: newUser.id,
-        role: newUser.role,
-        municipalityId: newUser.municipalityId,
-    };
-
-    const accessToken = await signJwt(jwtPayload, c.env.JWT_SECRET, ACCESS_TOKEN_TTL);
-    const rawRefresh  = generateRefreshToken();
-    const tokenHash   = await hashRefreshToken(rawRefresh);
-
-    await db.insert(refreshTokens).values({
-        id: ulid(),
-        userId: newUser.id,
-        tokenHash,
-        expiresAt: ts + REFRESH_TOKEN_TTL,
-        createdAt: ts,
-    });
-
-    setCookie(c, REFRESH_COOKIE, rawRefresh, refreshCookieOptions(c.env.ENVIRONMENT));
-
+// POST /auth/register — disabled; invitation-only
+auth.post("/register", (c) => {
     return c.json(
         {
-            accessToken,
-            user: {
-                id: newUser.id,
-                email: newUser.email,
-                name: newUser.name,
-                role: newUser.role,
-                municipalityId: newUser.municipalityId,
-            },
+            error: "FORBIDDEN",
+            message: "L'inscription est réservée aux administrateurs. Contactez votre gestionnaire.",
+            statusCode: 403,
         },
-        201,
+        403,
     );
 });
 
 // POST /auth/login
 auth.post("/login", async (c) => {
-  try {
     const body = await c.req.json().catch(() => null);
     const parsed = loginSchema.safeParse(body);
     if (!parsed.success) {
@@ -173,12 +90,10 @@ auth.post("/login", async (c) => {
         .limit(1);
 
     // Use constant-time verify to prevent timing attacks regardless of whether user exists
-    const dummyHash =
-        "pbkdf2:600000:AAAAAAAAAAAAAAAAAAAAAA==:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
     const valid =
         user && user.isActive
             ? await verifyPassword(password, user.passwordHash)
-            : await verifyPassword(password, dummyHash).then(() => false);
+            : await verifyPassword(password, DUMMY_HASH).then(() => false);
 
     if (!valid) {
         return c.json(
@@ -218,13 +133,6 @@ auth.post("/login", async (c) => {
             municipalityId: user.municipalityId,
         },
     });
-  } catch (err) {
-    console.error("[LOGIN ERROR]", err instanceof Error ? err.message : err, err instanceof Error ? err.stack : "");
-    return c.json(
-        { error: "INTERNAL_SERVER_ERROR", message: String(err instanceof Error ? err.message : err), statusCode: 500 },
-        500,
-    );
-  }
 });
 
 // POST /auth/refresh
@@ -350,8 +258,34 @@ auth.post("/forgot-password", async (c) => {
             createdAt: ts,
         });
 
-        // In production, send `rawToken` via email here.
-        // e.g. await sendResetEmail(user.email, rawToken);
+        // Send password reset email via Resend
+        const resetUrl = `${c.env.ALLOWED_ORIGIN}/reinitialiser-mot-de-passe?token=${rawToken}`;
+        try {
+            const { sendEmail } = await import("../lib/resend.js");
+            await sendEmail(c.env.RESEND_API_KEY, {
+                to: user.email,
+                subject: "[Observatoire 360] Réinitialisation de votre mot de passe",
+                html: `
+                    <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px">
+                        <div style="background:#008B8B;padding:16px 24px;border-radius:12px 12px 0 0;text-align:center">
+                            <h1 style="color:white;margin:0;font-size:20px">Observatoire 360</h1>
+                        </div>
+                        <div style="background:#f8fffe;padding:24px;border:1px solid #e0f2f1;border-top:none;border-radius:0 0 12px 12px">
+                            <p style="color:#1A2332;font-size:15px">Vous avez demandé la réinitialisation de votre mot de passe.</p>
+                            <p style="color:#1A2332;font-size:15px">Cliquez sur le bouton ci-dessous pour créer un nouveau mot de passe. Ce lien expire dans <strong>1 heure</strong>.</p>
+                            <div style="text-align:center;margin:24px 0">
+                                <a href="${resetUrl}" style="display:inline-block;background:#D4A843;color:white;padding:12px 32px;border-radius:9999px;text-decoration:none;font-weight:bold;font-size:15px">
+                                    Réinitialiser mon mot de passe
+                                </a>
+                            </div>
+                            <p style="color:#666;font-size:13px">Si vous n'avez pas fait cette demande, ignorez simplement ce courriel.</p>
+                        </div>
+                    </div>
+                `.trim(),
+            });
+        } catch (err) {
+            console.error("[auth] Failed to send password reset email:", err);
+        }
     }
 
     return c.json({

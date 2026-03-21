@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
+import { api } from "@/app/lib/api";
 
 export default function ResetPasswordPage() {
+    const [searchParams] = useSearchParams();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
@@ -17,8 +19,13 @@ export default function ResetPasswordPage() {
         setError(null);
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        const token = searchParams.get("token");
+        if (!token) {
+            setError("Lien de réinitialisation invalide ou manquant.");
+            return;
+        }
         if (form.password !== form.confirm) {
             setError("Les mots de passe ne correspondent pas.");
             return;
@@ -27,7 +34,7 @@ export default function ResetPasswordPage() {
             setError("Le mot de passe doit contenir au moins 8 caractères.");
             return;
         }
-        // TODO: implement reset password
+        await api.post("/auth/reset-password", { token, password: form.password });
         setIsSubmitted(true);
     };
 

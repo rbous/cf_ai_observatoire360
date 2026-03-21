@@ -31,7 +31,7 @@ function base64ToBuffer(base64: string): Uint8Array {
 
 /**
  * Hash a plaintext password using PBKDF2-SHA256.
- * Returns a string in the format: pbkdf2:600000:salt_base64:hash_base64
+ * Returns a string in the format: pbkdf2:100000:salt_base64:hash_base64
  */
 export async function hashPassword(password: string): Promise<string> {
     const salt = new Uint8Array(SALT_BYTES);

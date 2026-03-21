@@ -131,6 +131,13 @@ alertsRouter.get("/:id", async (c) => {
 // ---------------------------------------------------------------------------
 
 alertsRouter.put("/:id", async (c) => {
+    if (c.get("role") === "readonly") {
+        return c.json(
+            { error: "FORBIDDEN", message: "Accès refusé. Permissions insuffisantes.", statusCode: 403 },
+            403,
+        );
+    }
+
     const municipalityId = c.get("municipalityId");
     const { id } = c.req.param();
 

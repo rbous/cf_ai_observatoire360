@@ -57,7 +57,7 @@ scans.get("/", async (c) => {
     const pageRaw = parseInt(c.req.query("page") ?? "1", 10);
     const pageSizeRaw = parseInt(c.req.query("pageSize") ?? "20", 10);
     const page = isNaN(pageRaw) || pageRaw < 1 ? 1 : pageRaw;
-    const pageSize = isNaN(pageSizeRaw) || pageSizeRaw < 1 ? 20 : pageSizeRaw;
+    const pageSize = Math.min(isNaN(pageSizeRaw) || pageSizeRaw < 1 ? 20 : pageSizeRaw, 100);
     const statusFilter = c.req.query("status");
 
     if (statusFilter && !SCAN_JOB_STATUSES.includes(statusFilter as ScanJobStatus)) {

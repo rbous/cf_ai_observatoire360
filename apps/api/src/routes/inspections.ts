@@ -63,6 +63,13 @@ inspectionsRouter.get("/", async (c) => {
 // ---------------------------------------------------------------------------
 
 inspectionsRouter.post("/", async (c) => {
+    if (c.get("role") === "readonly") {
+        return c.json(
+            { error: "FORBIDDEN", message: "Accès refusé. Permissions insuffisantes.", statusCode: 403 },
+            403,
+        );
+    }
+
     const body = await c.req.json().catch(() => null);
     const parsed = createInspectionSchema.safeParse(body);
 
@@ -138,6 +145,13 @@ inspectionsRouter.post("/", async (c) => {
 // ---------------------------------------------------------------------------
 
 inspectionsRouter.put("/:id", async (c) => {
+    if (c.get("role") === "readonly") {
+        return c.json(
+            { error: "FORBIDDEN", message: "Accès refusé. Permissions insuffisantes.", statusCode: 403 },
+            403,
+        );
+    }
+
     const { id } = c.req.param();
     const municipalityId = c.get("municipalityId");
 
@@ -198,6 +212,13 @@ inspectionsRouter.put("/:id", async (c) => {
 // ---------------------------------------------------------------------------
 
 inspectionsRouter.delete("/:id", async (c) => {
+    if (c.get("role") === "readonly") {
+        return c.json(
+            { error: "FORBIDDEN", message: "Accès refusé. Permissions insuffisantes.", statusCode: 403 },
+            403,
+        );
+    }
+
     const { id } = c.req.param();
     const municipalityId = c.get("municipalityId");
     const db = drizzle(c.env.DB);

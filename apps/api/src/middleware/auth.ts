@@ -1,5 +1,4 @@
 import type { Context, MiddlewareHandler, Next } from "hono";
-import { getCookie } from "hono/cookie";
 import { verifyJwt } from "../lib/auth.js";
 import type { JwtPayload, UserRole } from "@observatoire360/shared";
 import type { Bindings } from "../types.js";
@@ -15,9 +14,8 @@ export type AuthVariables = {
 /**
  * JWT authentication middleware.
  *
- * Looks for the bearer token in (in order):
+ * Looks for the bearer token in:
  *   1. Authorization: Bearer <token> header
- *   2. `access_token` httpOnly cookie
  *
  * On success sets the following context variables:
  *   - userId         — JWT `sub` claim
@@ -37,15 +35,10 @@ export function requireAuth(): MiddlewareHandler<{
     ) => {
         let token: string | undefined;
 
-        // 1. Authorization header
+        // Authorization header
         const authHeader = c.req.header("Authorization");
         if (authHeader?.startsWith("Bearer ")) {
             token = authHeader.slice(7);
-        }
-
-        // 2. Fallback to cookie
-        if (!token) {
-            token = getCookie(c, "access_token");
         }
 
         if (!token) {

@@ -4,14 +4,15 @@ import { motion } from "framer-motion";
 import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
+import { api } from "@/app/lib/api";
 
 export default function ForgotPasswordPage() {
     const [email, setEmail] = useState("");
     const [isSubmitted, setIsSubmitted] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // TODO: implement forgot password
+        await api.post("/auth/forgot-password", { email });
         setIsSubmitted(true);
     };
 

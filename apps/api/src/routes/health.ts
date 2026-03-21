@@ -11,7 +11,6 @@ healthRouter.get("/", (c) => {
     return c.json({
         status: "ok",
         timestamp: Math.floor(Date.now() / 1000),
-        environment: c.env.ENVIRONMENT ?? "unknown",
     });
 });
 

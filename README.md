@@ -77,12 +77,14 @@ Open http://localhost:5173
 
 ### Demo Credentials
 
-| Email | Password | Role |
-|-------|----------|------|
-| `demo@observatoire360.com` | `[REDACTED_PASSWORD]` | Manager |
-| `inspector@obs360.com` | `[REDACTED_PASSWORD]` | Inspector |
-| `analyst@obs360.com` | `[REDACTED_PASSWORD]` | Analyst |
-| `readonly@obs360.com` | `[REDACTED_PASSWORD]` | Read-only |
+| Email | Role |
+|-------|------|
+| `demo@observatoire360.com` | Manager |
+| `inspector@obs360.com` | Inspector |
+| `analyst@obs360.com` | Analyst |
+| `readonly@obs360.com` | Read-only |
+
+Passwords are defined in `apps/api/src/db/seed.sql`. Run the seeder to create the demo accounts.
 
 ## Deployment
 
