@@ -1,0 +1,117 @@
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Menu, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/app/components/ui/button";
+import { NAV_LINKS } from "@/app/lib/constants";
+
+export default function Navbar() {
+    const [isScrolled, setIsScrolled] = useState(false);
+    const [isMobileOpen, setIsMobileOpen] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => setIsScrolled(window.scrollY > 20);
+        window.addEventListener("scroll", handleScroll, { passive: true });
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
+
+    const handleNavClick = (href: string) => {
+        setIsMobileOpen(false);
+        const id = href.replace("#", "");
+        const el = document.getElementById(id);
+        if (el) {
+            el.scrollIntoView({ behavior: "smooth" });
+        }
+    };
+
+    return (
+        <>
+            <nav
+                className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+                    isScrolled
+                        ? "bg-white/95 backdrop-blur-md shadow-md"
+                        : "bg-transparent"
+                }`}
+            >
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex items-center justify-between h-16 lg:h-20">
+                        {/* Logo */}
+                        <Link to="/" className="flex items-center gap-2 group">
+                            <div className="w-8 h-8 rounded-full bg-[#008B8B] flex items-center justify-center">
+                                <span className="text-white font-bold text-xs">O</span>
+                            </div>
+                            <span
+                                className={`font-bold text-lg tracking-tight transition-colors ${
+                                    isScrolled ? "text-[#1A2332]" : "text-[#1A2332]"
+                                } group-hover:text-[#008B8B]`}
+                            >
+                                Observatoire <span className="text-[#008B8B]">360</span>
+                            </span>
+                        </Link>
+
+                        {/* Desktop nav links */}
+                        <div className="hidden lg:flex items-center gap-6">
+                            {NAV_LINKS.map((link) => (
+                                <button
+                                    key={link.label}
+                                    onClick={() => handleNavClick(link.href)}
+                                    className="text-xs font-semibold tracking-wide text-[#1A2332] hover:text-[#008B8B] transition-colors cursor-pointer whitespace-nowrap"
+                                >
+                                    {link.label}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* CTA + hamburger */}
+                        <div className="flex items-center gap-3">
+                            <Link to="/connexion" className="hidden sm:block">
+                                <Button variant="accent" size="default" className="font-bold tracking-wide text-xs uppercase">
+                                    ESPACE CLIENT
+                                </Button>
+                            </Link>
+                            <button
+                                onClick={() => setIsMobileOpen(!isMobileOpen)}
+                                className="lg:hidden p-2 rounded-lg text-[#1A2332] hover:bg-[#008B8B]/10 transition-colors"
+                                aria-label="Menu"
+                            >
+                                {isMobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            {/* Mobile menu */}
+            <AnimatePresence>
+                {isMobileOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        className="fixed top-16 left-0 right-0 z-40 bg-white/98 backdrop-blur-md shadow-xl border-t border-gray-100 lg:hidden"
+                    >
+                        <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-1">
+                            {NAV_LINKS.map((link) => (
+                                <button
+                                    key={link.label}
+                                    onClick={() => handleNavClick(link.href)}
+                                    className="text-left px-4 py-3 text-sm font-semibold text-[#1A2332] hover:text-[#008B8B] hover:bg-[#008B8B]/5 rounded-lg transition-colors tracking-wide"
+                                >
+                                    {link.label}
+                                </button>
+                            ))}
+                            <div className="pt-2 border-t border-gray-100 mt-2">
+                                <Link to="/connexion" onClick={() => setIsMobileOpen(false)}>
+                                    <Button variant="accent" size="lg" className="w-full font-bold tracking-wide text-sm uppercase">
+                                        ESPACE CLIENT
+                                    </Button>
+                                </Link>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </>
+    );
+}

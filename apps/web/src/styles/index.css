@@ -1,0 +1,31 @@
+@import "tailwindcss";
+@import "./theme.css";
+
+@theme {
+    --color-primary: var(--color-primary);
+    --color-primary-light: var(--color-primary-light);
+    --color-primary-dark: var(--color-primary-dark);
+    --color-accent: var(--color-accent);
+    --color-accent-hover: var(--color-accent-hover);
+    --color-navy: var(--color-navy);
+    --color-navy-light: var(--color-navy-light);
+    --color-risk-high: var(--color-risk-high);
+    --color-risk-medium: var(--color-risk-medium);
+    --color-risk-low: var(--color-risk-low);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-body);
+    color: var(--color-navy);
+    background-color: var(--color-bg-gradient-end);
+    margin: 0;
+    padding: 0;
+}

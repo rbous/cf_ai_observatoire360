@@ -1,0 +1,196 @@
+import { motion } from "framer-motion";
+import { Button } from "@/app/components/ui/button";
+
+interface BlobData {
+    problem: string;
+    solution: string;
+    color: string;
+    delay: number;
+    floatY: number[];
+    floatX: number[];
+    rotate: number[];
+}
+
+const BLOBS: BlobData[] = [
+    {
+        problem: "Inspections manuelles coûteuses",
+        solution: "Détection automatique par satellite",
+        color: "#008B8B",
+        delay: 0,
+        floatY: [0, -16, 0],
+        floatX: [0, 6, 0],
+        rotate: [0, 3, 0],
+    },
+    {
+        problem: "Constructions illégales non détectées",
+        solution: "Alertes en temps réel avec preuves",
+        color: "#006666",
+        delay: 0.4,
+        floatY: [0, -12, 0],
+        floatX: [0, -8, 0],
+        rotate: [0, -4, 0],
+    },
+    {
+        problem: "Perte de revenus municipaux",
+        solution: "Récupération des revenus perdus",
+        color: "#00BFBF",
+        delay: 0.8,
+        floatY: [0, -20, 0],
+        floatX: [0, 5, 0],
+        rotate: [0, 5, 0],
+    },
+    {
+        problem: "Surcharge de travail des inspecteurs",
+        solution: "Libération de votre équipe",
+        color: "#D4A843",
+        delay: 1.2,
+        floatY: [0, -10, 0],
+        floatX: [0, -4, 0],
+        rotate: [0, -2, 0],
+    },
+];
+
+// CSS clip-path clover/blob shape
+const BLOB_CLIP =
+    "polygon(50% 0%, 80% 10%, 100% 35%, 85% 65%, 65% 85%, 35% 90%, 10% 75%, 0% 45%, 15% 20%)";
+
+interface FloatingBlobProps {
+    data: BlobData;
+    index: number;
+}
+
+function FloatingBlob({ data, index }: FloatingBlobProps) {
+    return (
+        <motion.div
+            initial={{ opacity: 0, scale: 0.7 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, delay: data.delay }}
+        >
+            <motion.div
+                animate={{
+                    y: data.floatY,
+                    x: data.floatX,
+                    rotate: data.rotate,
+                }}
+                transition={{
+                    duration: 4 + index * 0.5,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    repeatType: "reverse",
+                }}
+                className="relative"
+            >
+                {/* Blob shape */}
+                <div
+                    className="w-52 h-52 sm:w-60 sm:h-60 flex flex-col items-center justify-center p-6 text-center cursor-pointer group"
+                    style={{
+                        background: `radial-gradient(circle at 40% 40%, ${data.color}ee, ${data.color}bb)`,
+                        clipPath: BLOB_CLIP,
+                        borderRadius: "60% 40% 70% 30% / 30% 60% 40% 70%",
+                        boxShadow: `0 8px 32px ${data.color}40`,
+                    }}
+                >
+                    {/* Inner content */}
+                    <div className="relative z-10">
+                        <div className="mb-2">
+                            <span className="text-white/60 text-xs font-semibold uppercase tracking-wide block mb-1">
+                                Problème
+                            </span>
+                            <p className="text-white font-bold text-sm leading-tight">
+                                {data.problem}
+                            </p>
+                        </div>
+                        <div className="w-8 h-px bg-white/40 mx-auto my-2" />
+                        <div>
+                            <span className="text-white/60 text-xs font-semibold uppercase tracking-wide block mb-1">
+                                Solution
+                            </span>
+                            <p className="text-white font-black text-sm leading-tight">
+                                {data.solution}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </motion.div>
+        </motion.div>
+    );
+}
+
+export default function WhyUs() {
+    const handleDemoClick = () => {
+        const el = document.getElementById("contact");
+        if (el) el.scrollIntoView({ behavior: "smooth" });
+    };
+
+    return (
+        <section className="py-24 lg:py-32 bg-gradient-to-b from-[#f0fafa] to-white overflow-hidden">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                {/* Header */}
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6 }}
+                    className="text-center mb-16"
+                >
+                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black uppercase text-[#1A2332] mb-4">
+                        PKOI NOUS?
+                    </h2>
+                    <p className="text-lg text-[#2A3A4E]/70 max-w-xl mx-auto">
+                        Nous transformons vos défis municipaux en opportunités grâce à la technologie satellite
+                    </p>
+                    <div className="mt-4 w-16 h-1 bg-[#008B8B] mx-auto rounded-full" />
+                </motion.div>
+
+                {/* Blobs grid */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-4 justify-items-center mb-16">
+                    {BLOBS.map((blob, index) => (
+                        <FloatingBlob key={blob.problem} data={blob} index={index} />
+                    ))}
+                </div>
+
+                {/* Bottom stats */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: 0.3 }}
+                    className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto mb-12"
+                >
+                    {[
+                        { value: "10x", label: "Plus efficace que les inspections manuelles" },
+                        { value: "3 mois", label: "Pour voir les premiers résultats" },
+                        { value: "ROI +", label: "Récupérez des revenus perdus" },
+                    ].map((stat) => (
+                        <div
+                            key={stat.label}
+                            className="text-center p-6 rounded-2xl bg-white shadow-md border border-[#008B8B]/10"
+                        >
+                            <div className="text-3xl font-black text-[#008B8B] mb-2">{stat.value}</div>
+                            <div className="text-sm text-[#2A3A4E]/70">{stat.label}</div>
+                        </div>
+                    ))}
+                </motion.div>
+
+                {/* CTA */}
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: 0.5 }}
+                    className="text-center"
+                >
+                    <Button
+                        variant="accent"
+                        size="xl"
+                        onClick={handleDemoClick}
+                        className="font-bold tracking-wide uppercase shadow-lg shadow-[#D4A843]/30"
+                    >
+                        DÉMO GRATUITE
+                    </Button>
+                </motion.div>
+            </div>
+        </section>
+    );
+}

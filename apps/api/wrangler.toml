@@ -1,0 +1,29 @@
+name = "observatoire360-api"
+main = "src/index.ts"
+compatibility_date = "2025-03-14"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+ENVIRONMENT = "production"
+ALLOWED_ORIGIN = "https://observatoire360.pages.dev"
+
+# To get the database_id, run: npx wrangler d1 create observatoire360-db
+# Then replace TODO_REPLACE_WITH_ACTUAL_ID below with the returned ID.
+[[d1_databases]]
+binding = "DB"
+database_name = "observatoire360-db"
+database_id = "TODO_REPLACE_WITH_ACTUAL_ID"
+migrations_dir = "src/db/migrations"
+
+[env.dev]
+[env.dev.vars]
+ENVIRONMENT = "development"
+ALLOWED_ORIGIN = "http://localhost:5173"
+
+[[env.dev.d1_databases]]
+binding = "DB"
+database_name = "observatoire360-db"
+# To get the database_id, run: npx wrangler d1 create observatoire360-db
+# Then replace TODO_REPLACE_WITH_ACTUAL_ID below with the returned ID.
+database_id = "TODO_REPLACE_WITH_ACTUAL_ID"
+migrations_dir = "src/db/migrations"
