@@ -3,7 +3,8 @@ import { motion } from "framer-motion";
 import { Phone, Mail, Clock, MapPin, CheckCircle2 } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
-import { API_BASE_URL, LAUNCH_OFFER_TEXT, CONTACT_PHONE, CONTACT_EMAIL, CONTACT_HOURS, CONTACT_ADDRESS, CONTACT_RESPONSE_TIME } from "@/app/lib/constants";
+import { LAUNCH_OFFER_TEXT, CONTACT_PHONE, CONTACT_EMAIL, CONTACT_HOURS, CONTACT_ADDRESS, CONTACT_RESPONSE_TIME } from "@/app/lib/constants";
+import { api } from "@/app/lib/api";
 
 interface FormData {
     nom: string;
@@ -39,13 +40,13 @@ export default function Contact() {
         setError(null);
 
         try {
-            const res = await fetch(`${API_BASE_URL}/contact`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(form),
+            await api.post("/contact", {
+                name: form.nom,
+                position: form.poste,
+                municipality: form.municipalite,
+                email: form.courriel,
+                description: form.description,
             });
-
-            if (!res.ok) throw new Error("Erreur lors de l'envoi");
 
             setIsSubmitted(true);
             setForm(INITIAL_FORM);

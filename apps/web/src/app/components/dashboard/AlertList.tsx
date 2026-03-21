@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Search, SlidersHorizontal, Loader2 } from "lucide-react";
 import type { RiskLevel, AlertStatus, AlertType } from "@observatoire360/shared";
 import {
     ALERT_STATUS_LABELS,
@@ -10,73 +10,7 @@ import {
 import { RiskBadge } from "@/app/components/shared/RiskBadge";
 import { StatusBadge } from "@/app/components/shared/StatusBadge";
 import { cn } from "@/app/lib/cn";
-
-interface AlertItem {
-    id: string;
-    address: string;
-    type: AlertType;
-    riskLevel: RiskLevel;
-    riskScore: number;
-    status: AlertStatus;
-    detectedAt: string;
-}
-
-const MOCK_ALERTS: AlertItem[] = [
-    {
-        id: "ALT-001",
-        address: "45 Rue Bowen, Sherbrooke",
-        type: "construction",
-        riskLevel: "high",
-        riskScore: 92,
-        status: "a_inspecter",
-        detectedAt: "2026-03-19",
-    },
-    {
-        id: "ALT-004",
-        address: "33 Rue Wellington N",
-        type: "piscine",
-        riskLevel: "high",
-        riskScore: 88,
-        status: "infraction_confirmee",
-        detectedAt: "2026-03-15",
-    },
-    {
-        id: "ALT-002",
-        address: "12 Ave du Plateau",
-        type: "extension",
-        riskLevel: "medium",
-        riskScore: 64,
-        status: "a_analyser",
-        detectedAt: "2026-03-18",
-    },
-    {
-        id: "ALT-005",
-        address: "201 Chemin Godin",
-        type: "extension",
-        riskLevel: "medium",
-        riskScore: 58,
-        status: "a_analyser",
-        detectedAt: "2026-03-17",
-    },
-    {
-        id: "ALT-003",
-        address: "789 Blvd Portland",
-        type: "annexe",
-        riskLevel: "low",
-        riskScore: 31,
-        status: "en_cours",
-        detectedAt: "2026-03-16",
-    },
-    {
-        id: "ALT-006",
-        address: "56 Rue du Roi",
-        type: "construction",
-        riskLevel: "low",
-        riskScore: 22,
-        status: "cloturee",
-        detectedAt: "2026-03-12",
-    },
-];
+import { useAlerts } from "@/app/hooks/useAlerts";
 
 const ALL_OPTION = "all";
 
@@ -87,13 +21,12 @@ export function AlertList() {
     const [filterRisk, setFilterRisk] = useState<RiskLevel | "all">(ALL_OPTION);
     const [filterType, setFilterType] = useState<AlertType | "all">(ALL_OPTION);
 
-    const filtered = MOCK_ALERTS.filter((a) => {
-        const matchSearch = search === "" || a.address.toLowerCase().includes(search.toLowerCase()) || a.id.toLowerCase().includes(search.toLowerCase());
-        const matchStatus = filterStatus === ALL_OPTION || a.status === filterStatus;
-        const matchRisk = filterRisk === ALL_OPTION || a.riskLevel === filterRisk;
-        const matchType = filterType === ALL_OPTION || a.type === filterType;
-        return matchSearch && matchStatus && matchRisk && matchType;
-    }).sort((a, b) => b.riskScore - a.riskScore);
+    const { alerts, total, isLoading, error } = useAlerts({
+        search: search || undefined,
+        status: filterStatus !== ALL_OPTION ? filterStatus : undefined,
+        riskLevel: filterRisk !== ALL_OPTION ? filterRisk : undefined,
+        type: filterType !== ALL_OPTION ? filterType : undefined,
+    });
 
     return (
         <div className="flex flex-col h-full bg-white border-r border-gray-200">
@@ -102,7 +35,7 @@ export function AlertList() {
                 <div className="flex items-center justify-between mb-2">
                     <h2 className="text-sm font-bold text-[#1A2332]">
                         Alertes{" "}
-                        <span className="text-[#008B8B] font-black">{filtered.length}</span>
+                        <span className="text-[#008B8B] font-black">{isLoading ? "…" : total}</span>
                     </h2>
                     <SlidersHorizontal className="w-4 h-4 text-[#2A3A4E]/40" />
                 </div>
@@ -158,12 +91,21 @@ export function AlertList() {
 
             {/* Alert items */}
             <div className="flex-1 overflow-y-auto">
-                {filtered.length === 0 ? (
+                {isLoading ? (
+                    <div className="flex items-center justify-center h-32 gap-2 text-[#2A3A4E]/40">
+                        <Loader2 className="w-4 h-4 animate-spin text-[#008B8B]" />
+                        <span className="text-xs">Chargement…</span>
+                    </div>
+                ) : error ? (
+                    <div className="flex items-center justify-center h-32 text-xs text-red-500 px-4 text-center">
+                        {error}
+                    </div>
+                ) : alerts.length === 0 ? (
                     <div className="flex items-center justify-center h-32 text-xs text-[#2A3A4E]/40">
                         Aucune alerte trouvée
                     </div>
                 ) : (
-                    filtered.map((alert) => (
+                    alerts.map((alert) => (
                         <button
                             key={alert.id}
                             onClick={() => navigate(`/tableau-de-bord/alertes/${alert.id}`)}
@@ -177,10 +119,14 @@ export function AlertList() {
                                 <span className="text-[11px] font-bold text-[#008B8B]">{alert.id}</span>
                                 <RiskBadge level={alert.riskLevel} />
                             </div>
-                            <p className="text-xs font-semibold text-[#1A2332] leading-snug">{alert.address}</p>
+                            <p className="text-xs font-semibold text-[#1A2332] leading-snug">
+                                {alert.address ?? `${alert.latitude.toFixed(4)}, ${alert.longitude.toFixed(4)}`}
+                            </p>
                             <div className="flex items-center justify-between gap-2">
                                 <StatusBadge status={alert.status} />
-                                <span className="text-[10px] text-[#2A3A4E]/40">{alert.detectedAt}</span>
+                                <span className="text-[10px] text-[#2A3A4E]/40">
+                                    {new Date(alert.detectedAt).toLocaleDateString("fr-CA")}
+                                </span>
                             </div>
                         </button>
                     ))

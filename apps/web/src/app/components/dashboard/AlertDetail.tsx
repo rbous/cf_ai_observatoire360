@@ -1,52 +1,13 @@
 import { useState } from "react";
-import { ArrowLeft, MapPin, Calendar, FileText, User, Clock, CheckCircle, AlertTriangle, Image } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, FileText, User, Clock, CheckCircle, AlertTriangle, Image, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
 import { RiskBadge } from "@/app/components/shared/RiskBadge";
 import { StatusBadge } from "@/app/components/shared/StatusBadge";
-import type { RiskLevel, AlertStatus, AlertType } from "@observatoire360/shared";
+import type { Alert, AlertStatus } from "@observatoire360/shared";
 import { ALERT_STATUS_LABELS, ALERT_TYPE_LABELS } from "@observatoire360/shared";
-
-interface AlertDetailData {
-    id: string;
-    address: string;
-    type: AlertType;
-    riskLevel: RiskLevel;
-    riskScore: number;
-    status: AlertStatus;
-    detectedArea: number;
-    authorizedArea: number;
-    zone: string;
-    hasPermit: boolean;
-    coordinates: { lat: number; lng: number };
-    detectedAt: string;
-    events: { date: string; label: string; icon: "detection" | "status" | "assign" | "inspect"; user?: string }[];
-}
-
-// Mock data — each alert ID resolves to this template with slight variations
-function getMockAlert(id: string): AlertDetailData {
-    return {
-        id,
-        address: id === "ALT-001" ? "45 Rue Bowen, Sherbrooke, QC J1H 1W3" : `${id} — Sherbrooke, QC`,
-        type: "construction",
-        riskLevel: id === "ALT-001" ? "high" : id === "ALT-002" ? "medium" : "low",
-        riskScore: id === "ALT-001" ? 92 : id === "ALT-002" ? 64 : 31,
-        status: id === "ALT-001" ? "a_inspecter" : id === "ALT-004" ? "infraction_confirmee" : "a_analyser",
-        detectedArea: 87,
-        authorizedArea: 0,
-        zone: "Résidentielle R1",
-        hasPermit: false,
-        coordinates: { lat: 45.415, lng: -71.882 },
-        detectedAt: "2026-03-19",
-        events: [
-            { date: "2026-03-19 08:42", label: "Détection automatique par satellite", icon: "detection" },
-            { date: "2026-03-19 09:15", label: "Alerte créée — statut : À analyser", icon: "status", user: "Système" },
-            { date: "2026-03-20 10:00", label: "Statut mis à jour : À inspecter", icon: "status", user: "Marie Tremblay" },
-            { date: "2026-03-20 10:05", label: "Assignée à l'inspecteur Jean Bouchard", icon: "assign", user: "Marie Tremblay" },
-        ],
-    };
-}
+import { useApi } from "@/app/hooks/useApi";
 
 const STATUS_OPTIONS: AlertStatus[] = [
     "a_analyser",
@@ -62,8 +23,11 @@ interface AlertDetailProps {
 
 export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
     const navigate = useNavigate();
-    const alert = getMockAlert(alertId);
-    const [currentStatus, setCurrentStatus] = useState<AlertStatus>(alert.status);
+    const { data, isLoading, error } = useApi<{ alert: Alert }>(`/alerts/${alertId}`);
+    const alert = data?.alert;
+    const [currentStatus, setCurrentStatus] = useState<AlertStatus | null>(null);
+
+    const effectiveStatus = currentStatus ?? alert?.status ?? "a_analyser";
 
     const eventIcons = {
         detection: AlertTriangle,
@@ -78,6 +42,39 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
         assign: "text-blue-500 bg-blue-50",
         inspect: "text-amber-500 bg-amber-50",
     };
+
+    if (isLoading) {
+        return (
+            <div className="min-h-full bg-gray-50 p-4 md:p-6 flex items-center justify-center">
+                <div className="flex items-center gap-3 text-[#2A3A4E]/60">
+                    <Loader2 className="w-5 h-5 animate-spin text-[#008B8B]" />
+                    <span className="text-sm font-medium">Chargement de l'alerte…</span>
+                </div>
+            </div>
+        );
+    }
+
+    if (error || !alert) {
+        return (
+            <div className="min-h-full bg-gray-50 p-4 md:p-6">
+                <div className="max-w-5xl mx-auto">
+                    <button
+                        onClick={() => navigate("/tableau-de-bord")}
+                        className="inline-flex items-center gap-1.5 text-sm text-[#008B8B] hover:underline mb-5"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                        Retour à la carte
+                    </button>
+                    <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+                        <AlertTriangle className="w-5 h-5 shrink-0" />
+                        <span>{error ?? "Alerte introuvable."}</span>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    const detectedAtDate = new Date(alert.detectedAt).toLocaleDateString("fr-CA");
 
     return (
         <div className="min-h-full bg-gray-50 p-4 md:p-6">
@@ -99,13 +96,13 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                                 Alerte {alert.id}
                             </h1>
                             <RiskBadge level={alert.riskLevel} />
-                            <StatusBadge status={currentStatus} />
+                            <StatusBadge status={effectiveStatus} />
                         </div>
                         <p className="text-sm text-[#2A3A4E]/60">{ALERT_TYPE_LABELS[alert.type]}</p>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
                         <select
-                            value={currentStatus}
+                            value={effectiveStatus}
                             onChange={(e) => setCurrentStatus(e.target.value as AlertStatus)}
                             className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-white text-[#1A2332] focus:outline-none focus:ring-1 focus:ring-[#008B8B]"
                         >
@@ -137,24 +134,48 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                             </CardHeader>
                             <CardContent>
                                 <div className="grid grid-cols-2 gap-4">
-                                    {(["Avant", "Après"] as const).map((label, idx) => (
-                                        <div key={label}>
-                                            <p className="text-xs font-bold text-[#2A3A4E]/50 uppercase tracking-wide mb-2">{label}</p>
+                                    {/* Before image */}
+                                    <div>
+                                        <p className="text-xs font-bold text-[#2A3A4E]/50 uppercase tracking-wide mb-2">Avant</p>
+                                        {alert.beforeImageKey ? (
+                                            <img
+                                                src={`/api/images/${alert.beforeImageKey}`}
+                                                alt="Image avant"
+                                                className="aspect-video w-full rounded-xl object-cover"
+                                            />
+                                        ) : (
                                             <div
                                                 className="aspect-video rounded-xl flex items-center justify-center overflow-hidden"
-                                                style={{
-                                                    background: idx === 0
-                                                        ? "linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%)"
-                                                        : "linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)",
-                                                }}
+                                                style={{ background: "linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%)" }}
                                             >
                                                 <div className="text-center opacity-50">
                                                     <Image className="w-8 h-8 mx-auto mb-1.5 text-slate-400" />
-                                                    <p className="text-xs text-slate-500 font-medium">Image {label.toLowerCase()}</p>
+                                                    <p className="text-xs text-slate-500 font-medium">Image avant</p>
                                                 </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        )}
+                                    </div>
+                                    {/* After image */}
+                                    <div>
+                                        <p className="text-xs font-bold text-[#2A3A4E]/50 uppercase tracking-wide mb-2">Après</p>
+                                        {alert.afterImageKey ? (
+                                            <img
+                                                src={`/api/images/${alert.afterImageKey}`}
+                                                alt="Image après"
+                                                className="aspect-video w-full rounded-xl object-cover"
+                                            />
+                                        ) : (
+                                            <div
+                                                className="aspect-video rounded-xl flex items-center justify-center overflow-hidden"
+                                                style={{ background: "linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)" }}
+                                            >
+                                                <div className="text-center opacity-50">
+                                                    <Image className="w-8 h-8 mx-auto mb-1.5 text-slate-400" />
+                                                    <p className="text-xs text-slate-500 font-medium">Image après</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </CardContent>
                         </Card>
@@ -170,12 +191,35 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                             <CardContent>
                                 <div className="grid grid-cols-2 gap-x-6 gap-y-3">
                                     {[
-                                        { label: "Superficie détectée", value: `${alert.detectedArea} m²` },
-                                        { label: "Superficie autorisée", value: alert.authorizedArea > 0 ? `${alert.authorizedArea} m²` : "Non applicable" },
-                                        { label: "Zone de règlement", value: alert.zone },
-                                        { label: "Permis de construction", value: alert.hasPermit ? "Oui" : "Non" },
-                                        { label: "Coordonnées", value: `${alert.coordinates.lat.toFixed(4)}, ${alert.coordinates.lng.toFixed(4)}` },
-                                        { label: "Score de risque", value: `${alert.riskScore}/100` },
+                                        {
+                                            label: "Superficie détectée",
+                                            value: alert.detectedArea != null ? `${alert.detectedArea} m²` : "Non disponible",
+                                        },
+                                        {
+                                            label: "Superficie autorisée",
+                                            value: alert.authorizedArea != null && alert.authorizedArea > 0
+                                                ? `${alert.authorizedArea} m²`
+                                                : "Non applicable",
+                                        },
+                                        {
+                                            label: "Zone de règlement",
+                                            value: alert.zone ?? "Non spécifiée",
+                                        },
+                                        {
+                                            label: "Permis de construction",
+                                            value: alert.hasPermit ? "Oui" : "Non",
+                                        },
+                                        {
+                                            label: "Coordonnées",
+                                            value: `${alert.latitude.toFixed(4)}, ${alert.longitude.toFixed(4)}`,
+                                        },
+                                        {
+                                            label: "Score de risque",
+                                            value: `${alert.riskScore}/100`,
+                                        },
+                                        ...(alert.confidence != null
+                                            ? [{ label: "Confiance IA", value: `${Math.round(alert.confidence * 100)} %` }]
+                                            : []),
                                     ].map(({ label, value }) => (
                                         <div key={label}>
                                             <p className="text-[10px] text-[#2A3A4E]/50 uppercase font-semibold tracking-wide">{label}</p>
@@ -186,7 +230,7 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                             </CardContent>
                         </Card>
 
-                        {/* Action timeline */}
+                        {/* Action timeline — placeholder since API Alert has no events field */}
                         <Card>
                             <CardHeader className="pb-3">
                                 <CardTitle className="flex items-center gap-2 text-sm">
@@ -200,26 +244,36 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                                     <div className="absolute left-4 top-4 bottom-4 w-px bg-gray-200" />
 
                                     <div className="space-y-4">
-                                        {alert.events.map((event, idx) => {
-                                            const Icon = eventIcons[event.icon];
-                                            const colors = eventColors[event.icon];
-                                            return (
-                                                <div key={idx} className="flex items-start gap-3 relative">
-                                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 z-10 ${colors}`}>
-                                                        <Icon className="w-4 h-4" />
-                                                    </div>
-                                                    <div className="flex-1 min-w-0 pt-1">
-                                                        <p className="text-xs font-semibold text-[#1A2332]">{event.label}</p>
-                                                        <div className="flex items-center gap-2 mt-0.5">
-                                                            <p className="text-[10px] text-[#2A3A4E]/50">{event.date}</p>
-                                                            {event.user && (
-                                                                <span className="text-[10px] text-[#2A3A4E]/40">— {event.user}</span>
-                                                            )}
-                                                        </div>
-                                                    </div>
+                                        {/* Detection event derived from detectedAt */}
+                                        <div className="flex items-start gap-3 relative">
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 z-10 ${eventColors.detection}`}>
+                                                <AlertTriangle className="w-4 h-4" />
+                                            </div>
+                                            <div className="flex-1 min-w-0 pt-1">
+                                                <p className="text-xs font-semibold text-[#1A2332]">Détection automatique par satellite</p>
+                                                <div className="flex items-center gap-2 mt-0.5">
+                                                    <p className="text-[10px] text-[#2A3A4E]/50">{detectedAtDate}</p>
                                                 </div>
-                                            );
-                                        })}
+                                            </div>
+                                        </div>
+
+                                        {/* Status creation event derived from createdAt */}
+                                        <div className="flex items-start gap-3 relative">
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 z-10 ${eventColors.status}`}>
+                                                <CheckCircle className="w-4 h-4" />
+                                            </div>
+                                            <div className="flex-1 min-w-0 pt-1">
+                                                <p className="text-xs font-semibold text-[#1A2332]">
+                                                    Alerte créée — statut : {ALERT_STATUS_LABELS[alert.status]}
+                                                </p>
+                                                <div className="flex items-center gap-2 mt-0.5">
+                                                    <p className="text-[10px] text-[#2A3A4E]/50">
+                                                        {new Date(alert.createdAt).toLocaleString("fr-CA")}
+                                                    </p>
+                                                    <span className="text-[10px] text-[#2A3A4E]/40">— Système</span>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </CardContent>
@@ -239,12 +293,14 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                             <CardContent className="space-y-3">
                                 <div>
                                     <p className="text-[10px] text-[#2A3A4E]/50 uppercase font-semibold tracking-wide mb-0.5">Adresse</p>
-                                    <p className="text-sm text-[#1A2332] font-medium leading-snug">{alert.address}</p>
+                                    <p className="text-sm text-[#1A2332] font-medium leading-snug">
+                                        {alert.address ?? "Adresse non disponible"}
+                                    </p>
                                 </div>
                                 <div>
                                     <p className="text-[10px] text-[#2A3A4E]/50 uppercase font-semibold tracking-wide mb-0.5">Coordonnées GPS</p>
                                     <p className="text-xs font-mono text-[#1A2332]">
-                                        {alert.coordinates.lat}, {alert.coordinates.lng}
+                                        {alert.latitude}, {alert.longitude}
                                     </p>
                                 </div>
                                 <Button
@@ -269,7 +325,7 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                             <CardContent className="space-y-2">
                                 <div>
                                     <p className="text-[10px] text-[#2A3A4E]/50 uppercase font-semibold tracking-wide mb-0.5">Date</p>
-                                    <p className="text-sm text-[#1A2332] font-medium">{alert.detectedAt}</p>
+                                    <p className="text-sm text-[#1A2332] font-medium">{detectedAtDate}</p>
                                 </div>
                                 <div>
                                     <p className="text-[10px] text-[#2A3A4E]/50 uppercase font-semibold tracking-wide mb-0.5">Méthode</p>

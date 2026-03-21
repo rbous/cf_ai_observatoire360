@@ -13,72 +13,94 @@ import {
     Legend,
     ResponsiveContainer,
 } from "recharts";
-import { FileText, AlertTriangle, TrendingUp, CheckCircle } from "lucide-react";
+import { FileText, AlertTriangle, TrendingUp, CheckCircle, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
+import type { ReportStats } from "@observatoire360/shared";
+import { ALERT_TYPE_LABELS, RISK_LEVEL_LABELS } from "@observatoire360/shared";
+import { useApi } from "@/app/hooks/useApi";
 
-// -----------------------------------------------------------------------
-// Mock data
-// -----------------------------------------------------------------------
-const MONTHLY_DETECTIONS = [
-    { month: "Avr", count: 3 },
-    { month: "Mai", count: 5 },
-    { month: "Jui", count: 4 },
-    { month: "Jui", count: 8 },
-    { month: "Aoû", count: 6 },
-    { month: "Sep", count: 7 },
-    { month: "Oct", count: 5 },
-    { month: "Nov", count: 4 },
-    { month: "Déc", count: 3 },
-    { month: "Jan", count: 2 },
-    { month: "Fév", count: 4 },
-    { month: "Mar", count: 6 },
-];
+// Color maps for pie chart types and risk levels
+const TYPE_COLORS: Record<string, string> = {
+    construction: "#008B8B",
+    extension: "#D4A843",
+    annexe: "#6366F1",
+    piscine: "#10B981",
+};
 
-const BY_TYPE = [
-    { name: "Construction", value: 18, color: "#008B8B" },
-    { name: "Extension", value: 14, color: "#D4A843" },
-    { name: "Annexe", value: 9, color: "#6366F1" },
-    { name: "Piscine", value: 6, color: "#10B981" },
-];
-
-const BY_RISK = [
-    { level: "Faible", count: 20, fill: "#10B981" },
-    { level: "Moyen", count: 18, fill: "#F59E0B" },
-    { level: "Élevé", count: 9, fill: "#DC2626" },
-];
-
-const KPI_CARDS = [
-    {
-        label: "Total alertes",
-        value: "47",
-        icon: AlertTriangle,
-        color: "#008B8B",
-        bg: "#008B8B15",
-    },
-    {
-        label: "Infractions confirmées",
-        value: "12",
-        icon: FileText,
-        color: "#DC2626",
-        bg: "#DC262615",
-    },
-    {
-        label: "Taux de régularisation",
-        value: "78 %",
-        icon: TrendingUp,
-        color: "#10B981",
-        bg: "#10B98115",
-    },
-    {
-        label: "Inspections complétées",
-        value: "35",
-        icon: CheckCircle,
-        color: "#D4A843",
-        bg: "#D4A84315",
-    },
-];
+const RISK_COLORS: Record<string, string> = {
+    low: "#10B981",
+    medium: "#F59E0B",
+    high: "#DC2626",
+};
 
 export function ReportsView() {
+    const { data: stats, isLoading, error } = useApi<ReportStats>("/reports/stats");
+
+    if (isLoading) {
+        return (
+            <div className="p-4 md:p-6 flex items-center justify-center min-h-[300px]">
+                <div className="flex items-center gap-3 text-[#2A3A4E]/60">
+                    <Loader2 className="w-5 h-5 animate-spin text-[#008B8B]" />
+                    <span className="text-sm font-medium">Chargement des statistiques…</span>
+                </div>
+            </div>
+        );
+    }
+
+    if (error || !stats) {
+        return (
+            <div className="p-4 md:p-6">
+                <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+                    <AlertTriangle className="w-5 h-5 shrink-0" />
+                    <span>{error ?? "Impossible de charger les statistiques."}</span>
+                </div>
+            </div>
+        );
+    }
+
+    const kpiCards = [
+        {
+            label: "Total alertes",
+            value: String(stats.totalAlerts),
+            icon: AlertTriangle,
+            color: "#008B8B",
+            bg: "#008B8B15",
+        },
+        {
+            label: "Infractions confirmées",
+            value: String(stats.confirmedInfractions),
+            icon: FileText,
+            color: "#DC2626",
+            bg: "#DC262615",
+        },
+        {
+            label: "Taux de régularisation",
+            value: `${Math.round(stats.regularizationRate)} %`,
+            icon: TrendingUp,
+            color: "#10B981",
+            bg: "#10B98115",
+        },
+        {
+            label: "Inspections complétées",
+            value: String(stats.inspectionsDone),
+            icon: CheckCircle,
+            color: "#D4A843",
+            bg: "#D4A84315",
+        },
+    ];
+
+    const byTypeData = stats.alertsByType.map((entry) => ({
+        name: ALERT_TYPE_LABELS[entry.type] ?? entry.type,
+        value: entry.count,
+        color: TYPE_COLORS[entry.type] ?? "#6366F1",
+    }));
+
+    const byRiskData = stats.alertsByRiskLevel.map((entry) => ({
+        level: RISK_LEVEL_LABELS[entry.level] ?? entry.level,
+        count: entry.count,
+        fill: RISK_COLORS[entry.level] ?? "#6366F1",
+    }));
+
     return (
         <div className="p-4 md:p-6 space-y-6 max-w-6xl mx-auto">
             <div>
@@ -88,7 +110,7 @@ export function ReportsView() {
 
             {/* KPI cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                {KPI_CARDS.map((kpi) => {
+                {kpiCards.map((kpi) => {
                     const Icon = kpi.icon;
                     return (
                         <Card key={kpi.label}>
@@ -122,7 +144,7 @@ export function ReportsView() {
                 </CardHeader>
                 <CardContent>
                     <ResponsiveContainer width="100%" height={220}>
-                        <LineChart data={MONTHLY_DETECTIONS} margin={{ top: 8, right: 20, left: -20, bottom: 0 }}>
+                        <LineChart data={stats.alertsByMonth} margin={{ top: 8, right: 20, left: -20, bottom: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                             <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#6b7280" }} />
                             <YAxis tick={{ fontSize: 11, fill: "#6b7280" }} allowDecimals={false} />
@@ -154,7 +176,7 @@ export function ReportsView() {
                         <ResponsiveContainer width="100%" height={200}>
                             <PieChart>
                                 <Pie
-                                    data={BY_TYPE}
+                                    data={byTypeData}
                                     cx="50%"
                                     cy="50%"
                                     innerRadius={50}
@@ -162,7 +184,7 @@ export function ReportsView() {
                                     paddingAngle={3}
                                     dataKey="value"
                                 >
-                                    {BY_TYPE.map((entry) => (
+                                    {byTypeData.map((entry) => (
                                         <Cell key={entry.name} fill={entry.color} />
                                     ))}
                                 </Pie>
@@ -187,7 +209,7 @@ export function ReportsView() {
                     </CardHeader>
                     <CardContent>
                         <ResponsiveContainer width="100%" height={200}>
-                            <BarChart data={BY_RISK} margin={{ top: 8, right: 16, left: -20, bottom: 0 }}>
+                            <BarChart data={byRiskData} margin={{ top: 8, right: 16, left: -20, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                                 <XAxis dataKey="level" tick={{ fontSize: 11, fill: "#6b7280" }} />
                                 <YAxis tick={{ fontSize: 11, fill: "#6b7280" }} allowDecimals={false} />
@@ -196,7 +218,7 @@ export function ReportsView() {
                                     formatter={(val: number) => [`${val} alertes`, "Détections"]}
                                 />
                                 <Bar dataKey="count" radius={[6, 6, 0, 0]}>
-                                    {BY_RISK.map((entry) => (
+                                    {byRiskData.map((entry) => (
                                         <Cell key={entry.level} fill={entry.fill} />
                                     ))}
                                 </Bar>

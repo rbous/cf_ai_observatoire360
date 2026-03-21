@@ -17,7 +17,6 @@ export default function DashboardLayout() {
         <div className="min-h-screen bg-gray-50">
             {/* Fixed top bar */}
             <Topbar
-                notificationCount={3}
                 onNotificationToggle={() => setNotifOpen((v) => !v)}
             />
 

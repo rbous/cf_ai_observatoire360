@@ -1,87 +1,56 @@
-import { AlertTriangle, Calendar, FileText, Bell, CheckCircle, X } from "lucide-react";
+import { useEffect } from "react";
+import { AlertTriangle, Calendar, FileText, Bell, CheckCircle, X, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/app/lib/cn";
+import { useNotifications } from "@/app/hooks/useNotifications";
+import type { NotificationType } from "@observatoire360/shared";
 
-interface Notification {
-    id: string;
-    icon: React.ComponentType<{ className?: string }>;
-    iconColor: string;
-    iconBg: string;
-    title: string;
-    description: string;
-    timestamp: string;
-    read: boolean;
-    href?: string;
-}
-
-const MOCK_NOTIFICATIONS: Notification[] = [
+// Map API notification type to display icon and colours
+const TYPE_META: Record<
+    NotificationType,
     {
-        id: "n1",
-        icon: AlertTriangle,
+        Icon: React.ComponentType<{ className?: string }>;
+        iconColor: string;
+        iconBg: string;
+    }
+> = {
+    new_alert: {
+        Icon: AlertTriangle,
         iconColor: "text-red-600",
         iconBg: "bg-red-50",
-        title: "Nouvelle alerte détectée",
-        description: "Secteur Nord — 45 Rue Bowen",
-        timestamp: "Il y a 5 min",
-        read: false,
-        href: "/tableau-de-bord/alertes/ALT-001",
     },
-    {
-        id: "n2",
-        icon: AlertTriangle,
-        iconColor: "text-amber-600",
-        iconBg: "bg-amber-50",
-        title: "Alerte — risque moyen",
-        description: "Secteur Est — 12 Ave du Plateau",
-        timestamp: "Il y a 32 min",
-        read: false,
-        href: "/tableau-de-bord/alertes/ALT-002",
-    },
-    {
-        id: "n3",
-        icon: Calendar,
+    status_change: {
+        Icon: CheckCircle,
         iconColor: "text-[#008B8B]",
         iconBg: "bg-[#008B8B]/10",
-        title: "Inspection planifiée",
-        description: "Lot 123-456 — demain à 9h00",
-        timestamp: "Il y a 1 h",
-        read: false,
-        href: "/tableau-de-bord/planification",
     },
-    {
-        id: "n4",
-        icon: FileText,
+    inspection_due: {
+        Icon: Calendar,
+        iconColor: "text-[#008B8B]",
+        iconBg: "bg-[#008B8B]/10",
+    },
+    system: {
+        Icon: FileText,
         iconColor: "text-blue-600",
         iconBg: "bg-blue-50",
-        title: "Rapport mensuel disponible",
-        description: "Rapport Mars 2026 prêt à consulter",
-        timestamp: "Hier",
-        read: true,
-        href: "/tableau-de-bord/rapports",
     },
-    {
-        id: "n5",
-        icon: CheckCircle,
-        iconColor: "text-green-600",
-        iconBg: "bg-green-50",
-        title: "Inspection complétée",
-        description: "ALT-009 — Lot 456-789 clôturée",
-        timestamp: "Hier",
-        read: true,
-        href: "/tableau-de-bord/alertes/ALT-009",
-    },
-    {
-        id: "n6",
-        icon: AlertTriangle,
-        iconColor: "text-red-600",
-        iconBg: "bg-red-50",
-        title: "Infraction confirmée",
-        description: "Secteur Sud — 88 Chemin des Pins",
-        timestamp: "2 jours",
-        read: true,
-        href: "/tableau-de-bord/alertes/ALT-007",
-    },
-];
+};
+
+/** Format a Unix timestamp (ms or s) into a relative French label */
+function formatTimestamp(createdAt: number): string {
+    // API createdAt is in milliseconds (consistent with other entities)
+    const now = Date.now();
+    const ms = createdAt > 1e12 ? createdAt : createdAt * 1000;
+    const diffMs = now - ms;
+    const diffMin = Math.floor(diffMs / 60_000);
+    if (diffMin < 1) return "À l'instant";
+    if (diffMin < 60) return `Il y a ${diffMin} min`;
+    const diffH = Math.floor(diffMin / 60);
+    if (diffH < 24) return `Il y a ${diffH} h`;
+    const diffD = Math.floor(diffH / 24);
+    if (diffD === 1) return "Hier";
+    return `${diffD} jours`;
+}
 
 interface NotificationPanelProps {
     open?: boolean;
@@ -90,7 +59,19 @@ interface NotificationPanelProps {
 
 export function NotificationPanel({ open = true, onClose }: NotificationPanelProps) {
     const navigate = useNavigate();
-    const unreadCount = MOCK_NOTIFICATIONS.filter((n) => !n.read).length;
+    const {
+        notifications,
+        unreadCount,
+        isLoading,
+        fetchNotifications,
+        markAsRead,
+        markAllAsRead,
+    } = useNotifications();
+
+    // Fetch the notifications list on mount
+    useEffect(() => {
+        fetchNotifications();
+    }, [fetchNotifications]);
 
     return (
         <aside
@@ -126,47 +107,71 @@ export function NotificationPanel({ open = true, onClose }: NotificationPanelPro
 
             {/* Notification list */}
             <div className="flex-1 overflow-y-auto">
-                {MOCK_NOTIFICATIONS.map((notif) => {
-                    const Icon = notif.icon;
-                    return (
-                        <button
-                            key={notif.id}
-                            onClick={() => notif.href && navigate(notif.href)}
-                            className={cn(
-                                "w-full flex items-start gap-3 px-4 py-3 text-left",
-                                "hover:bg-gray-50 transition-colors border-b border-gray-50",
-                                !notif.read && "bg-[#008B8B]/3"
-                            )}
-                        >
-                            {/* Icon */}
-                            <div className={cn("w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5", notif.iconBg)}>
-                                <Icon className={cn("w-4 h-4", notif.iconColor)} />
-                            </div>
+                {isLoading ? (
+                    <div className="flex items-center justify-center h-32 gap-2 text-[#2A3A4E]/40">
+                        <Loader2 className="w-4 h-4 animate-spin text-[#008B8B]" />
+                        <span className="text-xs">Chargement…</span>
+                    </div>
+                ) : notifications.length === 0 ? (
+                    <div className="flex items-center justify-center h-32 text-xs text-[#2A3A4E]/40">
+                        Aucune notification
+                    </div>
+                ) : (
+                    notifications.map((notif) => {
+                        const meta = TYPE_META[notif.type] ?? TYPE_META.system;
+                        const { Icon, iconColor, iconBg } = meta;
+                        const href = notif.alertId
+                            ? `/tableau-de-bord/alertes/${notif.alertId}`
+                            : undefined;
 
-                            {/* Content */}
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-start justify-between gap-1">
-                                    <p className={cn(
-                                        "text-xs leading-snug text-[#1A2332]",
-                                        !notif.read ? "font-semibold" : "font-medium"
-                                    )}>
-                                        {notif.title}
-                                    </p>
-                                    {!notif.read && (
-                                        <span className="w-2 h-2 rounded-full bg-[#008B8B] shrink-0 mt-1" />
-                                    )}
+                        return (
+                            <button
+                                key={notif.id}
+                                onClick={() => {
+                                    if (!notif.isRead) {
+                                        markAsRead(notif.id);
+                                    }
+                                    if (href) navigate(href);
+                                }}
+                                className={cn(
+                                    "w-full flex items-start gap-3 px-4 py-3 text-left",
+                                    "hover:bg-gray-50 transition-colors border-b border-gray-50",
+                                    !notif.isRead && "bg-[#008B8B]/3"
+                                )}
+                            >
+                                {/* Icon */}
+                                <div className={cn("w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5", iconBg)}>
+                                    <Icon className={cn("w-4 h-4", iconColor)} />
                                 </div>
-                                <p className="text-[11px] text-[#2A3A4E]/50 mt-0.5 truncate">{notif.description}</p>
-                                <p className="text-[10px] text-[#2A3A4E]/40 mt-1">{notif.timestamp}</p>
-                            </div>
-                        </button>
-                    );
-                })}
+
+                                {/* Content */}
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-start justify-between gap-1">
+                                        <p className={cn(
+                                            "text-xs leading-snug text-[#1A2332]",
+                                            !notif.isRead ? "font-semibold" : "font-medium"
+                                        )}>
+                                            {notif.title}
+                                        </p>
+                                        {!notif.isRead && (
+                                            <span className="w-2 h-2 rounded-full bg-[#008B8B] shrink-0 mt-1" />
+                                        )}
+                                    </div>
+                                    <p className="text-[11px] text-[#2A3A4E]/50 mt-0.5 truncate">{notif.message}</p>
+                                    <p className="text-[10px] text-[#2A3A4E]/40 mt-1">{formatTimestamp(notif.createdAt)}</p>
+                                </div>
+                            </button>
+                        );
+                    })
+                )}
             </div>
 
             {/* Footer */}
             <div className="px-4 py-2.5 border-t border-gray-100 shrink-0">
-                <button className="w-full text-xs text-[#008B8B] font-medium hover:underline">
+                <button
+                    onClick={markAllAsRead}
+                    className="w-full text-xs text-[#008B8B] font-medium hover:underline"
+                >
                     Tout marquer comme lu
                 </button>
             </div>

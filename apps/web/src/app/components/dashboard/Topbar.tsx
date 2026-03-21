@@ -9,10 +9,10 @@ import {
     DropdownMenuTrigger,
 } from "@/app/components/ui/dropdown-menu";
 import { ProfileMenu } from "./ProfileMenu";
+import { useNotifications } from "@/app/hooks/useNotifications";
 
 interface TopbarProps {
     municipalityName?: string;
-    notificationCount?: number;
     onNotificationToggle?: () => void;
 }
 
@@ -36,11 +36,11 @@ const STATUS_OPTIONS = [
 
 export function Topbar({
     municipalityName = "Municipalité de Sherbrooke",
-    notificationCount = 3,
     onNotificationToggle,
 }: TopbarProps) {
     const [selectedSector, setSelectedSector] = useState("Tous les secteurs");
     const [selectedStatus, setSelectedStatus] = useState("Tous les statuts");
+    const { unreadCount } = useNotifications();
 
     return (
         <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-white shadow-sm border-b border-gray-200 flex items-center px-4 gap-3">
@@ -119,9 +119,9 @@ export function Topbar({
                 aria-label="Notifications"
             >
                 <Bell className="w-5 h-5 text-[#1A2332]" />
-                {notificationCount > 0 && (
+                {unreadCount > 0 && (
                     <span className="absolute top-1 right-1 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-[#DC2626] text-white text-[10px] font-bold px-1">
-                        {notificationCount > 9 ? "9+" : notificationCount}
+                        {unreadCount > 9 ? "9+" : unreadCount}
                     </span>
                 )}
             </button>
