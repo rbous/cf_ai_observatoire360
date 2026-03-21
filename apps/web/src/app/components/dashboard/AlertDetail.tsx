@@ -23,8 +23,7 @@ interface AlertDetailProps {
 
 export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
     const navigate = useNavigate();
-    const { data, isLoading, error } = useApi<{ alert: Alert }>(`/alerts/${alertId}`);
-    const alert = data?.alert;
+    const { data: alert, isLoading, error } = useApi<Alert>(`/alerts/${alertId}`);
     const [currentStatus, setCurrentStatus] = useState<AlertStatus | null>(null);
 
     const effectiveStatus = currentStatus ?? alert?.status ?? "a_analyser";
