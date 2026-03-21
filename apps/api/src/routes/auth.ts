@@ -148,6 +148,7 @@ auth.post("/register", async (c) => {
 
 // POST /auth/login
 auth.post("/login", async (c) => {
+  try {
     const body = await c.req.json().catch(() => null);
     const parsed = loginSchema.safeParse(body);
     if (!parsed.success) {
@@ -217,6 +218,13 @@ auth.post("/login", async (c) => {
             municipalityId: user.municipalityId,
         },
     });
+  } catch (err) {
+    console.error("[LOGIN ERROR]", err instanceof Error ? err.message : err, err instanceof Error ? err.stack : "");
+    return c.json(
+        { error: "INTERNAL_SERVER_ERROR", message: String(err instanceof Error ? err.message : err), statusCode: 500 },
+        500,
+    );
+  }
 });
 
 // POST /auth/refresh
