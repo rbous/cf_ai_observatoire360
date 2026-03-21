@@ -1,19 +1,27 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { Map, BarChart3, Calendar, Layers, Menu, X } from "lucide-react";
+import { Map, BarChart3, Calendar, Layers, Menu, X, ScanLine, Users, UserCircle } from "lucide-react";
 import { cn } from "@/app/lib/cn";
+import { useAuth } from "@/app/hooks/useAuth";
 
 interface NavItem {
     label: string;
     href: string;
     icon: React.ComponentType<{ className?: string }>;
+    managerOnly?: boolean;
 }
 
-const NAV_ITEMS: NavItem[] = [
+const NAV_ITEMS_PRIMARY: NavItem[] = [
     { label: "Carte", href: "/tableau-de-bord", icon: Map },
     { label: "Rapport et Stat", href: "/tableau-de-bord/rapports", icon: BarChart3 },
     { label: "Planification", href: "/tableau-de-bord/planification", icon: Calendar },
     { label: "Calques", href: "/tableau-de-bord/calques", icon: Layers },
+];
+
+const NAV_ITEMS_SECONDARY: NavItem[] = [
+    { label: "Analyses", href: "/tableau-de-bord/analyses", icon: ScanLine },
+    { label: "Utilisateurs", href: "/tableau-de-bord/utilisateurs", icon: Users, managerOnly: true },
+    { label: "Mon profil", href: "/tableau-de-bord/profil", icon: UserCircle },
 ];
 
 interface SidebarProps {
@@ -22,6 +30,8 @@ interface SidebarProps {
 
 export function Sidebar({ className }: SidebarProps) {
     const [mobileOpen, setMobileOpen] = useState(false);
+    const { user } = useAuth();
+    const isManager = user?.role === "manager";
 
     return (
         <>
@@ -63,8 +73,8 @@ export function Sidebar({ className }: SidebarProps) {
                     <X className="w-4 h-4 text-[#1A2332]" />
                 </button>
 
-                <nav className="flex-1 px-3 py-5 space-y-1">
-                    {NAV_ITEMS.map(({ label, href, icon: Icon }) => (
+                <nav className="flex-1 px-3 py-5 space-y-1 overflow-y-auto">
+                    {NAV_ITEMS_PRIMARY.map(({ label, href, icon: Icon }) => (
                         <NavLink
                             key={href}
                             to={href}
@@ -83,6 +93,31 @@ export function Sidebar({ className }: SidebarProps) {
                             <span>{label}</span>
                         </NavLink>
                     ))}
+
+                    {/* Separator */}
+                    <div className="my-2 h-px w-full bg-gray-200" />
+
+                    {NAV_ITEMS_SECONDARY.map(({ label, href, icon: Icon, managerOnly }) => {
+                        if (managerOnly && !isManager) return null;
+                        return (
+                            <NavLink
+                                key={href}
+                                to={href}
+                                onClick={() => setMobileOpen(false)}
+                                className={({ isActive }) =>
+                                    cn(
+                                        "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150",
+                                        isActive
+                                            ? "bg-[#008B8B] text-white shadow-sm"
+                                            : "text-[#2A3A4E] hover:bg-[#008B8B]/10 hover:text-[#008B8B]"
+                                    )
+                                }
+                            >
+                                <Icon className="w-4.5 h-4.5 shrink-0" />
+                                <span>{label}</span>
+                            </NavLink>
+                        );
+                    })}
                 </nav>
 
                 {/* Bottom branding */}

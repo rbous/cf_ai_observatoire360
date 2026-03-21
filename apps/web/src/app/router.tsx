@@ -16,6 +16,9 @@ const ReportsPage = lazy(() => import("./pages/ReportsPage"));
 const PlanningPage = lazy(() => import("./pages/PlanningPage"));
 const LayersPage = lazy(() => import("./pages/LayersPage"));
 const AlertDetailPage = lazy(() => import("./pages/AlertDetailPage"));
+const UsersPage = lazy(() => import("./pages/UsersPage"));
+const ScansPage = lazy(() => import("./pages/ScansPage"));
+const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 
 // Simple loading fallback
@@ -76,6 +79,9 @@ export function AppRouter() {
                     <Route path="planification" element={<PlanningPage />} />
                     <Route path="calques" element={<LayersPage />} />
                     <Route path="alertes/:id" element={<AlertDetailPage />} />
+                    <Route path="utilisateurs" element={<UsersPage />} />
+                    <Route path="analyses" element={<ScansPage />} />
+                    <Route path="profil" element={<ProfilePage />} />
                 </Route>
 
                 {/* 404 */}
