@@ -10,9 +10,9 @@ import {
 } from "@/app/components/ui/dropdown-menu";
 import { ProfileMenu } from "./ProfileMenu";
 import { useNotifications } from "@/app/hooks/useNotifications";
+import { useAuth } from "@/app/hooks/useAuth";
 
 interface TopbarProps {
-    municipalityName?: string;
     onNotificationToggle?: () => void;
 }
 
@@ -35,9 +35,13 @@ const STATUS_OPTIONS = [
 ];
 
 export function Topbar({
-    municipalityName = "Municipalité de Sherbrooke",
     onNotificationToggle,
 }: TopbarProps) {
+    const { user } = useAuth();
+    const municipalityName = user?.municipalityName
+        ? `Municipalité de ${user.municipalityName}`
+        : "Chargement...";
+
     const [selectedSector, setSelectedSector] = useState("Tous les secteurs");
     const [selectedStatus, setSelectedStatus] = useState("Tous les statuts");
     const { unreadCount } = useNotifications();

@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { drizzle } from "drizzle-orm/d1";
 import { eq } from "drizzle-orm";
 import { updateProfileSchema, changePasswordSchema } from "@observatoire360/shared";
-import { users } from "../db/schema.js";
+import { users, municipalities } from "../db/schema.js";
 import { hashPassword, verifyPassword } from "../lib/auth.js";
 import type { Bindings } from "../types.js";
 import type { AuthVariables } from "../middleware/auth.js";
@@ -14,7 +14,7 @@ me.get("/", async (c) => {
     const userId = c.get("userId");
     const db = drizzle(c.env.DB);
 
-    const [user] = await db
+    const [row] = await db
         .select({
             id: users.id,
             email: users.email,
@@ -24,19 +24,33 @@ me.get("/", async (c) => {
             isActive: users.isActive,
             createdAt: users.createdAt,
             updatedAt: users.updatedAt,
+            municipalityName: municipalities.name,
         })
         .from(users)
+        .leftJoin(municipalities, eq(users.municipalityId, municipalities.id))
         .where(eq(users.id, userId))
         .limit(1);
 
-    if (!user) {
+    if (!row) {
         return c.json(
             { error: "NOT_FOUND", message: "Utilisateur introuvable.", statusCode: 404 },
             404,
         );
     }
 
-    return c.json({ user });
+    return c.json({
+        user: {
+            id: row.id,
+            email: row.email,
+            name: row.name,
+            role: row.role,
+            municipalityId: row.municipalityId,
+            isActive: row.isActive,
+            createdAt: row.createdAt,
+            updatedAt: row.updatedAt,
+            municipalityName: row.municipalityName,
+        },
+    });
 });
 
 // PUT /me — update current user profile

@@ -159,7 +159,7 @@ export default function Contact() {
                                     name="municipalite"
                                     value={form.municipalite}
                                     onChange={handleChange}
-                                    placeholder="Ville de Sherbrooke"
+                                    placeholder="Ex: Ville de Gatineau"
                                     required
                                 />
                                 <Input

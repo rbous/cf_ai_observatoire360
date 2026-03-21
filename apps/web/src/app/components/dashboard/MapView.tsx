@@ -61,9 +61,19 @@ interface MapViewProps {
     className?: string;
 }
 
+// Default center: Quebec (fallback if no alerts)
+const DEFAULT_CENTER: [number, number] = [46.8, -71.2];
+const DEFAULT_ZOOM = 7;
+
 export function MapView({ className }: MapViewProps) {
     const navigate = useNavigate();
     const { alerts, isLoading, error } = useAlerts();
+
+    // Center map on alerts if available
+    const mapCenter: [number, number] = alerts.length > 0
+        ? [alerts[0].latitude, alerts[0].longitude]
+        : DEFAULT_CENTER;
+    const mapZoom = alerts.length > 0 ? 13 : DEFAULT_ZOOM;
 
     // Ensure Leaflet container fills its parent
     useEffect(() => {
@@ -73,8 +83,8 @@ export function MapView({ className }: MapViewProps) {
     return (
         <div className={`relative w-full h-full ${className ?? ""}`}>
             <MapContainer
-                center={[45.4042, -71.8929]}
-                zoom={13}
+                center={mapCenter}
+                zoom={mapZoom}
                 style={{ width: "100%", height: "100%" }}
                 zoomControl={true}
             >

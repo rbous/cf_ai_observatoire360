@@ -33,6 +33,7 @@ export interface User {
     name: string;
     role: UserRole;
     isActive: boolean;
+    municipalityName?: string;
     createdAt: number;
     updatedAt: number;
 }

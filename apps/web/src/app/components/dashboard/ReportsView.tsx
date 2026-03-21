@@ -105,7 +105,7 @@ export function ReportsView() {
         <div className="p-4 md:p-6 space-y-6 max-w-6xl mx-auto">
             <div>
                 <h1 className="text-xl font-black uppercase text-[#1A2332]">Rapports & Statistiques</h1>
-                <p className="text-sm text-[#2A3A4E]/60 mt-0.5">Vue d'ensemble du territoire — Municipalité de Sherbrooke</p>
+                <p className="text-sm text-[#2A3A4E]/60 mt-0.5">Vue d'ensemble du territoire</p>
             </div>
 
             {/* KPI cards */}

@@ -16,7 +16,9 @@ export function ProfileMenu() {
 
     const name = user?.name ?? "Utilisateur";
     const role = user?.role ? ROLE_LABELS[user.role] : "Inspecteur";
-    const municipality = "Municipalité de Sherbrooke";
+    const municipality = user?.municipalityName
+        ? `Municipalité de ${user.municipalityName}`
+        : "Municipalité";
 
     const initials = name
         .split(" ")
