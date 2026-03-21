@@ -28,6 +28,7 @@ interface RegisterData {
 }
 
 interface AuthLoginResponse {
+    accessToken: string;
     user: User;
 }
 
