@@ -101,8 +101,8 @@ async function processMessage(
     // 2. Fetch the latest Sentinel-2 imagery
     // ------------------------------------------------------------------
     const sentinelConfig: SentinelHubConfig = {
-        clientId: env.SENTINEL_HUB_CLIENT_ID,
-        clientSecret: env.SENTINEL_HUB_CLIENT_SECRET,
+        clientId: env.COPERNICUS_CLIENT_ID,
+        clientSecret: env.COPERNICUS_CLIENT_SECRET,
     };
 
     // We need the municipality code to build the R2 object key

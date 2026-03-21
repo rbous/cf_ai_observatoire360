@@ -1,10 +1,12 @@
 /**
- * Sentinel Hub API client.
+ * Copernicus Data Space Ecosystem API client (free, no trial).
  *
  * Handles OAuth2 token acquisition (with module-level caching) and fetching
  * the latest Sentinel-2 L2A true-colour imagery for a bounding box via the
  * Process API.  The raw PNG response is uploaded directly to the R2 bucket
  * so callers never need to touch the binary blob themselves.
+ *
+ * Register at: https://dataspace.copernicus.eu
  */
 
 // ---------------------------------------------------------------------------
@@ -61,7 +63,7 @@ export async function getAccessToken(config: SentinelHubConfig): Promise<string>
     });
 
     const response = await fetch(
-        "https://services.sentinel-hub.com/auth/realms/main/protocol/openid-connect/token",
+        "https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token",
         {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -72,7 +74,7 @@ export async function getAccessToken(config: SentinelHubConfig): Promise<string>
     if (!response.ok) {
         const text = await response.text();
         throw new Error(
-            `Sentinel Hub token request failed (${response.status}): ${text}`,
+            `Copernicus CDSE token request failed (${response.status}): ${text}`,
         );
     }
 
@@ -168,7 +170,7 @@ export async function fetchLatestImagery(
     };
 
     const response = await fetch(
-        "https://services.sentinel-hub.com/api/v1/process",
+        "https://sh.dataspace.copernicus.eu/api/v1/process",
         {
             method: "POST",
             headers: {
@@ -195,7 +197,7 @@ export async function fetchLatestImagery(
             return null;
         }
         throw new Error(
-            `Sentinel Hub process request failed (${response.status}): ${text}`,
+        `Copernicus CDSE process request failed (${response.status}): ${text}`,
         );
     }
 

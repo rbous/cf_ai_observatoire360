@@ -7,8 +7,8 @@ compatibility_flags = ["nodejs_compat"]
 ENVIRONMENT = "production"
 ALLOWED_ORIGIN = "https://observatoire360.pages.dev"
 # Secrets (set via `wrangler secret put`):
-# JWT_SECRET, SENTINEL_HUB_CLIENT_ID, SENTINEL_HUB_CLIENT_SECRET,
-# RESEND_API_KEY
+# JWT_SECRET, COPERNICUS_CLIENT_ID, COPERNICUS_CLIENT_SECRET, RESEND_API_KEY
+# Register at https://dataspace.copernicus.eu (free, no trial)
 
 # --- D1 Database ---
 [[d1_databases]]

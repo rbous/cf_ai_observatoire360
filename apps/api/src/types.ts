@@ -16,9 +16,9 @@ export interface Bindings {
     ENVIRONMENT: string;
     /** Allowed CORS origin (e.g. https://observatoire360.pages.dev) */
     ALLOWED_ORIGIN: string;
-    /** Sentinel Hub OAuth2 credentials */
-    SENTINEL_HUB_CLIENT_ID: string;
-    SENTINEL_HUB_CLIENT_SECRET: string;
+    /** Copernicus Data Space OAuth2 credentials (free) */
+    COPERNICUS_CLIENT_ID: string;
+    COPERNICUS_CLIENT_SECRET: string;
     /** Resend API key for email */
     RESEND_API_KEY: string;
     /** Cloudflare Workers AI (free, built-in) */
