@@ -8,6 +8,7 @@
         "clean": "turbo clean && rm -rf node_modules"
     },
     "devDependencies": {
+        "playwright": "^1.58.2",
         "turbo": "^2.5.0",
         "typescript": "^5.8.0",
         "wrangler": "^4.0.0"
