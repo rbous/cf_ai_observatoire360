@@ -17,6 +17,19 @@ export class ApiRequestError extends Error {
 }
 
 // ---------------------------------------------------------------------------
+// In-memory access token storage
+// ---------------------------------------------------------------------------
+let accessToken: string | null = null;
+
+export function setAccessToken(token: string | null) {
+    accessToken = token;
+}
+
+export function getAccessToken(): string | null {
+    return accessToken;
+}
+
+// ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
 
@@ -70,6 +83,7 @@ async function refreshAccessToken(): Promise<void> {
     });
 
     if (!response.ok) {
+        accessToken = null;
         let apiError: ApiError;
         try {
             apiError = (await response.json()) as ApiError;
@@ -82,6 +96,9 @@ async function refreshAccessToken(): Promise<void> {
         }
         throw new ApiRequestError(apiError);
     }
+
+    const data = await response.json() as { accessToken: string };
+    accessToken = data.accessToken;
 }
 
 // ---------------------------------------------------------------------------
@@ -95,12 +112,17 @@ async function request<T>(
 ): Promise<T> {
     const url = buildUrl(path);
 
+    const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+    };
+    if (accessToken) {
+        headers["Authorization"] = `Bearer ${accessToken}`;
+    }
+
     const init: RequestInit = {
         method,
         credentials: "include",
-        headers: {
-            "Content-Type": "application/json",
-        },
+        headers,
     };
 
     if (body !== undefined) {

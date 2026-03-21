@@ -16,6 +16,7 @@ import reportsRouter   from "./routes/reports.js";
 import usersRouter     from "./routes/users.js";
 import contactRouter   from "./routes/contact.js";
 import healthRouter    from "./routes/health.js";
+import meRouter        from "./routes/me.js";
 
 // Bindings — defined in types.ts to avoid circular imports
 import type { Bindings } from "./types.js";
@@ -56,11 +57,14 @@ app.route("/api/auth", authRouter);
 // Protected routes — JWT required for all /api/* routes below
 // ---------------------------------------------------------------------------
 
+app.use("/api/me",            requireAuth());
+app.use("/api/me/*",          requireAuth());
 app.use("/api/alerts/*",      requireAuth());
 app.use("/api/inspections/*", requireAuth());
 app.use("/api/reports/*",     requireAuth());
 app.use("/api/users/*",       requireAuth());
 
+app.route("/api/me",          meRouter);
 app.route("/api/alerts",      alertsRouter);
 app.route("/api/inspections", inspectionsRouter);
 app.route("/api/reports",     reportsRouter);

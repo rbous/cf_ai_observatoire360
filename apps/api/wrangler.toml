@@ -8,11 +8,11 @@ ENVIRONMENT = "production"
 ALLOWED_ORIGIN = "https://observatoire360.pages.dev"
 
 # To get the database_id, run: npx wrangler d1 create observatoire360-db
-# Then replace TODO_REPLACE_WITH_ACTUAL_ID below with the returned ID.
+# Then replace YOUR_D1_DATABASE_ID below with the returned ID.
 [[d1_databases]]
 binding = "DB"
 database_name = "observatoire360-db"
-database_id = "TODO_REPLACE_WITH_ACTUAL_ID"
+database_id = "YOUR_D1_DATABASE_ID"
 migrations_dir = "src/db/migrations"
 
 [env.dev]
@@ -24,6 +24,6 @@ ALLOWED_ORIGIN = "http://localhost:5173"
 binding = "DB"
 database_name = "observatoire360-db"
 # To get the database_id, run: npx wrangler d1 create observatoire360-db
-# Then replace TODO_REPLACE_WITH_ACTUAL_ID below with the returned ID.
-database_id = "TODO_REPLACE_WITH_ACTUAL_ID"
+# Then replace YOUR_D1_DATABASE_ID below with the returned ID.
+database_id = "YOUR_D1_DATABASE_ID"
 migrations_dir = "src/db/migrations"

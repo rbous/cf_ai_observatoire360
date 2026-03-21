@@ -8,7 +8,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import type { User } from "@observatoire360/shared";
 import type { UpdateProfileInput } from "@observatoire360/shared";
-import { api, ApiRequestError } from "@/app/lib/api";
+import { api, ApiRequestError, setAccessToken } from "@/app/lib/api";
 import { AUTH_ROUTES } from "@/app/lib/constants";
 
 // ---------------------------------------------------------------------------
@@ -95,6 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const login = useCallback(async (email: string, password: string) => {
         const credentials: LoginCredentials = { email, password };
         const data = await api.post<AuthLoginResponse>("/auth/login", credentials);
+        setAccessToken(data.accessToken);
         setUser(data.user);
     }, []);
 
@@ -103,6 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // -----------------------------------------------------------------------
     const register = useCallback(async (data: RegisterData) => {
         const response = await api.post<AuthLoginResponse>("/auth/register", data);
+        setAccessToken(response.accessToken);
         setUser(response.user);
     }, []);
 
@@ -116,6 +118,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // Even if the server call fails, clear local state and redirect
             console.error("Erreur lors de la déconnexion:", err);
         } finally {
+            setAccessToken(null);
             setUser(null);
             navigate(AUTH_ROUTES.LOGIN, { replace: true });
         }

@@ -63,8 +63,8 @@ INSERT OR IGNORE INTO users (id, municipality_id, email, password_hash, name, ro
     '01GW1FKJPQR2T3V4W5X6YUSER1',
     '01GW1FKJPQR2T3V4W5X6Y7Z8A9',
     'demo@observatoire360.com',
-    -- Password: [REDACTED_PASSWORD] — PLACEHOLDER HASH — must be regenerated via app
-    'pbkdf2:600000:AAAAAAAAAAAAAAAAAAAAAA==:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=',
+    -- Password: [REDACTED_PASSWORD]
+    'REDACTED_PBKDF2_HASH',
     'Demo Admin',
     'manager',
     1,
@@ -75,8 +75,8 @@ INSERT OR IGNORE INTO users (id, municipality_id, email, password_hash, name, ro
     '01GW1FKJPQR2T3V4W5X6YUSER2',
     '01GW1FKJPQR2T3V4W5X6Y7Z8A9',
     'admin.sherbrooke@obs360.com',
-    -- Password: [REDACTED_PASSWORD] — PLACEHOLDER HASH
-    'pbkdf2:600000:BBBBBBBBBBBBBBBBBBBBBB==:BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=',
+    -- Password: [REDACTED_PASSWORD]
+    'REDACTED_PBKDF2_HASH',
     'Admin Sherbrooke',
     'manager',
     1,
@@ -87,8 +87,8 @@ INSERT OR IGNORE INTO users (id, municipality_id, email, password_hash, name, ro
     '01GW1FKJPQR2T3V4W5X6YUSER3',
     '01GW1FKJPQR2T3V4W5X6Y7Z8A9',
     'inspector@obs360.com',
-    -- Password: [REDACTED_PASSWORD] — PLACEHOLDER HASH
-    'pbkdf2:600000:CCCCCCCCCCCCCCCCCCCCCC==:CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC=',
+    -- Password: [REDACTED_PASSWORD]
+    'REDACTED_PBKDF2_HASH',
     'Jean Inspecteur',
     'inspector',
     1,
@@ -99,8 +99,8 @@ INSERT OR IGNORE INTO users (id, municipality_id, email, password_hash, name, ro
     '01GW1FKJPQR2T3V4W5X6YUSER4',
     '01GW1FKJPQR2T3V4W5X6Y7Z8B0',
     'analyst@obs360.com',
-    -- Password: [REDACTED_PASSWORD] — PLACEHOLDER HASH
-    'pbkdf2:600000:DDDDDDDDDDDDDDDDDDDDDD==:DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD=',
+    -- Password: [REDACTED_PASSWORD]
+    'REDACTED_PBKDF2_HASH',
     'Marie Analyste',
     'analyst',
     1,
@@ -111,8 +111,8 @@ INSERT OR IGNORE INTO users (id, municipality_id, email, password_hash, name, ro
     '01GW1FKJPQR2T3V4W5X6YUSER5',
     '01GW1FKJPQR2T3V4W5X6Y7Z8C1',
     'readonly@obs360.com',
-    -- Password: [REDACTED_PASSWORD] — PLACEHOLDER HASH
-    'pbkdf2:600000:EEEEEEEEEEEEEEEEEEEEEE==:EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE=',
+    -- Password: [REDACTED_PASSWORD]
+    'REDACTED_PBKDF2_HASH',
     'Pierre Lecture',
     'readonly',
     1,

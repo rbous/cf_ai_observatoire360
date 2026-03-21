@@ -1,22 +1,47 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
+import { useAuth } from "@/app/hooks/useAuth";
+import { DASHBOARD_ROUTES } from "@/app/lib/constants";
 
 export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [form, setForm] = useState({ email: "", password: "" });
+    const [error, setError] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const { login, isAuthenticated } = useAuth();
+    const navigate = useNavigate();
+
+    // If already logged in, redirect to dashboard
+    if (isAuthenticated) {
+        navigate(DASHBOARD_ROUTES.HOME, { replace: true });
+    }
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+        if (error) setError(null);
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // TODO: implement authentication
-        console.log("Login attempt", form);
+        setError(null);
+        setIsSubmitting(true);
+
+        try {
+            await login(form.email, form.password);
+            navigate(DASHBOARD_ROUTES.HOME, { replace: true });
+        } catch (err) {
+            setError(
+                err instanceof Error
+                    ? err.message
+                    : "Courriel ou mot de passe incorrect."
+            );
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -51,6 +76,12 @@ export default function LoginPage() {
                 {/* Form card */}
                 <div className="bg-white rounded-3xl shadow-xl border border-[#008B8B]/10 p-8">
                     <form onSubmit={handleSubmit} className="space-y-5">
+                        {error && (
+                            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+                                {error}
+                            </div>
+                        )}
+
                         <Input
                             label="Courriel"
                             name="email"
@@ -95,8 +126,9 @@ export default function LoginPage() {
                             variant="default"
                             size="lg"
                             className="w-full font-bold tracking-wide uppercase"
+                            disabled={isSubmitting}
                         >
-                            SE CONNECTER
+                            {isSubmitting ? "CONNEXION..." : "SE CONNECTER"}
                         </Button>
                     </form>
                 </div>
