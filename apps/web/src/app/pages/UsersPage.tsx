@@ -69,7 +69,8 @@ function roleBadgeVariant(role: UserRole) {
 
 export default function UsersPage() {
     const { user: currentUser } = useAuth();
-    const { data: users, isLoading, error, refetch } = useApi<User[]>("/users");
+    const { data: usersResponse, isLoading, error, refetch } = useApi<{ data: User[]; total: number }>("/users");
+    const users = usersResponse?.data ?? null;
 
     // Create dialog
     const [createOpen, setCreateOpen] = useState(false);
