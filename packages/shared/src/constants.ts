@@ -54,6 +54,53 @@ export const ROLE_LABELS: Record<UserRole, string> = {
     readonly: "Lecture seule",
 };
 
+// ---------------------------------------------------------------------------
+// Notification types
+// ---------------------------------------------------------------------------
+
+export const NOTIFICATION_TYPES = ["new_alert", "status_change", "inspection_due", "system"] as const;
+export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
+
+export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
+    new_alert: "Nouvelle alerte",
+    status_change: "Changement de statut",
+    inspection_due: "Inspection à venir",
+    system: "Système",
+};
+
+// ---------------------------------------------------------------------------
+// Scan job statuses
+// ---------------------------------------------------------------------------
+
+export const SCAN_JOB_STATUSES = ["pending", "fetching", "analyzing", "completed", "failed"] as const;
+export type ScanJobStatus = (typeof SCAN_JOB_STATUSES)[number];
+
+export const SCAN_JOB_STATUS_LABELS: Record<ScanJobStatus, string> = {
+    pending: "En attente",
+    fetching: "Récupération",
+    analyzing: "Analyse en cours",
+    completed: "Terminé",
+    failed: "Échoué",
+};
+
+// ---------------------------------------------------------------------------
+// Scan frequencies
+// ---------------------------------------------------------------------------
+
+export const SCAN_FREQUENCIES = ["daily", "weekly", "biweekly", "monthly"] as const;
+export type ScanFrequency = (typeof SCAN_FREQUENCIES)[number];
+
+export const SCAN_FREQUENCY_LABELS: Record<ScanFrequency, string> = {
+    daily: "Quotidien",
+    weekly: "Hebdomadaire",
+    biweekly: "Bi-mensuel",
+    monthly: "Mensuel",
+};
+
+// ---------------------------------------------------------------------------
+// WMS Layers
+// ---------------------------------------------------------------------------
+
 export const WMS_LAYERS = {
     cadastre: {
         url: "https://ws.mapserver.mern.gouv.qc.ca/cgi-bin/cadastre?",

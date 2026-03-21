@@ -6,24 +6,54 @@ compatibility_flags = ["nodejs_compat"]
 [vars]
 ENVIRONMENT = "production"
 ALLOWED_ORIGIN = "https://observatoire360.pages.dev"
+# Secrets (set via `wrangler secret put`):
+# JWT_SECRET, SENTINEL_HUB_CLIENT_ID, SENTINEL_HUB_CLIENT_SECRET,
+# RESEND_API_KEY
 
-# To get the database_id, run: npx wrangler d1 create observatoire360-db
-# Then replace YOUR_D1_DATABASE_ID below with the returned ID.
+# --- D1 Database ---
 [[d1_databases]]
 binding = "DB"
 database_name = "observatoire360-db"
 database_id = "YOUR_D1_DATABASE_ID"
 migrations_dir = "src/db/migrations"
 
+# --- Workers AI (free, built-in) ---
+[ai]
+binding = "AI"
+
+# --- R2 Bucket (satellite imagery) ---
+[[r2_buckets]]
+binding = "IMAGES_BUCKET"
+bucket_name = "observatoire360-images"
+
+# --- Queue (detection jobs) ---
+[[queues.producers]]
+queue = "observatoire360-detection"
+binding = "DETECTION_QUEUE"
+
+[[queues.consumers]]
+queue = "observatoire360-detection"
+max_batch_size = 5
+max_retries = 3
+dead_letter_queue = "observatoire360-detection-dlq"
+
+# --- Cron Triggers (scan scheduling) ---
+[triggers]
+crons = ["0 11 * * *"]  # 6 AM EST (11:00 UTC) daily
+
+# =============================================================================
+# Development environment
+# =============================================================================
 [env.dev]
 [env.dev.vars]
 ENVIRONMENT = "development"
 ALLOWED_ORIGIN = "http://localhost:5173"
-
 [[env.dev.d1_databases]]
 binding = "DB"
 database_name = "observatoire360-db"
-# To get the database_id, run: npx wrangler d1 create observatoire360-db
-# Then replace YOUR_D1_DATABASE_ID below with the returned ID.
 database_id = "YOUR_D1_DATABASE_ID"
 migrations_dir = "src/db/migrations"
+
+[[env.dev.r2_buckets]]
+binding = "IMAGES_BUCKET"
+bucket_name = "observatoire360-images"

@@ -35,6 +35,10 @@ function rowToAlert(row: typeof alerts.$inferSelect): Alert {
         address: row.address ?? null,
         detectedAt: row.detectedAt,
         images: JSON.parse(row.images ?? "[]") as string[],
+        scanJobId: row.scanJobId ?? null,
+        beforeImageKey: row.beforeImageKey ?? null,
+        afterImageKey: row.afterImageKey ?? null,
+        confidence: row.confidence ?? null,
         createdAt: row.createdAt,
     };
 }

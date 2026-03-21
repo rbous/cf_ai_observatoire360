@@ -16,70 +16,11 @@ L.Icon.Default.mergeOptions({
     shadowUrl: markerShadow,
 });
 
-import { WMS_LAYERS } from "@observatoire360/shared";
-import type { RiskLevel, AlertStatus } from "@observatoire360/shared";
+import { WMS_LAYERS, ALERT_TYPE_LABELS } from "@observatoire360/shared";
+import type { RiskLevel } from "@observatoire360/shared";
 import { MapLegend } from "./MapLegend";
-
-// -----------------------------------------------------------------------
-// Mock alert data — replace with API data later
-// -----------------------------------------------------------------------
-interface MockAlert {
-    id: string;
-    lat: number;
-    lng: number;
-    riskLevel: RiskLevel;
-    status: AlertStatus;
-    address: string;
-    type: string;
-}
-
-const MOCK_ALERTS: MockAlert[] = [
-    {
-        id: "ALT-001",
-        lat: 45.415,
-        lng: -71.882,
-        riskLevel: "high",
-        status: "a_inspecter",
-        address: "45 Rue Bowen, Sherbrooke",
-        type: "Construction sans permis",
-    },
-    {
-        id: "ALT-002",
-        lat: 45.395,
-        lng: -71.905,
-        riskLevel: "medium",
-        status: "a_analyser",
-        address: "12 Ave du Plateau, Sherbrooke",
-        type: "Agrandissement non autorisé",
-    },
-    {
-        id: "ALT-003",
-        lat: 45.408,
-        lng: -71.862,
-        riskLevel: "low",
-        status: "en_cours",
-        address: "789 Blvd Portland, Sherbrooke",
-        type: "Abri temporaire",
-    },
-    {
-        id: "ALT-004",
-        lat: 45.422,
-        lng: -71.895,
-        riskLevel: "high",
-        status: "infraction_confirmee",
-        address: "33 Rue Wellington N, Sherbrooke",
-        type: "Piscine hors-norme",
-    },
-    {
-        id: "ALT-005",
-        lat: 45.385,
-        lng: -71.870,
-        riskLevel: "medium",
-        status: "a_analyser",
-        address: "201 Chemin Godin, Sherbrooke",
-        type: "Extension arrière",
-    },
-];
+import { useAlerts } from "@/app/hooks/useAlerts";
+import { LoadingSpinner } from "@/app/components/shared/LoadingSpinner";
 
 const RISK_COLORS: Record<RiskLevel, string> = {
     high: "#DC2626",
@@ -122,6 +63,7 @@ interface MapViewProps {
 
 export function MapView({ className }: MapViewProps) {
     const navigate = useNavigate();
+    const { alerts, isLoading, error } = useAlerts();
 
     // Ensure Leaflet container fills its parent
     useEffect(() => {
@@ -189,16 +131,16 @@ export function MapView({ className }: MapViewProps) {
                 </LayersControl>
 
                 {/* Alert markers */}
-                {MOCK_ALERTS.map((alert) => (
+                {alerts.map((alert) => (
                     <Marker
                         key={alert.id}
-                        position={[alert.lat, alert.lng]}
+                        position={[alert.latitude, alert.longitude]}
                         icon={createCircleIcon(RISK_COLORS[alert.riskLevel])}
                     >
                         <Popup>
                             <div className="p-1 min-w-[180px]">
                                 <div className="flex items-center justify-between mb-1.5">
-                                    <span className="text-xs font-bold text-[#1A2332]">{alert.id}</span>
+                                    <span className="text-xs font-bold text-[#1A2332]">{alert.id.slice(-6)}</span>
                                     <span
                                         className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
                                         style={{
@@ -209,8 +151,8 @@ export function MapView({ className }: MapViewProps) {
                                         {RISK_LABELS[alert.riskLevel]}
                                     </span>
                                 </div>
-                                <p className="text-xs text-[#2A3A4E] font-medium mb-0.5">{alert.address}</p>
-                                <p className="text-[11px] text-[#2A3A4E]/60 mb-2">{alert.type}</p>
+                                <p className="text-xs text-[#2A3A4E] font-medium mb-0.5">{alert.address ?? "Adresse inconnue"}</p>
+                                <p className="text-[11px] text-[#2A3A4E]/60 mb-2">{ALERT_TYPE_LABELS[alert.type]}</p>
                                 <button
                                     onClick={() => navigate(`/tableau-de-bord/alertes/${alert.id}`)}
                                     className="w-full text-xs bg-[#008B8B] text-white px-3 py-1.5 rounded-lg font-medium hover:bg-[#006666] transition-colors"
@@ -225,6 +167,20 @@ export function MapView({ className }: MapViewProps) {
 
             {/* Map legend overlay */}
             <MapLegend />
+
+            {/* Loading overlay */}
+            {isLoading && (
+                <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-white/60">
+                    <LoadingSpinner text="Chargement des alertes..." />
+                </div>
+            )}
+
+            {/* Error overlay */}
+            {error && (
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-xl text-sm shadow">
+                    {error}
+                </div>
+            )}
         </div>
     );
 }

@@ -1,4 +1,13 @@
-import type { AlertStatus, AlertType, InspectionStatus, RiskLevel, UserRole } from "./constants.js";
+import type {
+    AlertStatus,
+    AlertType,
+    InspectionStatus,
+    NotificationType,
+    RiskLevel,
+    ScanFrequency,
+    ScanJobStatus,
+    UserRole,
+} from "./constants.js";
 
 export interface Municipality {
     id: string;
@@ -11,6 +20,9 @@ export interface Municipality {
         east: number;
         west: number;
     } | null;
+    scanFrequency: ScanFrequency;
+    scanEnabled: boolean;
+    lastScanAt: number | null;
     createdAt: number;
 }
 
@@ -41,6 +53,10 @@ export interface Alert {
     address: string | null;
     detectedAt: number;
     images: string[];
+    scanJobId: string | null;
+    beforeImageKey: string | null;
+    afterImageKey: string | null;
+    confidence: number | null;
     createdAt: number;
 }
 
@@ -92,6 +108,32 @@ export interface ApiError {
     error: string;
     message: string;
     statusCode: number;
+}
+
+export interface Notification {
+    id: string;
+    municipalityId: string;
+    userId: string | null;
+    alertId: string | null;
+    type: NotificationType;
+    title: string;
+    message: string;
+    isRead: boolean;
+    createdAt: number;
+}
+
+export interface ScanJob {
+    id: string;
+    municipalityId: string;
+    status: ScanJobStatus;
+    imageryDate: string | null;
+    beforeImageKey: string | null;
+    afterImageKey: string | null;
+    detectionsCount: number;
+    error: string | null;
+    startedAt: number | null;
+    completedAt: number | null;
+    createdAt: number;
 }
 
 export interface PaginatedResponse<T> {

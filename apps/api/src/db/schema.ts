@@ -16,6 +16,10 @@ export const municipalities = sqliteTable("municipalities", {
     region: text("region"),
     /** JSON-encoded bounds object: { north, south, east, west } */
     bounds: text("bounds"),
+    /** One of: daily | weekly | biweekly | monthly */
+    scanFrequency: text("scan_frequency").notNull().default("daily"),
+    scanEnabled: integer("scan_enabled", { mode: "boolean" }).notNull().default(true),
+    lastScanAt: integer("last_scan_at"),
     createdAt: integer("created_at").notNull(),
 });
 
@@ -83,6 +87,12 @@ export const alerts = sqliteTable("alerts", {
     detectedAt: integer("detected_at").notNull(),
     /** JSON-encoded string[] of image URLs */
     images: text("images").notNull().default("[]"),
+    /** Pipeline source tracking */
+    scanJobId: text("scan_job_id").references(() => scanJobs.id),
+    beforeImageKey: text("before_image_key"),
+    afterImageKey: text("after_image_key"),
+    /** AI confidence score 0-1 */
+    confidence: real("confidence"),
     createdAt: integer("created_at").notNull(),
 });
 
@@ -122,6 +132,47 @@ export const contactSubmissions = sqliteTable("contact_submissions", {
 });
 
 // ---------------------------------------------------------------------------
+// notifications
+// ---------------------------------------------------------------------------
+
+export const notifications = sqliteTable("notifications", {
+    id: text("id").primaryKey(),
+    municipalityId: text("municipality_id")
+        .notNull()
+        .references(() => municipalities.id),
+    /** NULL = broadcast to all users in the municipality */
+    userId: text("user_id").references(() => users.id),
+    alertId: text("alert_id").references(() => alerts.id),
+    /** One of: new_alert | status_change | inspection_due | system */
+    type: text("type").notNull(),
+    title: text("title").notNull(),
+    message: text("message").notNull(),
+    isRead: integer("is_read", { mode: "boolean" }).notNull().default(false),
+    createdAt: integer("created_at").notNull(),
+});
+
+// ---------------------------------------------------------------------------
+// scan_jobs
+// ---------------------------------------------------------------------------
+
+export const scanJobs = sqliteTable("scan_jobs", {
+    id: text("id").primaryKey(),
+    municipalityId: text("municipality_id")
+        .notNull()
+        .references(() => municipalities.id),
+    /** One of: pending | fetching | analyzing | completed | failed */
+    status: text("status").notNull().default("pending"),
+    imageryDate: text("imagery_date"),
+    beforeImageKey: text("before_image_key"),
+    afterImageKey: text("after_image_key"),
+    detectionsCount: integer("detections_count").default(0),
+    error: text("error"),
+    startedAt: integer("started_at"),
+    completedAt: integer("completed_at"),
+    createdAt: integer("created_at").notNull(),
+});
+
+// ---------------------------------------------------------------------------
 // Type exports (Drizzle inferred types)
 // ---------------------------------------------------------------------------
 
@@ -137,3 +188,7 @@ export type InspectionRow = typeof inspections.$inferSelect;
 export type NewInspectionRow = typeof inspections.$inferInsert;
 export type ContactSubmissionRow = typeof contactSubmissions.$inferSelect;
 export type NewContactSubmissionRow = typeof contactSubmissions.$inferInsert;
+export type NotificationRow = typeof notifications.$inferSelect;
+export type NewNotificationRow = typeof notifications.$inferInsert;
+export type ScanJobRow = typeof scanJobs.$inferSelect;
+export type NewScanJobRow = typeof scanJobs.$inferInsert;

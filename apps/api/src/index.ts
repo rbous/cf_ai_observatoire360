@@ -17,6 +17,9 @@ import usersRouter     from "./routes/users.js";
 import contactRouter   from "./routes/contact.js";
 import healthRouter    from "./routes/health.js";
 import meRouter        from "./routes/me.js";
+import notificationsRouter from "./routes/notifications.js";
+import scansRouter     from "./routes/scans.js";
+import imagesRouter    from "./routes/images.js";
 
 // Bindings — defined in types.ts to avoid circular imports
 import type { Bindings } from "./types.js";
@@ -57,18 +60,24 @@ app.route("/api/auth", authRouter);
 // Protected routes — JWT required for all /api/* routes below
 // ---------------------------------------------------------------------------
 
-app.use("/api/me",            requireAuth());
-app.use("/api/me/*",          requireAuth());
-app.use("/api/alerts/*",      requireAuth());
-app.use("/api/inspections/*", requireAuth());
-app.use("/api/reports/*",     requireAuth());
-app.use("/api/users/*",       requireAuth());
+app.use("/api/me",             requireAuth());
+app.use("/api/me/*",           requireAuth());
+app.use("/api/alerts/*",       requireAuth());
+app.use("/api/inspections/*",  requireAuth());
+app.use("/api/reports/*",      requireAuth());
+app.use("/api/users/*",        requireAuth());
+app.use("/api/notifications/*", requireAuth());
+app.use("/api/scans/*",        requireAuth());
+app.use("/api/images/*",       requireAuth());
 
-app.route("/api/me",          meRouter);
-app.route("/api/alerts",      alertsRouter);
-app.route("/api/inspections", inspectionsRouter);
-app.route("/api/reports",     reportsRouter);
-app.route("/api/users",       usersRouter);
+app.route("/api/me",            meRouter);
+app.route("/api/alerts",        alertsRouter);
+app.route("/api/inspections",   inspectionsRouter);
+app.route("/api/reports",       reportsRouter);
+app.route("/api/users",         usersRouter);
+app.route("/api/notifications", notificationsRouter);
+app.route("/api/scans",         scansRouter);
+app.route("/api/images",        imagesRouter);
 
 // ---------------------------------------------------------------------------
 // 404 handler — must come after all route registrations
@@ -115,4 +124,20 @@ app.onError((err, c) => {
     );
 });
 
-export default app;
+export default {
+    fetch: app.fetch,
+    scheduled: async (
+        _event: ScheduledEvent,
+        _env: Bindings,
+        _ctx: ExecutionContext,
+    ) => {
+        // Will be implemented in scheduled.ts
+    },
+    queue: async (
+        _batch: MessageBatch,
+        _env: Bindings,
+        _ctx: ExecutionContext,
+    ) => {
+        // Will be implemented in queue.ts
+    },
+};
