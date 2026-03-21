@@ -1,6 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapContainer, TileLayer, WMSTileLayer, Marker, Popup, LayersControl } from "react-leaflet";
+import { MapContainer, TileLayer, WMSTileLayer, Marker, Popup, LayersControl, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -65,15 +65,22 @@ interface MapViewProps {
 const DEFAULT_CENTER: [number, number] = [46.8, -71.2];
 const DEFAULT_ZOOM = 7;
 
+/** Flies to the computed bounds when alerts change. */
+function FitToAlerts({ alerts }: { alerts: { latitude: number; longitude: number }[] }) {
+    const map = useMap();
+
+    useEffect(() => {
+        if (alerts.length === 0) return;
+        const bounds = L.latLngBounds(alerts.map((a) => [a.latitude, a.longitude]));
+        map.fitBounds(bounds.pad(0.15), { maxZoom: 14 });
+    }, [alerts, map]);
+
+    return null;
+}
+
 export function MapView({ className }: MapViewProps) {
     const navigate = useNavigate();
     const { alerts, isLoading, error } = useAlerts();
-
-    // Center map on alerts if available
-    const mapCenter: [number, number] = alerts.length > 0
-        ? [alerts[0].latitude, alerts[0].longitude]
-        : DEFAULT_CENTER;
-    const mapZoom = alerts.length > 0 ? 13 : DEFAULT_ZOOM;
 
     // Ensure Leaflet container fills its parent
     useEffect(() => {
@@ -83,8 +90,8 @@ export function MapView({ className }: MapViewProps) {
     return (
         <div className={`relative w-full h-full ${className ?? ""}`}>
             <MapContainer
-                center={mapCenter}
-                zoom={mapZoom}
+                center={DEFAULT_CENTER}
+                zoom={DEFAULT_ZOOM}
                 style={{ width: "100%", height: "100%" }}
                 zoomControl={true}
             >
@@ -139,6 +146,9 @@ export function MapView({ className }: MapViewProps) {
                         />
                     </LayersControl.Overlay>
                 </LayersControl>
+
+                {/* Auto-fit map to alert bounds */}
+                <FitToAlerts alerts={alerts} />
 
                 {/* Alert markers */}
                 {alerts.map((alert) => (
