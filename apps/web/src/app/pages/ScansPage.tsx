@@ -91,6 +91,7 @@ export default function ScansPage() {
     // -----------------------------------------------------------------------
 
     const [triggerDialogOpen, setTriggerDialogOpen] = useState(false);
+    const [scanMode, setScanMode] = useState<"municipality" | "address" | "coordinates">("address");
     const [startDate, setStartDate] = useState(getDefaultStartDate);
     const [endDate, setEndDate] = useState(getDefaultEndDate);
     const [address, setAddress] = useState("");
@@ -111,6 +112,7 @@ export default function ScansPage() {
     // -----------------------------------------------------------------------
 
     function openTriggerDialog() {
+        setScanMode("address");
         setStartDate(getDefaultStartDate());
         setEndDate(getDefaultEndDate());
         setAddress("");
@@ -121,22 +123,30 @@ export default function ScansPage() {
     }
 
     async function handleTriggerScan() {
-        const lat = parseFloat(latitude);
-        const lng = parseFloat(longitude);
-        if (isNaN(lat) || isNaN(lng)) {
-            setTriggerError("Latitude et longitude sont requis.");
-            return;
+        if (scanMode !== "municipality") {
+            const lat = parseFloat(latitude);
+            const lng = parseFloat(longitude);
+            if (isNaN(lat) || isNaN(lng)) {
+                setTriggerError("Latitude et longitude sont requis.");
+                return;
+            }
         }
         setTriggerLoading(true);
         setTriggerError(null);
         try {
-            await api.post<{ job: ScanJob }>("/scans/trigger", {
-                latitude: lat,
-                longitude: lng,
-                address: address || undefined,
+            const payload: Record<string, unknown> = {
+                mode: scanMode,
                 startDate,
                 endDate,
-            });
+            };
+            if (scanMode !== "municipality") {
+                payload.latitude = parseFloat(latitude);
+                payload.longitude = parseFloat(longitude);
+            }
+            if (address) {
+                payload.address = address;
+            }
+            await api.post<{ job: ScanJob }>("/scans/trigger", payload);
             setTriggerSuccess(true);
             setTriggerDialogOpen(false);
             refetch();
@@ -315,35 +325,96 @@ export default function ScansPage() {
                     </DialogHeader>
 
                     <div className="space-y-4">
-                        <Input
-                            label="Adresse"
-                            placeholder="Ex: 125 Boul. de la Cité-des-Jeunes, Gatineau"
-                            value={address}
-                            onChange={(e) => setAddress(e.target.value)}
-                        />
-                        <div className="grid grid-cols-2 gap-3">
-                            <Input
-                                label="Latitude"
-                                type="number"
-                                step="any"
-                                placeholder="45.4765"
-                                value={latitude}
-                                onChange={(e) => setLatitude(e.target.value)}
-                                required
-                            />
-                            <Input
-                                label="Longitude"
-                                type="number"
-                                step="any"
-                                placeholder="-75.7013"
-                                value={longitude}
-                                onChange={(e) => setLongitude(e.target.value)}
-                                required
-                            />
+                        {/* Mode selector */}
+                        <div className="flex gap-1 rounded-lg bg-gray-100 p-1">
+                            {([
+                                { value: "municipality", label: "Municipalité" },
+                                { value: "address", label: "Adresse" },
+                                { value: "coordinates", label: "Coordonnées" },
+                            ] as const).map((opt) => (
+                                <button
+                                    key={opt.value}
+                                    type="button"
+                                    onClick={() => setScanMode(opt.value)}
+                                    className={`flex-1 text-xs font-medium py-2 px-3 rounded-md transition-colors ${
+                                        scanMode === opt.value
+                                            ? "bg-white text-[#008B8B] shadow-sm"
+                                            : "text-[#2A3A4E]/60 hover:text-[#2A3A4E]"
+                                    }`}
+                                >
+                                    {opt.label}
+                                </button>
+                            ))}
                         </div>
-                        <p className="text-xs text-[#2A3A4E]/50">
-                            Astuce : cliquez droit sur Google Maps → « Qu'est-ce qu'il y a ici? » pour obtenir les coordonnées.
-                        </p>
+
+                        {scanMode === "municipality" && (
+                            <p className="text-sm text-[#2A3A4E]/70 bg-amber-50 border border-amber-200 rounded-lg p-3">
+                                L'analyse portera sur l'ensemble du territoire de votre municipalité. La résolution sera plus faible qu'une analyse ciblée.
+                            </p>
+                        )}
+
+                        {scanMode === "address" && (
+                            <>
+                                <Input
+                                    label="Adresse"
+                                    placeholder="Ex: 125 Boul. de la Cité-des-Jeunes, Gatineau"
+                                    value={address}
+                                    onChange={(e) => setAddress(e.target.value)}
+                                />
+                                <div className="grid grid-cols-2 gap-3">
+                                    <Input
+                                        label="Latitude"
+                                        type="number"
+                                        step="any"
+                                        placeholder="45.4765"
+                                        value={latitude}
+                                        onChange={(e) => setLatitude(e.target.value)}
+                                        required
+                                    />
+                                    <Input
+                                        label="Longitude"
+                                        type="number"
+                                        step="any"
+                                        placeholder="-75.7013"
+                                        value={longitude}
+                                        onChange={(e) => setLongitude(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                                <p className="text-xs text-[#2A3A4E]/50">
+                                    Astuce : cliquez droit sur Google Maps → « Qu'est-ce qu'il y a ici? » pour obtenir les coordonnées.
+                                </p>
+                            </>
+                        )}
+
+                        {scanMode === "coordinates" && (
+                            <>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <Input
+                                        label="Latitude"
+                                        type="number"
+                                        step="any"
+                                        placeholder="45.4765"
+                                        value={latitude}
+                                        onChange={(e) => setLatitude(e.target.value)}
+                                        required
+                                    />
+                                    <Input
+                                        label="Longitude"
+                                        type="number"
+                                        step="any"
+                                        placeholder="-75.7013"
+                                        value={longitude}
+                                        onChange={(e) => setLongitude(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                                <p className="text-xs text-[#2A3A4E]/50">
+                                    L'analyse portera sur un rayon de 200m autour des coordonnées.
+                                </p>
+                            </>
+                        )}
+
                         <div className="grid grid-cols-2 gap-3">
                             <Input
                                 type="date"
@@ -380,7 +451,7 @@ export default function ScansPage() {
                         </Button>
                         <Button
                             onClick={handleTriggerScan}
-                            disabled={triggerLoading || !startDate || !endDate || !latitude || !longitude}
+                            disabled={triggerLoading || !startDate || !endDate || (scanMode !== "municipality" && (!latitude || !longitude))}
                         >
                             {triggerLoading ? (
                                 <Loader2 className="w-4 h-4 animate-spin" />

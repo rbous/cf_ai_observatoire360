@@ -155,8 +155,12 @@ scans.post("/trigger", async (c) => {
     const municipalityId = c.get("municipalityId");
     const db = drizzle(c.env.DB);
 
-    // Parse body: requires latitude/longitude for focused analysis
+    // Parse body — supports 3 modes:
+    //   1. Municipality-wide: no lat/lng (uses municipality bounds)
+    //   2. Address: address string + lat/lng (200m focused bbox)
+    //   3. Coordinates: lat/lng only (200m focused bbox)
     const body = await c.req.json().catch(() => ({})) as {
+        mode?: "municipality" | "address" | "coordinates";
         latitude?: number;
         longitude?: number;
         address?: string;
@@ -164,32 +168,51 @@ scans.post("/trigger", async (c) => {
         endDate?: string;
     };
 
-    if (!body.latitude || !body.longitude) {
-        return c.json(
-            {
-                error: "VALIDATION_ERROR",
-                message: "Latitude et longitude sont requis pour une analyse ciblée.",
-                statusCode: 422,
-            },
-            422,
-        );
-    }
-
+    const mode = body.mode ?? (body.latitude ? "coordinates" : "municipality");
     const startDate = body.startDate ?? null;
     const endDate = body.endDate ?? null;
     const address = body.address ?? null;
 
-    // Create a ~200m bounding box around the target point
-    // At Quebec's latitude (~45°N), 1° lat ≈ 111km, 1° lng ≈ 78.8km
-    const RADIUS_M = 200;
-    const latOffset = RADIUS_M / 111_000;
-    const lngOffset = RADIUS_M / (111_000 * Math.cos(body.latitude * Math.PI / 180));
-    const bounds: Municipality["bounds"] = {
-        north: body.latitude + latOffset,
-        south: body.latitude - latOffset,
-        east: body.longitude + lngOffset,
-        west: body.longitude - lngOffset,
-    };
+    // Fetch municipality (needed for municipality-wide mode or as fallback)
+    const [municipality] = await db
+        .select()
+        .from(municipalities)
+        .where(eq(municipalities.id, municipalityId))
+        .limit(1);
+
+    if (!municipality) {
+        return c.json(
+            { error: "NOT_FOUND", message: "Municipalité introuvable.", statusCode: 404 },
+            404,
+        );
+    }
+
+    let bounds: Municipality["bounds"] | null;
+
+    if (mode === "municipality") {
+        // Use full municipality bounding box
+        bounds = municipality.bounds
+            ? (JSON.parse(municipality.bounds) as Municipality["bounds"])
+            : null;
+    } else {
+        // Address or coordinates mode — requires lat/lng
+        if (!body.latitude || !body.longitude) {
+            return c.json(
+                { error: "VALIDATION_ERROR", message: "Latitude et longitude sont requis.", statusCode: 422 },
+                422,
+            );
+        }
+        // Create a ~200m bounding box around the target point
+        const RADIUS_M = 200;
+        const latOffset = RADIUS_M / 111_000;
+        const lngOffset = RADIUS_M / (111_000 * Math.cos(body.latitude * Math.PI / 180));
+        bounds = {
+            north: body.latitude + latOffset,
+            south: body.latitude - latOffset,
+            east: body.longitude + lngOffset,
+            west: body.longitude - lngOffset,
+        };
+    }
 
     const jobId = ulid();
     const now = Date.now();
@@ -200,8 +223,8 @@ scans.post("/trigger", async (c) => {
         status: "pending",
         startDate,
         endDate,
-        latitude: body.latitude,
-        longitude: body.longitude,
+        latitude: body.latitude ?? null,
+        longitude: body.longitude ?? null,
         address,
         createdAt: now,
     };
