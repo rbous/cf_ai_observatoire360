@@ -123,13 +123,17 @@ export default function ScansPage() {
     }
 
     async function handleTriggerScan() {
-        if (scanMode !== "municipality") {
+        if (scanMode === "coordinates") {
             const lat = parseFloat(latitude);
             const lng = parseFloat(longitude);
             if (isNaN(lat) || isNaN(lng)) {
                 setTriggerError("Latitude et longitude sont requis.");
                 return;
             }
+        }
+        if (scanMode === "address" && !address.trim()) {
+            setTriggerError("L'adresse est requise.");
+            return;
         }
         setTriggerLoading(true);
         setTriggerError(null);
@@ -139,13 +143,27 @@ export default function ScansPage() {
                 startDate,
                 endDate,
             };
-            if (scanMode !== "municipality") {
+
+            if (scanMode === "address") {
+                // Geocode the address using Nominatim (free, no API key)
+                const geoRes = await fetch(
+                    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`,
+                    { headers: { "User-Agent": "Observatoire360/1.0" } },
+                );
+                const geoData = await geoRes.json() as Array<{ lat: string; lon: string }>;
+                if (!geoData.length) {
+                    setTriggerError("Adresse introuvable. Vérifiez l'adresse ou utilisez le mode coordonnées.");
+                    setTriggerLoading(false);
+                    return;
+                }
+                payload.latitude = parseFloat(geoData[0].lat);
+                payload.longitude = parseFloat(geoData[0].lon);
+                payload.address = address;
+            } else if (scanMode === "coordinates") {
                 payload.latitude = parseFloat(latitude);
                 payload.longitude = parseFloat(longitude);
             }
-            if (address) {
-                payload.address = address;
-            }
+
             await api.post<{ job: ScanJob }>("/scans/trigger", payload);
             setTriggerSuccess(true);
             setTriggerDialogOpen(false);
@@ -360,29 +378,10 @@ export default function ScansPage() {
                                     placeholder="Ex: 125 Boul. de la Cité-des-Jeunes, Gatineau"
                                     value={address}
                                     onChange={(e) => setAddress(e.target.value)}
+                                    required
                                 />
-                                <div className="grid grid-cols-2 gap-3">
-                                    <Input
-                                        label="Latitude"
-                                        type="number"
-                                        step="any"
-                                        placeholder="45.4765"
-                                        value={latitude}
-                                        onChange={(e) => setLatitude(e.target.value)}
-                                        required
-                                    />
-                                    <Input
-                                        label="Longitude"
-                                        type="number"
-                                        step="any"
-                                        placeholder="-75.7013"
-                                        value={longitude}
-                                        onChange={(e) => setLongitude(e.target.value)}
-                                        required
-                                    />
-                                </div>
                                 <p className="text-xs text-[#2A3A4E]/50">
-                                    Astuce : cliquez droit sur Google Maps → « Qu'est-ce qu'il y a ici? » pour obtenir les coordonnées.
+                                    L'adresse sera automatiquement géolocalisée. L'analyse portera sur un rayon de 200m.
                                 </p>
                             </>
                         )}
@@ -451,7 +450,11 @@ export default function ScansPage() {
                         </Button>
                         <Button
                             onClick={handleTriggerScan}
-                            disabled={triggerLoading || !startDate || !endDate || (scanMode !== "municipality" && (!latitude || !longitude))}
+                            disabled={
+                                triggerLoading || !startDate || !endDate ||
+                                (scanMode === "address" && !address.trim()) ||
+                                (scanMode === "coordinates" && (!latitude || !longitude))
+                            }
                         >
                             {triggerLoading ? (
                                 <Loader2 className="w-4 h-4 animate-spin" />
