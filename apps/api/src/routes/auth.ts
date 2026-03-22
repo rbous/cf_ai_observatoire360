@@ -40,7 +40,7 @@ function refreshCookieOptions(env: string) {
     return {
         httpOnly: true,
         secure: env !== "development",
-        sameSite: "Strict" as const,
+        sameSite: "None" as const,
         path: "/api/auth",
         maxAge: REFRESH_TOKEN_TTL,
     };
