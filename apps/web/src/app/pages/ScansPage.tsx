@@ -1,8 +1,17 @@
 import { useState } from "react";
-import { Loader2, AlertTriangle, ScanLine, CheckCircle2, Clock } from "lucide-react";
+import { Loader2, AlertTriangle, ScanLine, CheckCircle2, Clock, ArrowRight, Layers } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
 import { Badge } from "@/app/components/ui/badge";
+import { Input } from "@/app/components/ui/input";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+} from "@/app/components/ui/dialog";
+import { ImageComparator } from "@/app/components/dashboard/ImageComparator";
 import { useApi } from "@/app/hooks/useApi";
 import { useAuth } from "@/app/hooks/useAuth";
 import { api, ApiRequestError } from "@/app/lib/api";
@@ -55,6 +64,16 @@ function formatDate(timestamp: number | null): string {
     });
 }
 
+function getDefaultStartDate(): string {
+    const d = new Date();
+    d.setDate(d.getDate() - 90);
+    return d.toISOString().slice(0, 10);
+}
+
+function getDefaultEndDate(): string {
+    return new Date().toISOString().slice(0, 10);
+}
+
 // ---------------------------------------------------------------------------
 // ScansPage
 // ---------------------------------------------------------------------------
@@ -66,23 +85,42 @@ export default function ScansPage() {
     const { data: scansResponse, isLoading, error, refetch } =
         useApi<PaginatedResponse<ScanJob>>("/scans");
 
+    // -----------------------------------------------------------------------
+    // Trigger dialog state
+    // -----------------------------------------------------------------------
+
+    const [triggerDialogOpen, setTriggerDialogOpen] = useState(false);
+    const [startDate, setStartDate] = useState(getDefaultStartDate);
+    const [endDate, setEndDate] = useState(getDefaultEndDate);
     const [triggerLoading, setTriggerLoading] = useState(false);
     const [triggerError, setTriggerError] = useState<string | null>(null);
     const [triggerSuccess, setTriggerSuccess] = useState(false);
 
     // -----------------------------------------------------------------------
+    // Compare dialog state
+    // -----------------------------------------------------------------------
+
+    const [compareScan, setCompareScan] = useState<ScanJob | null>(null);
+
+    // -----------------------------------------------------------------------
     // Handlers
     // -----------------------------------------------------------------------
+
+    function openTriggerDialog() {
+        setStartDate(getDefaultStartDate());
+        setEndDate(getDefaultEndDate());
+        setTriggerError(null);
+        setTriggerDialogOpen(true);
+    }
 
     async function handleTriggerScan() {
         setTriggerLoading(true);
         setTriggerError(null);
-        setTriggerSuccess(false);
         try {
-            await api.post<{ job: ScanJob }>("/scans/trigger");
+            await api.post<{ job: ScanJob }>("/scans/trigger", { startDate, endDate });
             setTriggerSuccess(true);
+            setTriggerDialogOpen(false);
             refetch();
-            // Auto-hide success message after 5 seconds
             setTimeout(() => setTriggerSuccess(false), 5000);
         } catch (err) {
             if (err instanceof ApiRequestError) {
@@ -138,12 +176,8 @@ export default function ScansPage() {
                     </p>
                 </div>
                 {isManager && (
-                    <Button onClick={handleTriggerScan} disabled={triggerLoading}>
-                        {triggerLoading ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                            <ScanLine className="w-4 h-4" />
-                        )}
+                    <Button onClick={openTriggerDialog}>
+                        <ScanLine className="w-4 h-4" />
                         Lancer une analyse
                     </Button>
                 )}
@@ -154,12 +188,6 @@ export default function ScansPage() {
                 <div className="flex items-center gap-3 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 text-sm">
                     <CheckCircle2 className="w-4 h-4 shrink-0" />
                     <span>Analyse lancée avec succès. Elle apparaîtra dans la liste ci-dessous.</span>
-                </div>
-            )}
-            {triggerError && (
-                <div className="flex items-center gap-3 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
-                    <AlertTriangle className="w-4 h-4 shrink-0" />
-                    <span>{triggerError}</span>
                 </div>
             )}
 
@@ -194,7 +222,9 @@ export default function ScansPage() {
                                     <tr className="border-b border-gray-100">
                                         <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">Date</th>
                                         <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">Statut</th>
+                                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">Période</th>
                                         <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">Détections</th>
+                                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">Images</th>
                                         <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">Erreur</th>
                                     </tr>
                                 </thead>
@@ -209,10 +239,36 @@ export default function ScansPage() {
                                                     {SCAN_JOB_STATUS_LABELS[scan.status]}
                                                 </Badge>
                                             </td>
+                                            <td className="px-5 py-3.5 whitespace-nowrap">
+                                                {scan.startDate && scan.endDate ? (
+                                                    <span className="inline-flex items-center gap-1.5 text-xs text-[#2A3A4E]/70">
+                                                        <span>{scan.startDate}</span>
+                                                        <ArrowRight className="w-3 h-3 shrink-0 text-[#2A3A4E]/40" />
+                                                        <span>{scan.endDate}</span>
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-[#2A3A4E]/30">—</span>
+                                                )}
+                                            </td>
                                             <td className="px-5 py-3.5 font-medium text-[#1A2332]">
                                                 {scan.status === "completed"
                                                     ? scan.detectionsCount
                                                     : "—"}
+                                            </td>
+                                            <td className="px-5 py-3.5">
+                                                {scan.beforeImageKey && scan.afterImageKey ? (
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        className="h-7 text-xs px-2.5 border-[#008B8B]/40 text-[#008B8B] hover:bg-[#008B8B]/5"
+                                                        onClick={() => setCompareScan(scan)}
+                                                    >
+                                                        <Layers className="w-3.5 h-3.5" />
+                                                        Comparer
+                                                    </Button>
+                                                ) : (
+                                                    <span className="text-[#2A3A4E]/30">—</span>
+                                                )}
                                             </td>
                                             <td className="px-5 py-3.5 text-red-600 text-xs max-w-[240px] truncate">
                                                 {scan.error ?? "—"}
@@ -225,6 +281,83 @@ export default function ScansPage() {
                     </CardContent>
                 </Card>
             )}
+
+            {/* ---------------------------------------------------------------- */}
+            {/* Trigger scan dialog                                               */}
+            {/* ---------------------------------------------------------------- */}
+            <Dialog open={triggerDialogOpen} onOpenChange={setTriggerDialogOpen}>
+                <DialogContent className="max-w-sm">
+                    <DialogHeader>
+                        <DialogTitle>Nouvelle analyse</DialogTitle>
+                    </DialogHeader>
+
+                    <div className="space-y-4">
+                        <Input
+                            type="date"
+                            label="Date de début"
+                            value={startDate}
+                            onChange={(e) => setStartDate(e.target.value)}
+                            max={endDate}
+                        />
+                        <Input
+                            type="date"
+                            label="Date de fin"
+                            value={endDate}
+                            onChange={(e) => setEndDate(e.target.value)}
+                            min={startDate}
+                            max={getDefaultEndDate()}
+                        />
+
+                        {triggerError && (
+                            <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-xs">
+                                <AlertTriangle className="w-4 h-4 shrink-0" />
+                                <span>{triggerError}</span>
+                            </div>
+                        )}
+                    </div>
+
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => setTriggerDialogOpen(false)}
+                            disabled={triggerLoading}
+                        >
+                            Annuler
+                        </Button>
+                        <Button
+                            onClick={handleTriggerScan}
+                            disabled={triggerLoading || !startDate || !endDate}
+                        >
+                            {triggerLoading ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                                <ScanLine className="w-4 h-4" />
+                            )}
+                            Lancer
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* ---------------------------------------------------------------- */}
+            {/* Image comparator dialog                                           */}
+            {/* ---------------------------------------------------------------- */}
+            <Dialog open={compareScan !== null} onOpenChange={(open) => { if (!open) setCompareScan(null); }}>
+                <DialogContent className="max-w-3xl">
+                    <DialogHeader>
+                        <DialogTitle>Comparaison d'images</DialogTitle>
+                    </DialogHeader>
+
+                    {compareScan?.beforeImageKey && compareScan?.afterImageKey && (
+                        <ImageComparator
+                            beforeSrc={`/api/images/${compareScan.beforeImageKey}`}
+                            afterSrc={`/api/images/${compareScan.afterImageKey}`}
+                            beforeLabel={compareScan.startDate ? `AVANT (${compareScan.startDate})` : "AVANT"}
+                            afterLabel={compareScan.endDate ? `APRÈS (${compareScan.endDate})` : "APRÈS"}
+                        />
+                    )}
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

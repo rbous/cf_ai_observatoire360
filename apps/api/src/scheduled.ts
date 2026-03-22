@@ -27,6 +27,9 @@ export interface ScanJobMessage {
         east: number;
         west: number;
     };
+    /** Custom date range for manual analyses (ISO date strings) */
+    startDate?: string;
+    endDate?: string;
     comparisonMode: ComparisonMode;
 }
 

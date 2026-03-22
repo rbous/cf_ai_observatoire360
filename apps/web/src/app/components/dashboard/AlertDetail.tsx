@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ArrowLeft, MapPin, Calendar, FileText, User, Clock, CheckCircle, AlertTriangle, Image, Loader2 } from "lucide-react";
+import { ImageComparator } from "./ImageComparator";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
@@ -132,50 +133,43 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <div className="grid grid-cols-2 gap-4">
-                                    {/* Before image */}
-                                    <div>
-                                        <p className="text-xs font-bold text-[#2A3A4E]/50 uppercase tracking-wide mb-2">Avant</p>
-                                        {alert.beforeImageKey ? (
-                                            <img
-                                                src={`/api/images/${alert.beforeImageKey}`}
-                                                alt="Image avant"
-                                                className="aspect-video w-full rounded-xl object-cover"
-                                            />
-                                        ) : (
+                                {alert.beforeImageKey && alert.afterImageKey ? (
+                                    <ImageComparator
+                                        beforeSrc={"/api/images/" + alert.beforeImageKey}
+                                        afterSrc={"/api/images/" + alert.afterImageKey}
+                                        beforeLabel="AVANT"
+                                        afterLabel="APRÈS"
+                                    />
+                                ) : (
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {/* Before image placeholder */}
+                                        <div>
+                                            <p className="text-xs font-bold text-[#2A3A4E]/50 uppercase tracking-wide mb-2">Avant</p>
                                             <div
                                                 className="aspect-video rounded-xl flex items-center justify-center overflow-hidden"
                                                 style={{ background: "linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%)" }}
                                             >
                                                 <div className="text-center opacity-50">
                                                     <Image className="w-8 h-8 mx-auto mb-1.5 text-slate-400" />
-                                                    <p className="text-xs text-slate-500 font-medium">Image avant</p>
+                                                    <p className="text-xs text-slate-500 font-medium">Aucune image disponible</p>
                                                 </div>
                                             </div>
-                                        )}
-                                    </div>
-                                    {/* After image */}
-                                    <div>
-                                        <p className="text-xs font-bold text-[#2A3A4E]/50 uppercase tracking-wide mb-2">Après</p>
-                                        {alert.afterImageKey ? (
-                                            <img
-                                                src={`/api/images/${alert.afterImageKey}`}
-                                                alt="Image après"
-                                                className="aspect-video w-full rounded-xl object-cover"
-                                            />
-                                        ) : (
+                                        </div>
+                                        {/* After image placeholder */}
+                                        <div>
+                                            <p className="text-xs font-bold text-[#2A3A4E]/50 uppercase tracking-wide mb-2">Après</p>
                                             <div
                                                 className="aspect-video rounded-xl flex items-center justify-center overflow-hidden"
                                                 style={{ background: "linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)" }}
                                             >
                                                 <div className="text-center opacity-50">
                                                     <Image className="w-8 h-8 mx-auto mb-1.5 text-slate-400" />
-                                                    <p className="text-xs text-slate-500 font-medium">Image après</p>
+                                                    <p className="text-xs text-slate-500 font-medium">Aucune image disponible</p>
                                                 </div>
                                             </div>
-                                        )}
+                                        </div>
                                     </div>
-                                </div>
+                                )}
                             </CardContent>
                         </Card>
 

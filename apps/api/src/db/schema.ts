@@ -169,6 +169,9 @@ export const scanJobs = sqliteTable("scan_jobs", {
     error: text("error"),
     startedAt: integer("started_at"),
     completedAt: integer("completed_at"),
+    /** Custom date range for manual analyses */
+    startDate: text("start_date"),
+    endDate: text("end_date"),
     createdAt: integer("created_at").notNull(),
 });
 

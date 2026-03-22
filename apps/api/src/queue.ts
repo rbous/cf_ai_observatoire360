@@ -48,7 +48,10 @@ interface ScanJobMessage {
     jobId: string;
     municipalityId: string;
     bounds: BBox;
-    comparisonMode?: ComparisonMode; // undefined treated as "short_term" for backward compat
+    comparisonMode?: ComparisonMode;
+    /** Custom date range (ISO date strings) for manual analyses */
+    startDate?: string;
+    endDate?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -87,12 +90,10 @@ async function processMessage(
     env: Bindings,
     db: ReturnType<typeof drizzle>,
 ): Promise<void> {
-    const { jobId, municipalityId, bounds, comparisonMode = "short_term" } = body;
+    const { jobId, municipalityId, bounds, comparisonMode = "short_term", startDate, endDate } = body;
     const now = Math.floor(Date.now() / 1_000);
 
-    console.log(`[queue] Processing job ${jobId} (mode: ${comparisonMode})`);
-
-    console.log(`[queue] Processing job ${jobId} for municipality ${municipalityId}.`);
+    console.log(`[queue] Processing job ${jobId} (mode: ${comparisonMode}, dates: ${startDate ?? "auto"} → ${endDate ?? "auto"})`);
 
     // ------------------------------------------------------------------
     // 1. Mark job as "fetching"
@@ -128,6 +129,7 @@ async function processMessage(
             bounds,
             env.IMAGES_BUCKET,
             municipalityRow.code,
+            endDate,
         );
     } catch (err) {
         const errorMsg = err instanceof Error ? err.message : String(err);
@@ -148,13 +150,28 @@ async function processMessage(
     const { imageKey: afterImageKey, imageryDate } = afterResult;
 
     // ------------------------------------------------------------------
-    // 3. Select baseline image based on comparison mode:
-    //    SHORT-TERM: most recent completed scan (yesterday) → sudden changes
-    //    LONG-TERM:  oldest scan ≥90 days ago → gradual construction
+    // 3. Get the "before" image.
+    //    - Custom startDate: fetch from Sentinel Hub for that date
+    //    - SHORT-TERM: most recent completed scan (yesterday)
+    //    - LONG-TERM:  oldest scan ≥90 days ago
     // ------------------------------------------------------------------
     let beforeImageKey: string | null = null;
 
-    if (comparisonMode === "long_term") {
+    if (startDate) {
+        // Manual analysis — fetch "before" image for the start date
+        try {
+            const beforeResult = await fetchLatestImagery(
+                sentinelConfig,
+                bounds,
+                env.IMAGES_BUCKET,
+                `${municipalityRow.code}-before`,
+                startDate,
+            );
+            beforeImageKey = beforeResult?.imageKey ?? null;
+        } catch (err) {
+            console.warn(`[queue] Could not fetch before-image for ${startDate}:`, err);
+        }
+    } else if (comparisonMode === "long_term") {
         // LONG-TERM: find an image from ~90+ days ago
         const ninetyDaysAgo = now - 90 * 24 * 60 * 60;
         let [baselineJob] = await db
@@ -228,7 +245,7 @@ async function processMessage(
     // ------------------------------------------------------------------
     await db
         .update(scanJobs)
-        .set({ status: "analyzing", afterImageKey, imageryDate })
+        .set({ status: "analyzing", afterImageKey, beforeImageKey, imageryDate, startDate: startDate ?? null, endDate: endDate ?? null })
         .where(eq(scanJobs.id, jobId));
 
     // ------------------------------------------------------------------

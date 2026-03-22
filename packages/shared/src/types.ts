@@ -134,6 +134,8 @@ export interface ScanJob {
     error: string | null;
     startedAt: number | null;
     completedAt: number | null;
+    startDate: string | null;
+    endDate: string | null;
     createdAt: number;
 }
 

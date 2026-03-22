@@ -123,17 +123,25 @@ function evaluatePixel(sample) {
  * @param bbox             - Geographic extent to image.
  * @param bucket           - R2 bucket to store the PNG.
  * @param municipalityCode - Used to build the R2 object key.
+ * @param fromDate - Optional start of time range (ISO date string). Defaults to 30 days ago.
+ * @param toDate   - Optional end of time range (ISO date string). Defaults to today.
  */
 export async function fetchLatestImagery(
     config: SentinelHubConfig,
     bbox: BBox,
     bucket: R2Bucket,
     municipalityCode: string,
+    fromDate?: string,
+    toDate?: string,
 ): Promise<FetchImageryResult | null> {
     const token = await getAccessToken(config);
 
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1_000);
+
+    // Use custom dates if provided, otherwise default to last 30 days
+    const rangeFrom = fromDate ? new Date(fromDate) : thirtyDaysAgo;
+    const rangeTo = toDate ? new Date(toDate) : now;
 
     const toIso = (d: Date) => d.toISOString().replace(/\.\d{3}Z$/, "Z");
 
@@ -148,8 +156,8 @@ export async function fetchLatestImagery(
                     type: "sentinel-2-l2a",
                     dataFilter: {
                         timeRange: {
-                            from: toIso(thirtyDaysAgo),
-                            to: toIso(now),
+                            from: toIso(rangeFrom),
+                            to: toIso(rangeTo),
                         },
                         maxCloudCoverage: 30,
                     },

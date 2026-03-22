@@ -29,6 +29,8 @@ function rowToScanJob(row: typeof scanJobs.$inferSelect): ScanJob {
         error: row.error ?? null,
         startedAt: row.startedAt ?? null,
         completedAt: row.completedAt ?? null,
+        startDate: row.startDate ?? null,
+        endDate: row.endDate ?? null,
         createdAt: row.createdAt,
     };
 }
@@ -150,6 +152,14 @@ scans.post("/trigger", async (c) => {
     const municipalityId = c.get("municipalityId");
     const db = drizzle(c.env.DB);
 
+    // Parse optional date range from body
+    const body = await c.req.json().catch(() => ({})) as {
+        startDate?: string;
+        endDate?: string;
+    };
+    const startDate = body.startDate ?? null;
+    const endDate = body.endDate ?? null;
+
     // Fetch municipality to get bounds
     const [municipality] = await db
         .select()
@@ -179,6 +189,8 @@ scans.post("/trigger", async (c) => {
         id: jobId,
         municipalityId,
         status: "pending",
+        startDate,
+        endDate,
         createdAt: now,
     };
 
@@ -189,6 +201,8 @@ scans.post("/trigger", async (c) => {
         jobId,
         municipalityId,
         bounds,
+        startDate: startDate ?? undefined,
+        endDate: endDate ?? undefined,
     });
 
     const [inserted] = await db
