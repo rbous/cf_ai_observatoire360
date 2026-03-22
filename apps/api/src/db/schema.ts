@@ -172,6 +172,8 @@ export const scanJobs = sqliteTable("scan_jobs", {
     /** Custom date range for manual analyses */
     startDate: text("start_date"),
     endDate: text("end_date"),
+    /** High-res Quebec orthophoto (address-level scans) */
+    orthoImageKey: text("ortho_image_key"),
     /** Location for address-specific scans */
     latitude: real("latitude"),
     longitude: real("longitude"),

@@ -25,6 +25,7 @@ function rowToScanJob(row: typeof scanJobs.$inferSelect): ScanJob {
         imageryDate: row.imageryDate ?? null,
         beforeImageKey: row.beforeImageKey ?? null,
         afterImageKey: row.afterImageKey ?? null,
+        orthoImageKey: row.orthoImageKey ?? null,
         detectionsCount: row.detectionsCount ?? 0,
         error: row.error ?? null,
         startedAt: row.startedAt ?? null,

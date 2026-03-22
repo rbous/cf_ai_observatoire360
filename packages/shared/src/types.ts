@@ -130,6 +130,7 @@ export interface ScanJob {
     imageryDate: string | null;
     beforeImageKey: string | null;
     afterImageKey: string | null;
+    orthoImageKey: string | null;
     detectionsCount: number;
     error: string | null;
     startedAt: number | null;

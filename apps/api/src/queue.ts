@@ -30,6 +30,7 @@ import {
     type SentinelHubConfig,
 } from "./lib/sentinel.js";
 import { detectChanges, type DetectionResult } from "./lib/ai-detection.js";
+import { fetchOrthophoto } from "./lib/orthophoto.js";
 import {
     sendEmail,
     buildAlertEmailHtml,
@@ -241,15 +242,33 @@ async function processMessage(
     }
 
     // ------------------------------------------------------------------
-    // 4. Mark job as "analyzing" and store the after-image key
+    // 4. Fetch high-res Quebec orthophoto (address-level scans only)
+    // ------------------------------------------------------------------
+    let orthoImageKey: string | null = null;
+    try {
+        const orthoResult = await fetchOrthophoto(
+            bounds,
+            env.IMAGES_BUCKET,
+            `ortho/${municipalityRow.code}/${jobId}`,
+        );
+        orthoImageKey = orthoResult?.imageKey ?? null;
+        if (orthoImageKey) {
+            console.log(`[queue] Orthophoto saved: ${orthoImageKey}`);
+        }
+    } catch (err) {
+        console.warn("[queue] Orthophoto fetch failed (non-fatal):", err);
+    }
+
+    // ------------------------------------------------------------------
+    // 5. Mark job as "analyzing" and store image keys
     // ------------------------------------------------------------------
     await db
         .update(scanJobs)
-        .set({ status: "analyzing", afterImageKey, beforeImageKey, imageryDate, startDate: startDate ?? null, endDate: endDate ?? null })
+        .set({ status: "analyzing", afterImageKey, beforeImageKey, orthoImageKey, imageryDate, startDate: startDate ?? null, endDate: endDate ?? null })
         .where(eq(scanJobs.id, jobId));
 
     // ------------------------------------------------------------------
-    // 5. Run AI change detection
+    // 6. Run AI change detection
     // ------------------------------------------------------------------
     let detections: DetectionResult[];
     try {

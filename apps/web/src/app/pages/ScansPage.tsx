@@ -477,12 +477,26 @@ export default function ScansPage() {
                     </DialogHeader>
 
                     {compareScan?.beforeImageKey && compareScan?.afterImageKey && (
-                        <ImageComparator
-                            beforeSrc={`${API_BASE_URL}/images/${compareScan.beforeImageKey}`}
-                            afterSrc={`${API_BASE_URL}/images/${compareScan.afterImageKey}`}
-                            beforeLabel={compareScan.startDate ? `AVANT (${compareScan.startDate})` : "AVANT"}
-                            afterLabel={compareScan.endDate ? `APRÈS (${compareScan.endDate})` : "APRÈS"}
-                        />
+                        <>
+                            <p className="text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">Détection de changements (Sentinel-2, 10m/pixel)</p>
+                            <ImageComparator
+                                beforeSrc={`${API_BASE_URL}/images/${compareScan.beforeImageKey}`}
+                                afterSrc={`${API_BASE_URL}/images/${compareScan.afterImageKey}`}
+                                beforeLabel={compareScan.startDate ? `AVANT (${compareScan.startDate})` : "AVANT"}
+                                afterLabel={compareScan.endDate ? `APRÈS (${compareScan.endDate})` : "APRÈS"}
+                            />
+                        </>
+                    )}
+
+                    {compareScan?.orthoImageKey && (
+                        <div className="mt-4">
+                            <p className="text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide mb-2">Vue haute résolution (Orthophoto Québec, ~20cm/pixel)</p>
+                            <img
+                                src={`${API_BASE_URL}/images/${compareScan.orthoImageKey}`}
+                                alt="Orthophoto haute résolution"
+                                className="w-full rounded-xl border border-gray-200"
+                            />
+                        </div>
                     )}
                 </DialogContent>
             </Dialog>

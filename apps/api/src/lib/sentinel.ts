@@ -172,8 +172,8 @@ export async function fetchLatestImagery(
             ],
         },
         output: {
-            width: 1024,
-            height: 1024,
+            width: 2500,
+            height: 2500,
             responses: [
                 {
                     identifier: "default",
