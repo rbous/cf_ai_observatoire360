@@ -139,9 +139,16 @@ export async function fetchLatestImagery(
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1_000);
 
-    // Use custom dates if provided, otherwise default to last 30 days
-    const rangeFrom = fromDate ? new Date(fromDate) : thirtyDaysAgo;
-    const rangeTo = toDate ? new Date(toDate) : now;
+    // Use custom dates if provided, otherwise default to last 30 days.
+    // Expand the window by ±15 days to ensure we find available imagery
+    // (Sentinel-2 revisits every 5 days, so a tight window may miss images).
+    const WINDOW_MS = 15 * 24 * 60 * 60 * 1_000;
+    const rangeFrom = fromDate
+        ? new Date(new Date(fromDate).getTime() - WINDOW_MS)
+        : thirtyDaysAgo;
+    const rangeTo = toDate
+        ? new Date(Math.min(new Date(toDate).getTime() + WINDOW_MS, now.getTime()))
+        : now;
 
     const toIso = (d: Date) => d.toISOString().replace(/\.\d{3}Z$/, "Z");
 
@@ -159,14 +166,14 @@ export async function fetchLatestImagery(
                             from: toIso(rangeFrom),
                             to: toIso(rangeTo),
                         },
-                        maxCloudCoverage: 30,
+                        maxCloudCoverage: 50,
                     },
                 },
             ],
         },
         output: {
-            width: 512,
-            height: 512,
+            width: 1024,
+            height: 1024,
             responses: [
                 {
                     identifier: "default",
@@ -221,7 +228,9 @@ export async function fetchLatestImagery(
         ? dateHeader.slice(0, 10)
         : now.toISOString().slice(0, 10);
 
-    const imageKey = `sentinel/${imageryDate}/${municipalityCode}.png`;
+    // Include a random suffix to prevent key collisions between before/after
+    const suffix = Math.random().toString(36).slice(2, 8);
+    const imageKey = `sentinel/${imageryDate}/${municipalityCode}-${suffix}.png`;
 
     await bucket.put(imageKey, imageBuffer, {
         httpMetadata: { contentType: "image/png" },
