@@ -172,6 +172,10 @@ export const scanJobs = sqliteTable("scan_jobs", {
     /** Custom date range for manual analyses */
     startDate: text("start_date"),
     endDate: text("end_date"),
+    /** Location for address-specific scans */
+    latitude: real("latitude"),
+    longitude: real("longitude"),
+    address: text("address"),
     createdAt: integer("created_at").notNull(),
 });
 

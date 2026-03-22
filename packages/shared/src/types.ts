@@ -136,6 +136,9 @@ export interface ScanJob {
     completedAt: number | null;
     startDate: string | null;
     endDate: string | null;
+    latitude: number | null;
+    longitude: number | null;
+    address: string | null;
     createdAt: number;
 }
 

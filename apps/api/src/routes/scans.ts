@@ -31,6 +31,9 @@ function rowToScanJob(row: typeof scanJobs.$inferSelect): ScanJob {
         completedAt: row.completedAt ?? null,
         startDate: row.startDate ?? null,
         endDate: row.endDate ?? null,
+        latitude: row.latitude ?? null,
+        longitude: row.longitude ?? null,
+        address: row.address ?? null,
         createdAt: row.createdAt,
     };
 }
@@ -152,35 +155,41 @@ scans.post("/trigger", async (c) => {
     const municipalityId = c.get("municipalityId");
     const db = drizzle(c.env.DB);
 
-    // Parse optional date range from body
+    // Parse body: requires latitude/longitude for focused analysis
     const body = await c.req.json().catch(() => ({})) as {
+        latitude?: number;
+        longitude?: number;
+        address?: string;
         startDate?: string;
         endDate?: string;
     };
-    const startDate = body.startDate ?? null;
-    const endDate = body.endDate ?? null;
 
-    // Fetch municipality to get bounds
-    const [municipality] = await db
-        .select()
-        .from(municipalities)
-        .where(eq(municipalities.id, municipalityId))
-        .limit(1);
-
-    if (!municipality) {
+    if (!body.latitude || !body.longitude) {
         return c.json(
             {
-                error: "NOT_FOUND",
-                message: "Municipalité introuvable.",
-                statusCode: 404,
+                error: "VALIDATION_ERROR",
+                message: "Latitude et longitude sont requis pour une analyse ciblée.",
+                statusCode: 422,
             },
-            404,
+            422,
         );
     }
 
-    const bounds = municipality.bounds
-        ? (JSON.parse(municipality.bounds) as Municipality["bounds"])
-        : null;
+    const startDate = body.startDate ?? null;
+    const endDate = body.endDate ?? null;
+    const address = body.address ?? null;
+
+    // Create a ~200m bounding box around the target point
+    // At Quebec's latitude (~45°N), 1° lat ≈ 111km, 1° lng ≈ 78.8km
+    const RADIUS_M = 200;
+    const latOffset = RADIUS_M / 111_000;
+    const lngOffset = RADIUS_M / (111_000 * Math.cos(body.latitude * Math.PI / 180));
+    const bounds: Municipality["bounds"] = {
+        north: body.latitude + latOffset,
+        south: body.latitude - latOffset,
+        east: body.longitude + lngOffset,
+        west: body.longitude - lngOffset,
+    };
 
     const jobId = ulid();
     const now = Date.now();
@@ -191,6 +200,9 @@ scans.post("/trigger", async (c) => {
         status: "pending",
         startDate,
         endDate,
+        latitude: body.latitude,
+        longitude: body.longitude,
+        address,
         createdAt: now,
     };
 

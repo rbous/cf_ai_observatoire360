@@ -93,6 +93,9 @@ export default function ScansPage() {
     const [triggerDialogOpen, setTriggerDialogOpen] = useState(false);
     const [startDate, setStartDate] = useState(getDefaultStartDate);
     const [endDate, setEndDate] = useState(getDefaultEndDate);
+    const [address, setAddress] = useState("");
+    const [latitude, setLatitude] = useState("");
+    const [longitude, setLongitude] = useState("");
     const [triggerLoading, setTriggerLoading] = useState(false);
     const [triggerError, setTriggerError] = useState<string | null>(null);
     const [triggerSuccess, setTriggerSuccess] = useState(false);
@@ -110,15 +113,30 @@ export default function ScansPage() {
     function openTriggerDialog() {
         setStartDate(getDefaultStartDate());
         setEndDate(getDefaultEndDate());
+        setAddress("");
+        setLatitude("");
+        setLongitude("");
         setTriggerError(null);
         setTriggerDialogOpen(true);
     }
 
     async function handleTriggerScan() {
+        const lat = parseFloat(latitude);
+        const lng = parseFloat(longitude);
+        if (isNaN(lat) || isNaN(lng)) {
+            setTriggerError("Latitude et longitude sont requis.");
+            return;
+        }
         setTriggerLoading(true);
         setTriggerError(null);
         try {
-            await api.post<{ job: ScanJob }>("/scans/trigger", { startDate, endDate });
+            await api.post<{ job: ScanJob }>("/scans/trigger", {
+                latitude: lat,
+                longitude: lng,
+                address: address || undefined,
+                startDate,
+                endDate,
+            });
             setTriggerSuccess(true);
             setTriggerDialogOpen(false);
             refetch();
@@ -222,6 +240,7 @@ export default function ScansPage() {
                                 <thead>
                                     <tr className="border-b border-gray-100">
                                         <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">Date</th>
+                                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">Adresse</th>
                                         <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">Statut</th>
                                         <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">Période</th>
                                         <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">Détections</th>
@@ -234,6 +253,9 @@ export default function ScansPage() {
                                         <tr key={scan.id} className="hover:bg-gray-50/60 transition-colors">
                                             <td className="px-5 py-3.5 text-[#2A3A4E]/80 whitespace-nowrap">
                                                 {formatDate(scan.createdAt)}
+                                            </td>
+                                            <td className="px-5 py-3.5 text-xs text-[#2A3A4E]/70 max-w-[200px] truncate">
+                                                {scan.address ?? "—"}
                                             </td>
                                             <td className="px-5 py-3.5">
                                                 <Badge variant={statusBadgeVariant(scan.status)}>
@@ -294,20 +316,51 @@ export default function ScansPage() {
 
                     <div className="space-y-4">
                         <Input
-                            type="date"
-                            label="Date de début"
-                            value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
-                            max={endDate}
+                            label="Adresse"
+                            placeholder="Ex: 125 Boul. de la Cité-des-Jeunes, Gatineau"
+                            value={address}
+                            onChange={(e) => setAddress(e.target.value)}
                         />
-                        <Input
-                            type="date"
-                            label="Date de fin"
-                            value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
-                            min={startDate}
-                            max={getDefaultEndDate()}
-                        />
+                        <div className="grid grid-cols-2 gap-3">
+                            <Input
+                                label="Latitude"
+                                type="number"
+                                step="any"
+                                placeholder="45.4765"
+                                value={latitude}
+                                onChange={(e) => setLatitude(e.target.value)}
+                                required
+                            />
+                            <Input
+                                label="Longitude"
+                                type="number"
+                                step="any"
+                                placeholder="-75.7013"
+                                value={longitude}
+                                onChange={(e) => setLongitude(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <p className="text-xs text-[#2A3A4E]/50">
+                            Astuce : cliquez droit sur Google Maps → « Qu'est-ce qu'il y a ici? » pour obtenir les coordonnées.
+                        </p>
+                        <div className="grid grid-cols-2 gap-3">
+                            <Input
+                                type="date"
+                                label="Date de début"
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                                max={endDate}
+                            />
+                            <Input
+                                type="date"
+                                label="Date de fin"
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                                min={startDate}
+                                max={getDefaultEndDate()}
+                            />
+                        </div>
 
                         {triggerError && (
                             <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-xs">
@@ -327,7 +380,7 @@ export default function ScansPage() {
                         </Button>
                         <Button
                             onClick={handleTriggerScan}
-                            disabled={triggerLoading || !startDate || !endDate}
+                            disabled={triggerLoading || !startDate || !endDate || !latitude || !longitude}
                         >
                             {triggerLoading ? (
                                 <Loader2 className="w-4 h-4 animate-spin" />
