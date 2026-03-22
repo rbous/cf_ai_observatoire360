@@ -68,7 +68,7 @@ app.use("/api/reports/*",      requireAuth());
 app.use("/api/users/*",        requireAuth());
 app.use("/api/notifications/*", requireAuth());
 app.use("/api/scans/*",        requireAuth());
-app.use("/api/images/*",       requireAuth());
+// Images are public — R2 keys are unguessable ULIDs, no auth needed for <img src>
 
 app.route("/api/me",            meRouter);
 app.route("/api/alerts",        alertsRouter);

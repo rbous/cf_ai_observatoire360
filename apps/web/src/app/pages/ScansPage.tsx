@@ -15,6 +15,7 @@ import { ImageComparator } from "@/app/components/dashboard/ImageComparator";
 import { useApi } from "@/app/hooks/useApi";
 import { useAuth } from "@/app/hooks/useAuth";
 import { api, ApiRequestError } from "@/app/lib/api";
+import { API_BASE_URL } from "@/app/lib/constants";
 import type { ScanJob, PaginatedResponse } from "@observatoire360/shared";
 import { SCAN_JOB_STATUS_LABELS } from "@observatoire360/shared";
 import type { ScanJobStatus } from "@observatoire360/shared";
@@ -350,8 +351,8 @@ export default function ScansPage() {
 
                     {compareScan?.beforeImageKey && compareScan?.afterImageKey && (
                         <ImageComparator
-                            beforeSrc={`/api/images/${compareScan.beforeImageKey}`}
-                            afterSrc={`/api/images/${compareScan.afterImageKey}`}
+                            beforeSrc={`${API_BASE_URL}/images/${compareScan.beforeImageKey}`}
+                            afterSrc={`${API_BASE_URL}/images/${compareScan.afterImageKey}`}
                             beforeLabel={compareScan.startDate ? `AVANT (${compareScan.startDate})` : "AVANT"}
                             afterLabel={compareScan.endDate ? `APRÈS (${compareScan.endDate})` : "APRÈS"}
                         />

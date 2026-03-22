@@ -9,6 +9,7 @@ import { StatusBadge } from "@/app/components/shared/StatusBadge";
 import type { Alert, AlertStatus } from "@observatoire360/shared";
 import { ALERT_STATUS_LABELS, ALERT_TYPE_LABELS } from "@observatoire360/shared";
 import { useApi } from "@/app/hooks/useApi";
+import { API_BASE_URL } from "@/app/lib/constants";
 
 const STATUS_OPTIONS: AlertStatus[] = [
     "a_analyser",
@@ -135,8 +136,8 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                             <CardContent>
                                 {alert.beforeImageKey && alert.afterImageKey ? (
                                     <ImageComparator
-                                        beforeSrc={"/api/images/" + alert.beforeImageKey}
-                                        afterSrc={"/api/images/" + alert.afterImageKey}
+                                        beforeSrc={API_BASE_URL + "/images/" + alert.beforeImageKey}
+                                        afterSrc={API_BASE_URL + "/images/" + alert.afterImageKey}
                                         beforeLabel="AVANT"
                                         afterLabel="APRÈS"
                                     />
