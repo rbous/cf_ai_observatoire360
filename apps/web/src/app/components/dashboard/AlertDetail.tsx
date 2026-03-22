@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { ArrowLeft, MapPin, Calendar, FileText, User, Clock, CheckCircle, AlertTriangle, Image, Loader2 } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, FileText, User, Clock, CheckCircle, AlertTriangle, Image, Loader2, ScanLine } from "lucide-react";
+import { api } from "@/app/lib/api";
 import { ImageComparator } from "./ImageComparator";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
@@ -10,6 +11,84 @@ import type { Alert, AlertStatus } from "@observatoire360/shared";
 import { ALERT_STATUS_LABELS, ALERT_TYPE_LABELS } from "@observatoire360/shared";
 import { useApi } from "@/app/hooks/useApi";
 import { API_BASE_URL } from "@/app/lib/constants";
+
+// ---------------------------------------------------------------------------
+// Sub-component: prompt to analyze zone when no images exist
+// ---------------------------------------------------------------------------
+
+function AnalyzeZonePrompt({ latitude, longitude, address }: {
+    latitude: number;
+    longitude: number;
+    address: string | null;
+}) {
+    const [isLoading, setIsLoading] = useState(false);
+    const [result, setResult] = useState<"idle" | "success" | "error">("idle");
+    const [errorMsg, setErrorMsg] = useState("");
+
+    const today = new Date().toISOString().slice(0, 10);
+    const threeMonthsAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+    async function handleAnalyze() {
+        setIsLoading(true);
+        setResult("idle");
+        try {
+            await api.post("/scans/trigger", {
+                mode: "coordinates",
+                latitude,
+                longitude,
+                address: address ?? undefined,
+                startDate: threeMonthsAgo,
+                endDate: today,
+            });
+            setResult("success");
+        } catch (err) {
+            setResult("error");
+            setErrorMsg(err instanceof Error ? err.message : "Erreur inattendue");
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    return (
+        <div className="flex flex-col items-center justify-center py-8 px-4 rounded-xl bg-gray-50 border border-dashed border-gray-200">
+            <Image className="w-10 h-10 text-[#2A3A4E]/20 mb-3" />
+            <p className="text-sm text-[#2A3A4E]/60 mb-1 text-center">Aucune image satellite disponible pour cette alerte.</p>
+            <p className="text-xs text-[#2A3A4E]/40 mb-4 text-center">
+                Lancez une analyse pour obtenir les images avant/après de cette zone.
+            </p>
+
+            {result === "success" ? (
+                <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-4 py-2">
+                    <CheckCircle className="w-4 h-4" />
+                    Analyse lancée ! Les images seront disponibles dans quelques minutes.
+                </div>
+            ) : result === "error" ? (
+                <div className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-4 py-2 mb-2">
+                    {errorMsg}
+                </div>
+            ) : null}
+
+            {result !== "success" && (
+                <Button
+                    variant="default"
+                    size="sm"
+                    onClick={handleAnalyze}
+                    disabled={isLoading}
+                    className="gap-2"
+                >
+                    {isLoading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                        <ScanLine className="w-4 h-4" />
+                    )}
+                    Analyser cette zone (3 derniers mois)
+                </Button>
+            )}
+        </div>
+    );
+}
+
+// ---------------------------------------------------------------------------
 
 const STATUS_OPTIONS: AlertStatus[] = [
     "a_analyser",
@@ -142,34 +221,11 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                                         afterLabel="APRÈS"
                                     />
                                 ) : (
-                                    <div className="grid grid-cols-2 gap-4">
-                                        {/* Before image placeholder */}
-                                        <div>
-                                            <p className="text-xs font-bold text-[#2A3A4E]/50 uppercase tracking-wide mb-2">Avant</p>
-                                            <div
-                                                className="aspect-video rounded-xl flex items-center justify-center overflow-hidden"
-                                                style={{ background: "linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%)" }}
-                                            >
-                                                <div className="text-center opacity-50">
-                                                    <Image className="w-8 h-8 mx-auto mb-1.5 text-slate-400" />
-                                                    <p className="text-xs text-slate-500 font-medium">Aucune image disponible</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        {/* After image placeholder */}
-                                        <div>
-                                            <p className="text-xs font-bold text-[#2A3A4E]/50 uppercase tracking-wide mb-2">Après</p>
-                                            <div
-                                                className="aspect-video rounded-xl flex items-center justify-center overflow-hidden"
-                                                style={{ background: "linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)" }}
-                                            >
-                                                <div className="text-center opacity-50">
-                                                    <Image className="w-8 h-8 mx-auto mb-1.5 text-slate-400" />
-                                                    <p className="text-xs text-slate-500 font-medium">Aucune image disponible</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <AnalyzeZonePrompt
+                                        latitude={alert.latitude}
+                                        longitude={alert.longitude}
+                                        address={alert.address}
+                                    />
                                 )}
                             </CardContent>
                         </Card>
