@@ -16,35 +16,65 @@ import { API_BASE_URL } from "@/app/lib/constants";
 // Sub-component: prompt to analyze zone when no images exist
 // ---------------------------------------------------------------------------
 
-function AnalyzeZonePrompt({ latitude, longitude, address }: {
+function AnalyzeZonePrompt({ alertId, latitude, longitude, address, onComplete }: {
+    alertId: string;
     latitude: number;
     longitude: number;
     address: string | null;
+    onComplete: () => void;
 }) {
     const [isLoading, setIsLoading] = useState(false);
-    const [result, setResult] = useState<"idle" | "success" | "error">("idle");
+    const [result, setResult] = useState<"idle" | "success" | "polling" | "done" | "error">("idle");
     const [errorMsg, setErrorMsg] = useState("");
 
     const today = new Date().toISOString().slice(0, 10);
-    const threeMonthsAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const sixMonthsAgo = new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
     async function handleAnalyze() {
         setIsLoading(true);
         setResult("idle");
         try {
-            await api.post("/scans/trigger", {
+            const res = await api.post<{ job: { id: string } }>("/scans/trigger", {
                 mode: "coordinates",
                 latitude,
                 longitude,
                 address: address ?? undefined,
-                startDate: threeMonthsAgo,
+                alertId,
+                startDate: sixMonthsAgo,
                 endDate: today,
             });
-            setResult("success");
+            setResult("polling");
+
+            // Poll scan job until completed
+            const jobId = res.job.id;
+            let attempts = 0;
+            const poll = setInterval(async () => {
+                attempts++;
+                try {
+                    const job = await api.get<{ job: { status: string } }>(`/scans/${jobId}`);
+                    if (job.job.status === "completed" || job.job.status === "failed") {
+                        clearInterval(poll);
+                        if (job.job.status === "completed") {
+                            setResult("done");
+                            onComplete();
+                        } else {
+                            setResult("error");
+                            setErrorMsg("L'analyse a échoué.");
+                        }
+                        setIsLoading(false);
+                    }
+                } catch {
+                    // Keep polling
+                }
+                if (attempts > 30) {
+                    clearInterval(poll);
+                    setResult("success");
+                    setIsLoading(false);
+                }
+            }, 5000);
         } catch (err) {
             setResult("error");
             setErrorMsg(err instanceof Error ? err.message : "Erreur inattendue");
-        } finally {
             setIsLoading(false);
         }
     }
@@ -104,7 +134,7 @@ interface AlertDetailProps {
 
 export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
     const navigate = useNavigate();
-    const { data: alert, isLoading, error } = useApi<Alert>(`/alerts/${alertId}`);
+    const { data: alert, isLoading, error, refetch } = useApi<Alert>(`/alerts/${alertId}`);
     const [currentStatus, setCurrentStatus] = useState<AlertStatus | null>(null);
 
     const effectiveStatus = currentStatus ?? alert?.status ?? "a_analyser";
@@ -222,9 +252,11 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                                     />
                                 ) : (
                                     <AnalyzeZonePrompt
+                                        alertId={alert.id}
                                         latitude={alert.latitude}
                                         longitude={alert.longitude}
                                         address={alert.address}
+                                        onComplete={() => refetch()}
                                     />
                                 )}
                             </CardContent>

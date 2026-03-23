@@ -57,6 +57,8 @@ interface ScanJobMessage {
     /** Center point for address-specific scans (triggers high-res Wayback) */
     latitude?: number;
     longitude?: number;
+    /** If triggered from an alert, update alert images when scan completes */
+    alertId?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -128,24 +130,28 @@ async function processMessage(
     let imageryDate: string | null = null;
 
     if (isAddressLevel) {
-        // --- HIGH-RES: Esri Wayback for address-specific scans ---
+        // --- HIGH-RES: Esri export (after) + Wayback (before) ---
         const effectiveEndDate = endDate ?? new Date().toISOString().slice(0, 10);
-        const effectiveStartDate = startDate ?? new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+        const effectiveStartDate = startDate ?? new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
         try {
-            const [afterResult, beforeResult] = await Promise.all([
-                fetchWaybackImage(latitude, longitude, effectiveEndDate, env.IMAGES_BUCKET, `wayback/${municipalityRow.code}/${jobId}-after`),
-                fetchWaybackImage(latitude, longitude, effectiveStartDate, env.IMAGES_BUCKET, `wayback/${municipalityRow.code}/${jobId}-before`),
-            ]);
+            // "After" = current Esri World Imagery (latest, 1024px, exact bbox)
+            const afterOrtho = await fetchOrthophoto(
+                bounds, env.IMAGES_BUCKET, `hires/${municipalityRow.code}/${jobId}-after`, 1024,
+            );
+            // "Before" = Wayback historical at start date
+            const beforeWb = await fetchWaybackImage(
+                latitude, longitude, effectiveStartDate, env.IMAGES_BUCKET, `wayback/${municipalityRow.code}/${jobId}-before`,
+            );
 
-            afterImageKey = afterResult?.imageKey ?? null;
-            beforeImageKey = beforeResult?.imageKey ?? null;
-            imageryDate = afterResult?.releaseDate ?? effectiveEndDate;
+            afterImageKey = afterOrtho?.imageKey ?? null;
+            beforeImageKey = beforeWb?.imageKey ?? null;
+            imageryDate = effectiveEndDate;
 
-            console.log(`[queue] Wayback: before=${beforeResult?.releaseDate ?? "none"}, after=${afterResult?.releaseDate ?? "none"}`);
+            console.log(`[queue] High-res: before=Wayback(${beforeWb?.releaseDate ?? "none"}), after=Esri(latest)`);
         } catch (err) {
             const errorMsg = err instanceof Error ? err.message : String(err);
-            await markJobFailed(db, jobId, `Wayback fetch failed: ${errorMsg}`);
+            await markJobFailed(db, jobId, `High-res image fetch failed: ${errorMsg}`);
             return;
         }
     } else {
@@ -456,6 +462,25 @@ async function processMessage(
             completedAt: now,
         })
         .where(eq(scanJobs.id, jobId));
+
+    // ------------------------------------------------------------------
+    // 8. If triggered from an alert, link images back to it
+    // ------------------------------------------------------------------
+    if (body.alertId && (afterImageKey || beforeImageKey)) {
+        try {
+            await db
+                .update(alerts)
+                .set({
+                    beforeImageKey: beforeImageKey ?? undefined,
+                    afterImageKey: afterImageKey ?? undefined,
+                    scanJobId: jobId,
+                })
+                .where(eq(alerts.id, body.alertId));
+            console.log(`[queue] Linked images to alert ${body.alertId}`);
+        } catch (err) {
+            console.warn(`[queue] Failed to link images to alert ${body.alertId}:`, err);
+        }
+    }
 
     console.log(
         `[queue] Job ${jobId} completed: ${detections.length} detection(s), ` +

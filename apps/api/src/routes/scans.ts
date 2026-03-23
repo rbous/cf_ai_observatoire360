@@ -167,12 +167,14 @@ scans.post("/trigger", async (c) => {
         address?: string;
         startDate?: string;
         endDate?: string;
+        alertId?: string;
     };
 
     const mode = body.mode ?? (body.latitude ? "coordinates" : "municipality");
     const startDate = body.startDate ?? null;
     const endDate = body.endDate ?? null;
     const address = body.address ?? null;
+    const alertId = body.alertId ?? null;
 
     // Fetch municipality (needed for municipality-wide mode or as fallback)
     const [municipality] = await db
@@ -241,6 +243,7 @@ scans.post("/trigger", async (c) => {
         endDate: endDate ?? undefined,
         latitude: body.latitude ?? undefined,
         longitude: body.longitude ?? undefined,
+        alertId: alertId ?? undefined,
     });
 
     const [inserted] = await db
