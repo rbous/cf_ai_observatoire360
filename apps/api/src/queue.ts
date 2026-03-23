@@ -31,6 +31,7 @@ import {
 } from "./lib/sentinel.js";
 import { detectChanges, type DetectionResult } from "./lib/ai-detection.js";
 import { fetchOrthophoto } from "./lib/orthophoto.js";
+import { fetchWaybackImage } from "./lib/wayback.js";
 import {
     sendEmail,
     buildAlertEmailHtml,
@@ -53,6 +54,9 @@ interface ScanJobMessage {
     /** Custom date range (ISO date strings) for manual analyses */
     startDate?: string;
     endDate?: string;
+    /** Center point for address-specific scans (triggers high-res Wayback) */
+    latitude?: number;
+    longitude?: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -91,10 +95,11 @@ async function processMessage(
     env: Bindings,
     db: ReturnType<typeof drizzle>,
 ): Promise<void> {
-    const { jobId, municipalityId, bounds, comparisonMode = "short_term", startDate, endDate } = body;
+    const { jobId, municipalityId, bounds, comparisonMode = "short_term", startDate, endDate, latitude, longitude } = body;
     const now = Math.floor(Date.now() / 1_000);
+    const isAddressLevel = latitude !== undefined && longitude !== undefined;
 
-    console.log(`[queue] Processing job ${jobId} (mode: ${comparisonMode}, dates: ${startDate ?? "auto"} → ${endDate ?? "auto"})`);
+    console.log(`[queue] Processing job ${jobId} (mode: ${comparisonMode}, address-level: ${isAddressLevel}, dates: ${startDate ?? "auto"} → ${endDate ?? "auto"})`);
 
     // ------------------------------------------------------------------
     // 1. Mark job as "fetching"
@@ -104,15 +109,7 @@ async function processMessage(
         .set({ status: "fetching", startedAt: now })
         .where(eq(scanJobs.id, jobId));
 
-    // ------------------------------------------------------------------
-    // 2. Fetch the latest Sentinel-2 imagery
-    // ------------------------------------------------------------------
-    const sentinelConfig: SentinelHubConfig = {
-        clientId: env.COPERNICUS_CLIENT_ID,
-        clientSecret: env.COPERNICUS_CLIENT_SECRET,
-    };
-
-    // We need the municipality code to build the R2 object key
+    // We need the municipality code for R2 key prefixes
     const [municipalityRow] = await db
         .select()
         .from(municipalities)
@@ -123,23 +120,57 @@ async function processMessage(
         throw new Error(`Municipality ${municipalityId} not found in database.`);
     }
 
-    let afterResult: { imageKey: string; imageryDate: string } | null;
-    try {
-        afterResult = await fetchLatestImagery(
-            sentinelConfig,
-            bounds,
-            env.IMAGES_BUCKET,
-            municipalityRow.code,
-            endDate,
-        );
-    } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : String(err);
-        await markJobFailed(db, jobId, `fetchLatestImagery failed: ${errorMsg}`);
-        return;
+    // ------------------------------------------------------------------
+    // 2. Fetch imagery — Wayback (high-res) for address, Sentinel-2 for city
+    // ------------------------------------------------------------------
+    let afterImageKey: string | null = null;
+    let beforeImageKey: string | null = null;
+    let imageryDate: string | null = null;
+
+    if (isAddressLevel) {
+        // --- HIGH-RES: Esri Wayback for address-specific scans ---
+        const effectiveEndDate = endDate ?? new Date().toISOString().slice(0, 10);
+        const effectiveStartDate = startDate ?? new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+        try {
+            const [afterResult, beforeResult] = await Promise.all([
+                fetchWaybackImage(latitude, longitude, effectiveEndDate, env.IMAGES_BUCKET, `wayback/${municipalityRow.code}/${jobId}-after`),
+                fetchWaybackImage(latitude, longitude, effectiveStartDate, env.IMAGES_BUCKET, `wayback/${municipalityRow.code}/${jobId}-before`),
+            ]);
+
+            afterImageKey = afterResult?.imageKey ?? null;
+            beforeImageKey = beforeResult?.imageKey ?? null;
+            imageryDate = afterResult?.releaseDate ?? effectiveEndDate;
+
+            console.log(`[queue] Wayback: before=${beforeResult?.releaseDate ?? "none"}, after=${afterResult?.releaseDate ?? "none"}`);
+        } catch (err) {
+            const errorMsg = err instanceof Error ? err.message : String(err);
+            await markJobFailed(db, jobId, `Wayback fetch failed: ${errorMsg}`);
+            return;
+        }
+    } else {
+        // --- STANDARD: Sentinel-2 for municipality-wide scans ---
+        const sentinelConfig: SentinelHubConfig = {
+            clientId: env.COPERNICUS_CLIENT_ID,
+            clientSecret: env.COPERNICUS_CLIENT_SECRET,
+        };
+
+        try {
+            const afterResult = await fetchLatestImagery(
+                sentinelConfig, bounds, env.IMAGES_BUCKET, municipalityRow.code, endDate,
+            );
+            if (afterResult) {
+                afterImageKey = afterResult.imageKey;
+                imageryDate = afterResult.imageryDate;
+            }
+        } catch (err) {
+            const errorMsg = err instanceof Error ? err.message : String(err);
+            await markJobFailed(db, jobId, `Sentinel-2 fetch failed: ${errorMsg}`);
+            return;
+        }
     }
 
-    // No imagery available within the last 30 days
-    if (!afterResult) {
+    if (!afterImageKey) {
         console.log(`[queue] No imagery available for job ${jobId}, marking completed.`);
         await db
             .update(scanJobs)
@@ -148,50 +179,44 @@ async function processMessage(
         return;
     }
 
-    const { imageKey: afterImageKey, imageryDate } = afterResult;
-
     // ------------------------------------------------------------------
-    // 3. Get the "before" image.
-    //    - Custom startDate: fetch from Sentinel Hub for that date
-    //    - SHORT-TERM: most recent completed scan (yesterday)
-    //    - LONG-TERM:  oldest scan ≥90 days ago
+    // 3. Get "before" image for municipality-wide (Sentinel-2) scans.
+    //    Address-level scans already have before/after from Wayback.
     // ------------------------------------------------------------------
-    let beforeImageKey: string | null = null;
+    if (!isAddressLevel && !beforeImageKey) {
+        if (comparisonMode === "long_term") {
+            const ninetyDaysAgo = now - 90 * 24 * 60 * 60;
+            let [baselineJob] = await db
+                .select({ afterImageKey: scanJobs.afterImageKey })
+                .from(scanJobs)
+                .where(
+                    and(
+                        eq(scanJobs.municipalityId, municipalityId),
+                        eq(scanJobs.status, "completed"),
+                        isNotNull(scanJobs.afterImageKey),
+                        lte(scanJobs.completedAt, ninetyDaysAgo),
+                    ),
+                )
+                .orderBy(asc(scanJobs.completedAt))
+                .limit(1);
 
-    if (startDate) {
-        // Manual analysis — fetch "before" image for the start date
-        try {
-            const beforeResult = await fetchLatestImagery(
-                sentinelConfig,
-                bounds,
-                env.IMAGES_BUCKET,
-                `${municipalityRow.code}-before`,
-                startDate,
-            );
-            beforeImageKey = beforeResult?.imageKey ?? null;
-        } catch (err) {
-            console.warn(`[queue] Could not fetch before-image for ${startDate}:`, err);
-        }
-    } else if (comparisonMode === "long_term") {
-        // LONG-TERM: find an image from ~90+ days ago
-        const ninetyDaysAgo = now - 90 * 24 * 60 * 60;
-        let [baselineJob] = await db
-            .select({ afterImageKey: scanJobs.afterImageKey })
-            .from(scanJobs)
-            .where(
-                and(
-                    eq(scanJobs.municipalityId, municipalityId),
-                    eq(scanJobs.status, "completed"),
-                    isNotNull(scanJobs.afterImageKey),
-                    lte(scanJobs.completedAt, ninetyDaysAgo),
-                ),
-            )
-            .orderBy(asc(scanJobs.completedAt))
-            .limit(1);
-
-        // Fallback: oldest available if nothing ≥90 days
-        if (!baselineJob) {
-            [baselineJob] = await db
+            if (!baselineJob) {
+                [baselineJob] = await db
+                    .select({ afterImageKey: scanJobs.afterImageKey })
+                    .from(scanJobs)
+                    .where(
+                        and(
+                            eq(scanJobs.municipalityId, municipalityId),
+                            eq(scanJobs.status, "completed"),
+                            isNotNull(scanJobs.afterImageKey),
+                        ),
+                    )
+                    .orderBy(asc(scanJobs.completedAt))
+                    .limit(1);
+            }
+            beforeImageKey = baselineJob?.afterImageKey ?? null;
+        } else {
+            const [recentJob] = await db
                 .select({ afterImageKey: scanJobs.afterImageKey })
                 .from(scanJobs)
                 .where(
@@ -201,25 +226,10 @@ async function processMessage(
                         isNotNull(scanJobs.afterImageKey),
                     ),
                 )
-                .orderBy(asc(scanJobs.completedAt))
+                .orderBy(desc(scanJobs.completedAt))
                 .limit(1);
+            beforeImageKey = recentJob?.afterImageKey ?? null;
         }
-        beforeImageKey = baselineJob?.afterImageKey ?? null;
-    } else {
-        // SHORT-TERM: most recent completed scan (yesterday's image)
-        const [recentJob] = await db
-            .select({ afterImageKey: scanJobs.afterImageKey })
-            .from(scanJobs)
-            .where(
-                and(
-                    eq(scanJobs.municipalityId, municipalityId),
-                    eq(scanJobs.status, "completed"),
-                    isNotNull(scanJobs.afterImageKey),
-                ),
-            )
-            .orderBy(desc(scanJobs.completedAt))
-            .limit(1);
-        beforeImageKey = recentJob?.afterImageKey ?? null;
     }
 
     if (!beforeImageKey) {
@@ -343,7 +353,27 @@ async function processMessage(
             continue;
         }
 
-        // 6b. Create alert
+        // 6b. Fetch high-res Wayback images for this specific detection point
+        let alertBeforeKey = beforeImageKey;
+        let alertAfterKey = afterImageKey;
+        try {
+            const effectiveStart = startDate ?? new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+            const effectiveEnd = endDate ?? new Date().toISOString().slice(0, 10);
+            const alertPrefix = `wayback/${municipalityRow.code}/alert-${ulid()}`;
+
+            const [wbAfter, wbBefore] = await Promise.all([
+                fetchWaybackImage(detection.latitude, detection.longitude, effectiveEnd, env.IMAGES_BUCKET, `${alertPrefix}-after`),
+                fetchWaybackImage(detection.latitude, detection.longitude, effectiveStart, env.IMAGES_BUCKET, `${alertPrefix}-before`),
+            ]);
+
+            if (wbAfter) alertAfterKey = wbAfter.imageKey;
+            if (wbBefore) alertBeforeKey = wbBefore.imageKey;
+            console.log(`[queue] Wayback drill-down for detection at ${detection.latitude.toFixed(4)},${detection.longitude.toFixed(4)}: before=${wbBefore?.releaseDate ?? "none"}, after=${wbAfter?.releaseDate ?? "none"}`);
+        } catch (err) {
+            console.warn("[queue] Wayback drill-down failed (non-fatal, keeping Sentinel-2 images):", err);
+        }
+
+        // 6c. Create alert with high-res images
         const alertId = ulid();
         await db.insert(alerts).values({
             id: alertId,
@@ -359,13 +389,13 @@ async function processMessage(
             detectedAt,
             images: JSON.stringify([]),
             scanJobId: jobId,
-            beforeImageKey,
-            afterImageKey,
+            beforeImageKey: alertBeforeKey,
+            afterImageKey: alertAfterKey,
             confidence: detection.confidence,
             createdAt: now,
         });
 
-        // 6c. Create notifications for all managers and inspectors
+        // 6d. Create notifications for all managers and inspectors
         for (const user of notifyUsers) {
             const notifId = ulid();
             const typeLabel = formatTypeLabel(detection.type);

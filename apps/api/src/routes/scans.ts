@@ -239,6 +239,8 @@ scans.post("/trigger", async (c) => {
         bounds,
         startDate: startDate ?? undefined,
         endDate: endDate ?? undefined,
+        latitude: body.latitude ?? undefined,
+        longitude: body.longitude ?? undefined,
     });
 
     const [inserted] = await db

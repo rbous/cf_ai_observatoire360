@@ -1,9 +1,11 @@
 /**
  * Cloudflare Workers Cron Trigger handler.
  *
- * Runs daily and enqueues TWO types of scan jobs:
- *   1. SHORT-TERM (daily): compare today vs yesterday → catches sudden changes
- *   2. LONG-TERM (biweekly): compare today vs ~90 days ago → catches gradual construction
+ * Runs daily and checks if a new Esri Wayback release is available.
+ * If so, enqueues high-res scans for all enabled municipalities.
+ * If not, skips — no point scanning without new imagery.
+ *
+ * Wayback releases happen every 1-3 weeks with sub-meter resolution.
  */
 
 import { drizzle } from "drizzle-orm/d1";
@@ -16,8 +18,6 @@ import type { Bindings } from "./types.js";
 // Queue message shape
 // ---------------------------------------------------------------------------
 
-export type ComparisonMode = "short_term" | "long_term";
-
 export interface ScanJobMessage {
     jobId: string;
     municipalityId: string;
@@ -27,10 +27,52 @@ export interface ScanJobMessage {
         east: number;
         west: number;
     };
-    /** Custom date range for manual analyses (ISO date strings) */
     startDate?: string;
     endDate?: string;
-    comparisonMode: ComparisonMode;
+    latitude?: number;
+    longitude?: number;
+    comparisonMode?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Wayback release check
+// ---------------------------------------------------------------------------
+
+const WAYBACK_CONFIG_URL = "https://s3-us-west-2.amazonaws.com/config.maptiles.arcgis.com/waybackconfig.json";
+
+interface WaybackRelease {
+    date: string;
+    releaseId: string;
+}
+
+async function getLatestRelease(): Promise<WaybackRelease | null> {
+    try {
+        const res = await fetch(WAYBACK_CONFIG_URL);
+        if (!res.ok) return null;
+
+        const config = (await res.json()) as Record<string, {
+            itemTitle: string;
+            itemURL: string;
+        }>;
+
+        let latest: WaybackRelease | null = null;
+
+        for (const item of Object.values(config)) {
+            const releaseId = item.itemURL.match(/tile\/(\d+)\//)?.[1];
+            const dateMatch = item.itemTitle.match(/(\d{4}-\d{2}-\d{2})/);
+            if (!releaseId || !dateMatch) continue;
+
+            const date = dateMatch[1];
+            if (!latest || date > latest.date) {
+                latest = { date, releaseId };
+            }
+        }
+
+        return latest;
+    } catch (err) {
+        console.error("[scheduler] Failed to fetch Wayback config:", err);
+        return null;
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -41,6 +83,16 @@ export async function handleScheduled(env: Bindings): Promise<void> {
     const db = drizzle(env.DB);
     const now = Math.floor(Date.now() / 1_000);
 
+    // Check if there's a new Wayback release
+    const latestRelease = await getLatestRelease();
+    if (!latestRelease) {
+        console.log("[scheduler] Could not fetch Wayback releases. Skipping.");
+        return;
+    }
+
+    console.log(`[scheduler] Latest Wayback release: ${latestRelease.date}`);
+
+    // Get all scan-enabled municipalities
     const rows = await db
         .select()
         .from(municipalities)
@@ -51,6 +103,17 @@ export async function handleScheduled(env: Bindings): Promise<void> {
     let enqueued = 0;
 
     for (const municipality of rows) {
+        // Skip if we already scanned with this release
+        // (lastScanAt stores the date string of the last Wayback release used)
+        const lastScanDate = municipality.lastScanAt
+            ? new Date(municipality.lastScanAt * 1000).toISOString().slice(0, 10)
+            : null;
+
+        if (lastScanDate && lastScanDate >= latestRelease.date) {
+            console.log(`[scheduler] ${municipality.name}: already scanned with release ${lastScanDate}, skipping.`);
+            continue;
+        }
+
         // Parse bounds
         let bounds: ScanJobMessage["bounds"] | null = null;
         if (municipality.bounds) {
@@ -66,51 +129,45 @@ export async function handleScheduled(env: Bindings): Promise<void> {
             continue;
         }
 
-        // --- Always enqueue a SHORT-TERM (daily) job ---
-        const shortJobId = ulid();
+        // Compute center point of the municipality for Wayback tile fetch
+        const centerLat = (bounds.north + bounds.south) / 2;
+        const centerLng = (bounds.east + bounds.west) / 2;
+
+        // Find the comparison date: use the release before this one
+        // Default to ~6 months ago if this is the first scan
+        const startDate = lastScanDate ?? new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+        const endDate = latestRelease.date;
+
+        const jobId = ulid();
         await db.insert(scanJobs).values({
-            id: shortJobId,
+            id: jobId,
             municipalityId: municipality.id,
             status: "pending",
+            startDate,
+            endDate,
+            latitude: centerLat,
+            longitude: centerLng,
             createdAt: now,
         });
+
         await env.DETECTION_QUEUE.send({
-            jobId: shortJobId,
+            jobId,
             municipalityId: municipality.id,
             bounds,
-            comparisonMode: "short_term",
+            startDate,
+            endDate,
+            latitude: centerLat,
+            longitude: centerLng,
         } satisfies ScanJobMessage);
-        enqueued++;
-
-        console.log(`[scheduler] Enqueued SHORT-TERM job ${shortJobId} for ${municipality.name}`);
-
-        // --- Enqueue a LONG-TERM job every 14 days ---
-        const lastScan = municipality.lastScanAt ?? 0;
-        const daysSinceLastLongTerm = (now - lastScan) / 86_400;
-        if (daysSinceLastLongTerm >= 14 || lastScan === 0) {
-            const longJobId = ulid();
-            await db.insert(scanJobs).values({
-                id: longJobId,
-                municipalityId: municipality.id,
-                status: "pending",
-                createdAt: now,
-            });
-            await env.DETECTION_QUEUE.send({
-                jobId: longJobId,
-                municipalityId: municipality.id,
-                bounds,
-                comparisonMode: "long_term",
-            } satisfies ScanJobMessage);
-            enqueued++;
-
-            console.log(`[scheduler] Enqueued LONG-TERM job ${longJobId} for ${municipality.name}`);
-        }
 
         // Update last_scan_at
         await db
             .update(municipalities)
             .set({ lastScanAt: now })
             .where(eq(municipalities.id, municipality.id));
+
+        enqueued++;
+        console.log(`[scheduler] Enqueued scan for ${municipality.name}: ${startDate} → ${endDate} (Wayback release ${latestRelease.date})`);
     }
 
     console.log(`[scheduler] Done — ${enqueued} job(s) enqueued.`);
