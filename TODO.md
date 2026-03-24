@@ -37,7 +37,7 @@
 
 ## Infrastructure
 
-- [ ] **Verify Resend domain** — add SPF/DKIM/DMARC records for `example.com` in Resend dashboard
+- [ ] **Verify Resend domain** — add SPF/DKIM/DMARC records for your sending domain in the Resend dashboard
 - [ ] **Set up staging environment** — separate Workers + D1 for testing before production
 - [ ] **Add automated tests** — unit tests for auth, pipeline, and API routes
 - [ ] **Monitoring/alerting** — set up Cloudflare analytics or external monitoring for uptime

@@ -1,8 +1,11 @@
 import { chromium } from "playwright";
 
-const BASE = "https://observatoire360.pages.dev";
-const API = "https://observatoire360-api.YOUR_SUBDOMAIN.workers.dev";
-const CREDS = { email: "demo@observatoire360.com", password: "[REDACTED_PASSWORD]" };
+const BASE = process.env.E2E_BASE_URL ?? "http://localhost:5173";
+const API = process.env.E2E_API_URL ?? "http://localhost:8787";
+const CREDS = {
+    email: process.env.E2E_EMAIL ?? "demo@observatoire360.com",
+    password: process.env.E2E_PASSWORD ?? "[REDACTED_PASSWORD]",
+};
 
 let browser, page;
 let passed = 0;
@@ -166,7 +169,7 @@ async function run() {
 
     await test("User list contains current user", async () => {
         const text = await page.textContent("body");
-        if (!text.includes("demo@observatoire360.com") && !text.includes("Demo User")) throw new Error("Current user not in list");
+        if (!text.includes(CREDS.email)) throw new Error("Current user not in list");
     });
 
     // --- Profile page ---
