@@ -1,19 +1,40 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, MapPin } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import { useAuth } from "@/app/hooks/useAuth";
 import { DASHBOARD_ROUTES } from "@/app/lib/constants";
+
+const DEMO_CITIES = [
+    { label: "Gatineau, QC", flag: "\u{1F1E8}\u{1F1E6}", email: "demo@observatoire360.com" },
+    { label: "Austin, TX", flag: "\u{1F1FA}\u{1F1F8}", email: "demo.austin@observatoire360.com" },
+    { label: "London, UK", flag: "\u{1F1EC}\u{1F1E7}", email: "demo.london@observatoire360.com" },
+    { label: "Lisbon, PT", flag: "\u{1F1F5}\u{1F1F9}", email: "demo.lisbon@observatoire360.com" },
+] as const;
 
 export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [form, setForm] = useState({ email: "", password: "" });
     const [error, setError] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [demoLoading, setDemoLoading] = useState<string | null>(null);
     const { login, isAuthenticated } = useAuth();
     const navigate = useNavigate();
+
+    const handleDemoLogin = async (email: string) => {
+        setError(null);
+        setDemoLoading(email);
+        try {
+            await login(email, "REDACTED_DEMO_PASSWORD");
+            navigate(DASHBOARD_ROUTES.HOME, { replace: true });
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Demo login failed.");
+        } finally {
+            setDemoLoading(null);
+        }
+    };
 
     // If already logged in, redirect to dashboard
     if (isAuthenticated) {
@@ -133,7 +154,40 @@ export default function LoginPage() {
                     </form>
                 </div>
 
-                <p className="text-center text-sm text-[#2A3A4E]/60 mt-6">
+                {/* Demo access */}
+                <div className="mt-6">
+                    <div className="relative mb-4">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-gray-200" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-transparent px-3 text-[#2A3A4E]/40 font-semibold tracking-wider">
+                                ou essayer la démo
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                        {DEMO_CITIES.map((city) => (
+                            <button
+                                key={city.email}
+                                onClick={() => handleDemoLogin(city.email)}
+                                disabled={demoLoading !== null}
+                                className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-gray-200 bg-white hover:border-[#008B8B]/40 hover:bg-[#008B8B]/5 transition-all text-left disabled:opacity-50"
+                            >
+                                <span className="text-lg">{city.flag}</span>
+                                <div className="min-w-0">
+                                    <p className="text-xs font-semibold text-[#1A2332] truncate">
+                                        {demoLoading === city.email ? "Connexion..." : city.label}
+                                    </p>
+                                    <p className="text-[10px] text-[#2A3A4E]/40">Démo gratuite</p>
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <p className="text-center text-sm text-[#2A3A4E]/60 mt-4">
                     Pas encore client?{" "}
                     <a
                         href="#contact"
