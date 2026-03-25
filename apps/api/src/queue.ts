@@ -430,6 +430,7 @@ async function processMessage(
             beforeImageKey,
             afterImageKey,
             confidence: detection.confidence,
+            aiSummary: detection.description,
             createdAt: now,
         });
 

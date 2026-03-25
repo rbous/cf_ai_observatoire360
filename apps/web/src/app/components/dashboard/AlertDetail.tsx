@@ -244,12 +244,22 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                             </CardHeader>
                             <CardContent>
                                 {alert.beforeImageKey && alert.afterImageKey ? (
-                                    <ImageComparator
-                                        beforeSrc={API_BASE_URL + "/images/" + alert.beforeImageKey}
-                                        afterSrc={API_BASE_URL + "/images/" + alert.afterImageKey}
-                                        beforeLabel="AVANT"
-                                        afterLabel="APRÈS"
-                                    />
+                                    <div className="relative">
+                                        {alert.scanJobId && (
+                                            <div className="absolute inset-0 z-10 pointer-events-none rounded-xl border-2 border-red-500/60" />
+                                        )}
+                                        <ImageComparator
+                                            beforeSrc={API_BASE_URL + "/images/" + alert.beforeImageKey}
+                                            afterSrc={API_BASE_URL + "/images/" + alert.afterImageKey}
+                                            beforeLabel="AVANT"
+                                            afterLabel="APRÈS"
+                                        />
+                                        {alert.scanJobId && (
+                                            <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 bg-red-500/90 text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
+                                                Changement détecté par IA
+                                            </div>
+                                        )}
+                                    </div>
                                 ) : (
                                     <AnalyzeZonePrompt
                                         alertId={alert.id}
@@ -330,6 +340,20 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                                             Détection automatique par analyse d'images satellite
                                         </p>
                                     </div>
+
+                                    {/* AI Summary */}
+                                    {alert.aiSummary && (
+                                        <div>
+                                            <p className="text-[10px] text-[#2A3A4E]/50 uppercase font-semibold tracking-wide mb-1">
+                                                Résumé IA
+                                            </p>
+                                            <div className="bg-[#008B8B]/5 border border-[#008B8B]/15 rounded-lg p-3">
+                                                <p className="text-sm text-[#1A2332] leading-relaxed">
+                                                    {alert.aiSummary}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
 
                                     {/* Method */}
                                     <div>

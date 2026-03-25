@@ -93,6 +93,8 @@ export const alerts = sqliteTable("alerts", {
     afterImageKey: text("after_image_key"),
     /** AI confidence score 0-1 */
     confidence: real("confidence"),
+    /** AI-generated description of the detected change */
+    aiSummary: text("ai_summary"),
     createdAt: integer("created_at").notNull(),
 });
 

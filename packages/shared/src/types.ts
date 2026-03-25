@@ -58,6 +58,7 @@ export interface Alert {
     beforeImageKey: string | null;
     afterImageKey: string | null;
     confidence: number | null;
+    aiSummary: string | null;
     createdAt: number;
 }
 

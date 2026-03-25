@@ -39,6 +39,7 @@ function rowToAlert(row: typeof alerts.$inferSelect): Alert {
         beforeImageKey: row.beforeImageKey ?? null,
         afterImageKey: row.afterImageKey ?? null,
         confidence: row.confidence ?? null,
+        aiSummary: row.aiSummary ?? null,
         createdAt: row.createdAt,
     };
 }
