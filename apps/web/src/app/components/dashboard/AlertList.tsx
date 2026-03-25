@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, SlidersHorizontal, Loader2 } from "lucide-react";
+import { Search, SlidersHorizontal, Loader2, BrainCircuit } from "lucide-react";
 import type { RiskLevel, AlertStatus, AlertType } from "@observatoire360/shared";
 import {
     ALERT_STATUS_LABELS,
@@ -9,6 +9,7 @@ import {
 } from "@observatoire360/shared";
 import { RiskBadge } from "@/app/components/shared/RiskBadge";
 import { StatusBadge } from "@/app/components/shared/StatusBadge";
+import { Badge } from "@/app/components/ui/badge";
 import { cn } from "@/app/lib/cn";
 import { useAlerts } from "@/app/hooks/useAlerts";
 
@@ -117,7 +118,20 @@ export function AlertList() {
                         >
                             <div className="flex items-center justify-between gap-2">
                                 <span className="text-[11px] font-bold text-[#008B8B]">{alert.id}</span>
-                                <RiskBadge level={alert.riskLevel} />
+                                <div className="flex items-center gap-1">
+                                    <RiskBadge level={alert.riskLevel} />
+                                    {alert.scanJobId !== null && (
+                                        <Badge
+                                            className="gap-0.5 px-1.5 py-0.5 text-[10px] font-bold leading-none"
+                                            style={{ background: "#008B8B", color: "white", border: "none" }}
+                                        >
+                                            <BrainCircuit className="w-2.5 h-2.5 shrink-0" />
+                                            {alert.confidence != null
+                                                ? `IA ${Math.round(alert.confidence * 100)}%`
+                                                : "IA"}
+                                        </Badge>
+                                    )}
+                                </div>
                             </div>
                             <p className="text-xs font-semibold text-[#1A2332] leading-snug">
                                 {alert.address ?? `${alert.latitude.toFixed(4)}, ${alert.longitude.toFixed(4)}`}

@@ -18,6 +18,7 @@ L.Icon.Default.mergeOptions({
 
 import { WMS_LAYERS, ALERT_TYPE_LABELS } from "@observatoire360/shared";
 import type { RiskLevel } from "@observatoire360/shared";
+import { BrainCircuit } from "lucide-react";
 import { MapLegend } from "./MapLegend";
 import { useAlerts } from "@/app/hooks/useAlerts";
 import { LoadingSpinner } from "@/app/components/shared/LoadingSpinner";
@@ -161,15 +162,26 @@ export function MapView({ className }: MapViewProps) {
                             <div className="p-1 min-w-[180px]">
                                 <div className="flex items-center justify-between mb-1.5">
                                     <span className="text-xs font-bold text-[#1A2332]">{alert.id.slice(-6)}</span>
-                                    <span
-                                        className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-                                        style={{
-                                            background: `${RISK_COLORS[alert.riskLevel]}20`,
-                                            color: RISK_COLORS[alert.riskLevel],
-                                        }}
-                                    >
-                                        {RISK_LABELS[alert.riskLevel]}
-                                    </span>
+                                    <div className="flex items-center gap-1">
+                                        <span
+                                            className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+                                            style={{
+                                                background: `${RISK_COLORS[alert.riskLevel]}20`,
+                                                color: RISK_COLORS[alert.riskLevel],
+                                            }}
+                                        >
+                                            {RISK_LABELS[alert.riskLevel]}
+                                        </span>
+                                        {alert.scanJobId !== null && (
+                                            <span
+                                                className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                                                style={{ background: "#008B8B", color: "white" }}
+                                            >
+                                                <BrainCircuit style={{ width: "10px", height: "10px" }} />
+                                                IA
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                                 <p className="text-xs text-[#2A3A4E] font-medium mb-0.5">{alert.address ?? "Adresse inconnue"}</p>
                                 <p className="text-[11px] text-[#2A3A4E]/60 mb-2">{ALERT_TYPE_LABELS[alert.type]}</p>

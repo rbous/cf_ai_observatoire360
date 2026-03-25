@@ -272,6 +272,7 @@ export default function ScansPage() {
                                         <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">Statut</th>
                                         <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">Période</th>
                                         <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">Détections</th>
+                                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">Résultat IA</th>
                                         <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">Images</th>
                                         <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">Erreur</th>
                                     </tr>
@@ -305,6 +306,21 @@ export default function ScansPage() {
                                                 {scan.status === "completed"
                                                     ? scan.detectionsCount
                                                     : "—"}
+                                            </td>
+                                            <td className="px-5 py-3.5">
+                                                {scan.status === "failed" ? (
+                                                    <Badge variant="high">Echec</Badge>
+                                                ) : scan.status === "analyzing" ? (
+                                                    <Badge variant="pending">Analyse en cours...</Badge>
+                                                ) : scan.status === "completed" && scan.detectionsCount > 0 ? (
+                                                    <Badge variant="active">
+                                                        &#10003; {scan.detectionsCount} detection{scan.detectionsCount > 1 ? "s" : ""}
+                                                    </Badge>
+                                                ) : scan.status === "completed" && scan.detectionsCount === 0 ? (
+                                                    <Badge variant="secondary">Aucun changement</Badge>
+                                                ) : (
+                                                    <span className="text-[#2A3A4E]/30">—</span>
+                                                )}
                                             </td>
                                             <td className="px-5 py-3.5">
                                                 {scan.beforeImageKey && scan.afterImageKey ? (

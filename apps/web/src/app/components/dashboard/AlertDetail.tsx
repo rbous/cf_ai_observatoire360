@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, MapPin, Calendar, FileText, User, Clock, CheckCircle, AlertTriangle, Image, Loader2, ScanLine } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, FileText, User, Clock, CheckCircle, AlertTriangle, Image, Loader2, ScanLine, BrainCircuit } from "lucide-react";
 import { api } from "@/app/lib/api";
 import { ImageComparator } from "./ImageComparator";
 import { useNavigate } from "react-router-dom";
@@ -261,6 +261,88 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                                 )}
                             </CardContent>
                         </Card>
+
+                        {/* AI analysis */}
+                        {alert.scanJobId !== null && (
+                            <Card>
+                                <CardHeader className="pb-3">
+                                    <CardTitle className="flex items-center gap-2 text-sm">
+                                        <BrainCircuit className="w-4 h-4 text-[#008B8B]" />
+                                        Analyse IA
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    {/* Confidence */}
+                                    <div>
+                                        <p className="text-[10px] text-[#2A3A4E]/50 uppercase font-semibold tracking-wide mb-1.5">
+                                            Confiance IA
+                                        </p>
+                                        {alert.confidence != null ? (
+                                            <div className="space-y-1.5">
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-sm font-semibold text-[#1A2332]">
+                                                        {Math.round(alert.confidence * 100)} %
+                                                    </span>
+                                                    <span
+                                                        className="text-xs font-medium"
+                                                        style={{
+                                                            color: alert.confidence >= 0.7
+                                                                ? "#10B981"
+                                                                : alert.confidence >= 0.4
+                                                                    ? "#F59E0B"
+                                                                    : "#DC2626",
+                                                        }}
+                                                    >
+                                                        {alert.confidence >= 0.7
+                                                            ? "Élevée"
+                                                            : alert.confidence >= 0.4
+                                                                ? "Modérée"
+                                                                : "Faible"}
+                                                    </span>
+                                                </div>
+                                                <div className="h-2 w-full rounded-full bg-gray-100 overflow-hidden">
+                                                    <div
+                                                        className="h-full rounded-full transition-all"
+                                                        style={{
+                                                            width: `${Math.round(alert.confidence * 100)}%`,
+                                                            background: alert.confidence >= 0.7
+                                                                ? "#10B981"
+                                                                : alert.confidence >= 0.4
+                                                                    ? "#F59E0B"
+                                                                    : "#DC2626",
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <p className="text-xs text-[#2A3A4E]/50 italic">
+                                                Score de confiance non disponible
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    {/* Source */}
+                                    <div>
+                                        <p className="text-[10px] text-[#2A3A4E]/50 uppercase font-semibold tracking-wide mb-0.5">
+                                            Source
+                                        </p>
+                                        <p className="text-xs text-[#2A3A4E]/70">
+                                            Détection automatique par analyse d'images satellite
+                                        </p>
+                                    </div>
+
+                                    {/* Method */}
+                                    <div>
+                                        <p className="text-[10px] text-[#2A3A4E]/50 uppercase font-semibold tracking-wide mb-0.5">
+                                            Méthode
+                                        </p>
+                                        <p className="text-xs text-[#2A3A4E]/70">
+                                            Comparaison pixel-diff + classification Workers AI (LLaMA 3.2 Vision)
+                                        </p>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
 
                         {/* Technical data */}
                         <Card>
