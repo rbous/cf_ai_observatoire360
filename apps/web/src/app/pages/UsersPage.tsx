@@ -23,8 +23,9 @@ import { useApi } from "@/app/hooks/useApi";
 import { useAuth } from "@/app/hooks/useAuth";
 import { api, ApiRequestError } from "@/app/lib/api";
 import type { User } from "@observatoire360/shared";
-import { USER_ROLES, ROLE_LABELS } from "@observatoire360/shared";
+import { USER_ROLES } from "@observatoire360/shared";
 import type { UserRole } from "@observatoire360/shared";
+import { useLanguage } from "@/app/hooks/useLanguage";
 
 // ---------------------------------------------------------------------------
 // Create user form state
@@ -69,8 +70,16 @@ function roleBadgeVariant(role: UserRole) {
 
 export default function UsersPage() {
     const { user: currentUser } = useAuth();
+    const { t } = useLanguage();
     const { data: usersResponse, isLoading, error, refetch } = useApi<{ data: User[]; total: number }>("/users");
     const users = usersResponse?.data ?? null;
+
+    const ROLE_LABELS_I18N: Record<UserRole, string> = {
+        inspector: t("role_inspector"),
+        analyst: t("role_analyst"),
+        manager: t("role_manager"),
+        readonly: t("role_readonly"),
+    };
 
     // Create dialog
     const [createOpen, setCreateOpen] = useState(false);
@@ -111,7 +120,7 @@ export default function UsersPage() {
             if (err instanceof ApiRequestError) {
                 setCreateError(err.message);
             } else {
-                setCreateError("Une erreur inattendue s'est produite.");
+                setCreateError(t("users_unexpected_error"));
             }
         } finally {
             setCreateLoading(false);
@@ -137,7 +146,7 @@ export default function UsersPage() {
             if (err instanceof ApiRequestError) {
                 setEditError(err.message);
             } else {
-                setEditError("Une erreur inattendue s'est produite.");
+                setEditError(t("users_unexpected_error"));
             }
         } finally {
             setEditLoading(false);
@@ -158,7 +167,7 @@ export default function UsersPage() {
             if (err instanceof ApiRequestError) {
                 setToggleError(err.message);
             } else {
-                setToggleError("Une erreur inattendue s'est produite.");
+                setToggleError(t("users_unexpected_error"));
             }
         } finally {
             setToggleLoadingId(null);
@@ -172,9 +181,9 @@ export default function UsersPage() {
     if (isLoading) {
         return (
             <div className="p-4 md:p-6 flex items-center justify-center min-h-[300px]">
-                <div className="flex items-center gap-3 text-[#2A3A4E]/60">
-                    <Loader2 className="w-5 h-5 animate-spin text-[#008B8B]" />
-                    <span className="text-sm font-medium">Chargement des utilisateurs…</span>
+                <div className="flex items-center gap-3 text-[#94A3B8]/60">
+                    <Loader2 className="w-5 h-5 animate-spin text-[#6366F1]" />
+                    <span className="text-sm font-medium">{t("loading")}</span>
                 </div>
             </div>
         );
@@ -195,19 +204,21 @@ export default function UsersPage() {
     // Render: main
     // -----------------------------------------------------------------------
 
+    const userCount = users?.length ?? 0;
+
     return (
         <div className="p-4 md:p-6 space-y-6 max-w-5xl mx-auto">
             {/* Page header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-xl font-black uppercase text-[#1A2332]">Gestion des utilisateurs</h1>
-                    <p className="text-sm text-[#2A3A4E]/60 mt-0.5">
-                        {users?.length ?? 0} utilisateur{(users?.length ?? 0) !== 1 ? "s" : ""} dans votre municipalité
+                    <h1 className="text-xl font-black uppercase text-[#E2E8F0]">{t("users_title")}</h1>
+                    <p className="text-sm text-[#94A3B8]/60 mt-0.5">
+                        {userCount} {userCount !== 1 ? t("users_count_many") : t("users_count_one")} {t("users_in_municipality")}
                     </p>
                 </div>
                 <Button onClick={() => { setCreateForm(DEFAULT_FORM); setCreateError(null); setCreateOpen(true); }}>
                     <UserPlus className="w-4 h-4" />
-                    Ajouter un utilisateur
+                    {t("users_add")}
                 </Button>
             </div>
 
@@ -225,27 +236,27 @@ export default function UsersPage() {
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead>
-                                <tr className="border-b border-gray-100">
-                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">Nom</th>
-                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">Courriel</th>
-                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">Rôle</th>
-                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">Statut</th>
-                                    <th className="px-5 py-3.5 text-right text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">Actions</th>
+                                <tr className="border-b border-slate-800">
+                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#94A3B8]/60 uppercase tracking-wide">{t("users_col_name")}</th>
+                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#94A3B8]/60 uppercase tracking-wide">{t("users_col_email")}</th>
+                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#94A3B8]/60 uppercase tracking-wide">{t("users_col_role")}</th>
+                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#94A3B8]/60 uppercase tracking-wide">{t("users_col_status")}</th>
+                                    <th className="px-5 py-3.5 text-right text-xs font-semibold text-[#94A3B8]/60 uppercase tracking-wide">{t("users_col_actions")}</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-50">
+                            <tbody className="divide-y divide-slate-800">
                                 {(users ?? []).map((u) => (
-                                    <tr key={u.id} className="hover:bg-gray-50/60 transition-colors">
-                                        <td className="px-5 py-3.5 font-medium text-[#1A2332]">{u.name}</td>
-                                        <td className="px-5 py-3.5 text-[#2A3A4E]/70">{u.email}</td>
+                                    <tr key={u.id} className="hover:bg-slate-950/60 transition-colors">
+                                        <td className="px-5 py-3.5 font-medium text-[#E2E8F0]">{u.name}</td>
+                                        <td className="px-5 py-3.5 text-[#94A3B8]/70">{u.email}</td>
                                         <td className="px-5 py-3.5">
                                             <Badge variant={roleBadgeVariant(u.role)}>
-                                                {ROLE_LABELS[u.role]}
+                                                {ROLE_LABELS_I18N[u.role]}
                                             </Badge>
                                         </td>
                                         <td className="px-5 py-3.5">
                                             <Badge variant={u.isActive ? "active" : "inactive"}>
-                                                {u.isActive ? "Actif" : "Inactif"}
+                                                {u.isActive ? t("users_active") : t("users_inactive")}
                                             </Badge>
                                         </td>
                                         <td className="px-5 py-3.5">
@@ -255,10 +266,10 @@ export default function UsersPage() {
                                                     size="sm"
                                                     onClick={() => openEditDialog(u)}
                                                     disabled={u.id === currentUser?.id}
-                                                    title="Modifier le rôle"
+                                                    title={t("users_edit_role_title")}
                                                 >
                                                     <Pencil className="w-3.5 h-3.5" />
-                                                    Rôle
+                                                    {t("users_edit_role")}
                                                 </Button>
                                                 <Button
                                                     variant={u.isActive ? "destructive" : "outline"}
@@ -268,7 +279,7 @@ export default function UsersPage() {
                                                         u.id === currentUser?.id ||
                                                         toggleLoadingId === u.id
                                                     }
-                                                    title={u.isActive ? "Désactiver" : "Activer"}
+                                                    title={u.isActive ? t("users_deactivate") : t("users_activate")}
                                                 >
                                                     {toggleLoadingId === u.id ? (
                                                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -277,7 +288,7 @@ export default function UsersPage() {
                                                     ) : (
                                                         <Power className="w-3.5 h-3.5" />
                                                     )}
-                                                    {u.isActive ? "Désactiver" : "Activer"}
+                                                    {u.isActive ? t("users_deactivate") : t("users_activate")}
                                                 </Button>
                                             </div>
                                         </td>
@@ -285,8 +296,8 @@ export default function UsersPage() {
                                 ))}
                                 {(users ?? []).length === 0 && (
                                     <tr>
-                                        <td colSpan={5} className="px-5 py-10 text-center text-sm text-[#2A3A4E]/50">
-                                            Aucun utilisateur trouvé.
+                                        <td colSpan={5} className="px-5 py-10 text-center text-sm text-[#94A3B8]/50">
+                                            {t("users_no_users")}
                                         </td>
                                     </tr>
                                 )}
@@ -302,19 +313,19 @@ export default function UsersPage() {
             <Dialog open={createOpen} onOpenChange={setCreateOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Ajouter un utilisateur</DialogTitle>
+                        <DialogTitle>{t("users_create_title")}</DialogTitle>
                     </DialogHeader>
 
                     <form onSubmit={handleCreate} className="space-y-4 mt-2">
                         <Input
-                            label="Nom"
+                            label={t("users_col_name")}
                             placeholder="Marie Tremblay"
                             value={createForm.name}
                             onChange={(e) => setCreateForm((f) => ({ ...f, name: e.target.value }))}
                             required
                         />
                         <Input
-                            label="Courriel"
+                            label={t("users_col_email")}
                             type="email"
                             placeholder="marie@municipalite.qc.ca"
                             value={createForm.email}
@@ -322,7 +333,7 @@ export default function UsersPage() {
                             required
                         />
                         <Input
-                            label="Mot de passe"
+                            label={t("login_password")}
                             type="password"
                             placeholder="••••••••"
                             value={createForm.password}
@@ -331,18 +342,18 @@ export default function UsersPage() {
                         />
 
                         <div className="flex flex-col gap-1.5">
-                            <label className="text-sm font-medium text-[#1A2332]">Rôle</label>
+                            <label className="text-sm font-medium text-[#E2E8F0]">{t("users_col_role")}</label>
                             <Select
                                 value={createForm.role}
                                 onValueChange={(v) => setCreateForm((f) => ({ ...f, role: v as UserRole }))}
                             >
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Choisir un rôle" />
+                                    <SelectValue placeholder={t("users_choose_role")} />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {USER_ROLES.map((role) => (
                                         <SelectItem key={role} value={role}>
-                                            {ROLE_LABELS[role]}
+                                            {ROLE_LABELS_I18N[role]}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -359,12 +370,12 @@ export default function UsersPage() {
                         <DialogFooter>
                             <DialogClose asChild>
                                 <Button type="button" variant="ghost">
-                                    Annuler
+                                    {t("cancel")}
                                 </Button>
                             </DialogClose>
                             <Button type="submit" disabled={createLoading}>
                                 {createLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-                                Créer l'utilisateur
+                                {t("users_create_btn")}
                             </Button>
                         </DialogFooter>
                     </form>
@@ -377,27 +388,27 @@ export default function UsersPage() {
             <Dialog open={editUser !== null} onOpenChange={(open) => { if (!open) setEditUser(null); }}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Modifier le rôle</DialogTitle>
+                        <DialogTitle>{t("users_edit_title")}</DialogTitle>
                     </DialogHeader>
 
                     <form onSubmit={handleEditRole} className="space-y-4 mt-2">
-                        <p className="text-sm text-[#2A3A4E]/70">
-                            Modifier le rôle de <span className="font-semibold text-[#1A2332]">{editUser?.name}</span>.
+                        <p className="text-sm text-[#94A3B8]/70">
+                            {t("users_edit_desc")} <span className="font-semibold text-[#E2E8F0]">{editUser?.name}</span>.
                         </p>
 
                         <div className="flex flex-col gap-1.5">
-                            <label className="text-sm font-medium text-[#1A2332]">Rôle</label>
+                            <label className="text-sm font-medium text-[#E2E8F0]">{t("users_col_role")}</label>
                             <Select
                                 value={editRole}
                                 onValueChange={(v) => setEditRole(v as UserRole)}
                             >
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Choisir un rôle" />
+                                    <SelectValue placeholder={t("users_choose_role")} />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {USER_ROLES.map((role) => (
                                         <SelectItem key={role} value={role}>
-                                            {ROLE_LABELS[role]}
+                                            {ROLE_LABELS_I18N[role]}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -413,11 +424,11 @@ export default function UsersPage() {
 
                         <DialogFooter>
                             <Button type="button" variant="ghost" onClick={() => setEditUser(null)}>
-                                Annuler
+                                {t("cancel")}
                             </Button>
                             <Button type="submit" disabled={editLoading}>
                                 {editLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-                                Enregistrer
+                                {t("save")}
                             </Button>
                         </DialogFooter>
                     </form>

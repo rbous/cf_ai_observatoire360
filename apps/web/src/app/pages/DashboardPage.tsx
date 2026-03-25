@@ -2,9 +2,11 @@ import { BrainCircuit } from "lucide-react";
 import { AlertList } from "@/app/components/dashboard/AlertList";
 import { MapView } from "@/app/components/dashboard/MapView";
 import { useAlerts } from "@/app/hooks/useAlerts";
+import { useLanguage } from "@/app/hooks/useLanguage";
 
 export default function DashboardPage() {
     const { alerts } = useAlerts();
+    const { t } = useLanguage();
     const aiDetectionCount = alerts.filter((a) => a.scanJobId !== null).length;
 
     return (
@@ -13,10 +15,10 @@ export default function DashboardPage() {
             {aiDetectionCount > 0 && (
                 <div
                     className="shrink-0 flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white"
-                    style={{ background: "#008B8B" }}
+                    style={{ background: "#6366F1" }}
                 >
                     <BrainCircuit className="w-3.5 h-3.5 shrink-0" />
-                    Pipeline IA active — {aiDetectionCount} detection{aiDetectionCount > 1 ? "s" : ""} automatique{aiDetectionCount > 1 ? "s" : ""}
+                    {t("dashboard_ai_pipeline")} — {aiDetectionCount} {t("dashboard_ai_detections")}
                 </div>
             )}
 

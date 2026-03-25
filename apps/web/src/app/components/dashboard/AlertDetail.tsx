@@ -8,9 +8,9 @@ import { Button } from "@/app/components/ui/button";
 import { RiskBadge } from "@/app/components/shared/RiskBadge";
 import { StatusBadge } from "@/app/components/shared/StatusBadge";
 import type { Alert, AlertStatus } from "@observatoire360/shared";
-import { ALERT_STATUS_LABELS, ALERT_TYPE_LABELS } from "@observatoire360/shared";
 import { useApi } from "@/app/hooks/useApi";
 import { API_BASE_URL } from "@/app/lib/constants";
+import { useLanguage } from "@/app/hooks/useLanguage";
 
 // ---------------------------------------------------------------------------
 // Sub-component: prompt to analyze zone when no images exist
@@ -26,6 +26,7 @@ function AnalyzeZonePrompt({ alertId, latitude, longitude, address, onComplete }
     const [isLoading, setIsLoading] = useState(false);
     const [result, setResult] = useState<"idle" | "success" | "polling" | "done" | "error">("idle");
     const [errorMsg, setErrorMsg] = useState("");
+    const { t } = useLanguage();
 
     const today = new Date().toISOString().slice(0, 10);
     const sixMonthsAgo = new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
@@ -59,7 +60,7 @@ function AnalyzeZonePrompt({ alertId, latitude, longitude, address, onComplete }
                             onComplete();
                         } else {
                             setResult("error");
-                            setErrorMsg("L'analyse a échoué.");
+                            setErrorMsg(t("alert_analysis_failed"));
                         }
                         setIsLoading(false);
                     }
@@ -74,23 +75,23 @@ function AnalyzeZonePrompt({ alertId, latitude, longitude, address, onComplete }
             }, 5000);
         } catch (err) {
             setResult("error");
-            setErrorMsg(err instanceof Error ? err.message : "Erreur inattendue");
+            setErrorMsg(err instanceof Error ? err.message : t("alert_unexpected_error"));
             setIsLoading(false);
         }
     }
 
     return (
-        <div className="flex flex-col items-center justify-center py-8 px-4 rounded-xl bg-gray-50 border border-dashed border-gray-200">
-            <Image className="w-10 h-10 text-[#2A3A4E]/20 mb-3" />
-            <p className="text-sm text-[#2A3A4E]/60 mb-1 text-center">Aucune image satellite disponible pour cette alerte.</p>
-            <p className="text-xs text-[#2A3A4E]/40 mb-4 text-center">
-                Lancez une analyse pour obtenir les images avant/après de cette zone.
+        <div className="flex flex-col items-center justify-center py-8 px-4 rounded-xl bg-slate-950 border border-dashed border-slate-700">
+            <Image className="w-10 h-10 text-[#94A3B8]/20 mb-3" />
+            <p className="text-sm text-[#94A3B8]/60 mb-1 text-center">{t("alert_no_images")}</p>
+            <p className="text-xs text-[#94A3B8]/40 mb-4 text-center">
+                {t("alert_analyze_zone_sub")}
             </p>
 
             {result === "success" ? (
                 <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-4 py-2">
                     <CheckCircle className="w-4 h-4" />
-                    Analyse lancée ! Les images seront disponibles dans quelques minutes.
+                    {t("alert_analysis_launched")}
                 </div>
             ) : result === "error" ? (
                 <div className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-4 py-2 mb-2">
@@ -111,7 +112,7 @@ function AnalyzeZonePrompt({ alertId, latitude, longitude, address, onComplete }
                     ) : (
                         <ScanLine className="w-4 h-4" />
                     )}
-                    Analyser cette zone (3 derniers mois)
+                    {t("alert_analyze_zone")}
                 </Button>
             )}
         </div>
@@ -134,31 +135,40 @@ interface AlertDetailProps {
 
 export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
     const navigate = useNavigate();
+    const { t } = useLanguage();
     const { data: alert, isLoading, error, refetch } = useApi<Alert>(`/alerts/${alertId}`);
     const [currentStatus, setCurrentStatus] = useState<AlertStatus | null>(null);
 
     const effectiveStatus = currentStatus ?? alert?.status ?? "a_analyser";
 
-    const eventIcons = {
-        detection: AlertTriangle,
-        status: CheckCircle,
-        assign: User,
-        inspect: Calendar,
+    const ALERT_STATUS_LABELS_I18N: Record<AlertStatus, string> = {
+        a_analyser: t("status_a_analyser"),
+        a_inspecter: t("status_a_inspecter"),
+        en_cours: t("status_en_cours"),
+        infraction_confirmee: t("status_infraction_confirmee"),
+        cloturee: t("status_cloturee"),
+    };
+
+    const ALERT_TYPE_LABELS_I18N: Record<string, string> = {
+        construction: t("type_construction"),
+        extension: t("type_extension"),
+        annexe: t("type_annexe"),
+        piscine: t("type_piscine"),
     };
 
     const eventColors = {
         detection: "text-red-500 bg-red-50",
-        status: "text-[#008B8B] bg-[#008B8B]/10",
+        status: "text-[#6366F1] bg-[#6366F1]/10",
         assign: "text-blue-500 bg-blue-50",
         inspect: "text-amber-500 bg-amber-50",
     };
 
     if (isLoading) {
         return (
-            <div className="min-h-full bg-gray-50 p-4 md:p-6 flex items-center justify-center">
-                <div className="flex items-center gap-3 text-[#2A3A4E]/60">
-                    <Loader2 className="w-5 h-5 animate-spin text-[#008B8B]" />
-                    <span className="text-sm font-medium">Chargement de l'alerte…</span>
+            <div className="min-h-full bg-slate-950 p-4 md:p-6 flex items-center justify-center">
+                <div className="flex items-center gap-3 text-[#94A3B8]/60">
+                    <Loader2 className="w-5 h-5 animate-spin text-[#6366F1]" />
+                    <span className="text-sm font-medium">{t("alert_loading")}</span>
                 </div>
             </div>
         );
@@ -166,18 +176,18 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
 
     if (error || !alert) {
         return (
-            <div className="min-h-full bg-gray-50 p-4 md:p-6">
+            <div className="min-h-full bg-slate-950 p-4 md:p-6">
                 <div className="max-w-5xl mx-auto">
                     <button
                         onClick={() => navigate("/tableau-de-bord")}
-                        className="inline-flex items-center gap-1.5 text-sm text-[#008B8B] hover:underline mb-5"
+                        className="inline-flex items-center gap-1.5 text-sm text-[#6366F1] hover:underline mb-5"
                     >
                         <ArrowLeft className="w-4 h-4" />
-                        Retour à la carte
+                        {t("alert_back_to_map")}
                     </button>
                     <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
                         <AlertTriangle className="w-5 h-5 shrink-0" />
-                        <span>{error ?? "Alerte introuvable."}</span>
+                        <span>{error ?? t("alert_not_found")}</span>
                     </div>
                 </div>
             </div>
@@ -187,46 +197,46 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
     const detectedAtDate = new Date(alert.detectedAt).toLocaleDateString("fr-CA");
 
     return (
-        <div className="min-h-full bg-gray-50 p-4 md:p-6">
+        <div className="min-h-full bg-slate-950 p-4 md:p-6">
             <div className="max-w-5xl mx-auto">
                 {/* Back button */}
                 <button
                     onClick={() => navigate("/tableau-de-bord")}
-                    className="inline-flex items-center gap-1.5 text-sm text-[#008B8B] hover:underline mb-5"
+                    className="inline-flex items-center gap-1.5 text-sm text-[#6366F1] hover:underline mb-5"
                 >
                     <ArrowLeft className="w-4 h-4" />
-                    Retour à la carte
+                    {t("alert_back_to_map")}
                 </button>
 
                 {/* Header */}
                 <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
                     <div>
                         <div className="flex items-center gap-3 mb-1 flex-wrap">
-                            <h1 className="text-xl font-black uppercase text-[#1A2332]">
-                                Alerte {alert.id}
+                            <h1 className="text-xl font-black uppercase text-[#E2E8F0]">
+                                {t("alert_title")} {alert.id}
                             </h1>
                             <RiskBadge level={alert.riskLevel} />
                             <StatusBadge status={effectiveStatus} />
                         </div>
-                        <p className="text-sm text-[#2A3A4E]/60">{ALERT_TYPE_LABELS[alert.type]}</p>
+                        <p className="text-sm text-[#94A3B8]/60">{ALERT_TYPE_LABELS_I18N[alert.type] ?? alert.type}</p>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
                         <select
                             value={effectiveStatus}
                             onChange={(e) => setCurrentStatus(e.target.value as AlertStatus)}
-                            className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-white text-[#1A2332] focus:outline-none focus:ring-1 focus:ring-[#008B8B]"
+                            className="text-sm border border-slate-700 rounded-lg px-3 py-1.5 bg-slate-900 text-[#E2E8F0] focus:outline-none focus:ring-1 focus:ring-[#6366F1]"
                         >
                             {STATUS_OPTIONS.map((s) => (
-                                <option key={s} value={s}>{ALERT_STATUS_LABELS[s]}</option>
+                                <option key={s} value={s}>{ALERT_STATUS_LABELS_I18N[s]}</option>
                             ))}
                         </select>
                         <Button size="sm" variant="outline">
                             <User className="w-4 h-4" />
-                            Assigner
+                            {t("alert_assign")}
                         </Button>
                         <Button size="sm">
                             <Calendar className="w-4 h-4" />
-                            Planifier
+                            {t("alert_plan")}
                         </Button>
                     </div>
                 </div>
@@ -238,8 +248,8 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                         <Card>
                             <CardHeader className="pb-3">
                                 <CardTitle className="flex items-center gap-2 text-sm">
-                                    <Image className="w-4 h-4 text-[#008B8B]" />
-                                    Comparaison avant / après
+                                    <Image className="w-4 h-4 text-[#6366F1]" />
+                                    {t("alert_comparison")}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -256,7 +266,7 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                                         />
                                         {alert.scanJobId && (
                                             <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 bg-red-500/90 text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
-                                                Changement détecté par IA
+                                                {t("alert_ai_detected")}
                                             </div>
                                         )}
                                     </div>
@@ -277,20 +287,20 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                             <Card>
                                 <CardHeader className="pb-3">
                                     <CardTitle className="flex items-center gap-2 text-sm">
-                                        <BrainCircuit className="w-4 h-4 text-[#008B8B]" />
-                                        Analyse IA
+                                        <BrainCircuit className="w-4 h-4 text-[#6366F1]" />
+                                        {t("alert_ai_analysis")}
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     {/* Confidence */}
                                     <div>
-                                        <p className="text-[10px] text-[#2A3A4E]/50 uppercase font-semibold tracking-wide mb-1.5">
-                                            Confiance IA
+                                        <p className="text-[10px] text-[#94A3B8]/50 uppercase font-semibold tracking-wide mb-1.5">
+                                            {t("alert_ai_confidence")}
                                         </p>
                                         {alert.confidence != null ? (
                                             <div className="space-y-1.5">
                                                 <div className="flex items-center justify-between">
-                                                    <span className="text-sm font-semibold text-[#1A2332]">
+                                                    <span className="text-sm font-semibold text-[#E2E8F0]">
                                                         {Math.round(alert.confidence * 100)} %
                                                     </span>
                                                     <span
@@ -304,13 +314,13 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                                                         }}
                                                     >
                                                         {alert.confidence >= 0.7
-                                                            ? "Élevée"
+                                                            ? t("alert_ai_confidence_high")
                                                             : alert.confidence >= 0.4
-                                                                ? "Modérée"
-                                                                : "Faible"}
+                                                                ? t("alert_ai_confidence_medium")
+                                                                : t("alert_ai_confidence_low")}
                                                     </span>
                                                 </div>
-                                                <div className="h-2 w-full rounded-full bg-gray-100 overflow-hidden">
+                                                <div className="h-2 w-full rounded-full bg-slate-800 overflow-hidden">
                                                     <div
                                                         className="h-full rounded-full transition-all"
                                                         style={{
@@ -325,30 +335,30 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                                                 </div>
                                             </div>
                                         ) : (
-                                            <p className="text-xs text-[#2A3A4E]/50 italic">
-                                                Score de confiance non disponible
+                                            <p className="text-xs text-[#94A3B8]/50 italic">
+                                                {t("alert_ai_confidence_na")}
                                             </p>
                                         )}
                                     </div>
 
                                     {/* Source */}
                                     <div>
-                                        <p className="text-[10px] text-[#2A3A4E]/50 uppercase font-semibold tracking-wide mb-0.5">
-                                            Source
+                                        <p className="text-[10px] text-[#94A3B8]/50 uppercase font-semibold tracking-wide mb-0.5">
+                                            {t("alert_ai_source")}
                                         </p>
-                                        <p className="text-xs text-[#2A3A4E]/70">
-                                            Détection automatique par analyse d'images satellite
+                                        <p className="text-xs text-[#94A3B8]/70">
+                                            {t("alert_ai_source_desc")}
                                         </p>
                                     </div>
 
                                     {/* AI Summary */}
                                     {alert.aiSummary && (
                                         <div>
-                                            <p className="text-[10px] text-[#2A3A4E]/50 uppercase font-semibold tracking-wide mb-1">
-                                                Résumé IA
+                                            <p className="text-[10px] text-[#94A3B8]/50 uppercase font-semibold tracking-wide mb-1">
+                                                {t("alert_ai_summary")}
                                             </p>
-                                            <div className="bg-[#008B8B]/5 border border-[#008B8B]/15 rounded-lg p-3">
-                                                <p className="text-sm text-[#1A2332] leading-relaxed">
+                                            <div className="bg-[#6366F1]/5 border border-[#6366F1]/15 rounded-lg p-3">
+                                                <p className="text-sm text-[#E2E8F0] leading-relaxed">
                                                     {alert.aiSummary}
                                                 </p>
                                             </div>
@@ -357,11 +367,11 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
 
                                     {/* Method */}
                                     <div>
-                                        <p className="text-[10px] text-[#2A3A4E]/50 uppercase font-semibold tracking-wide mb-0.5">
-                                            Méthode
+                                        <p className="text-[10px] text-[#94A3B8]/50 uppercase font-semibold tracking-wide mb-0.5">
+                                            {t("alert_ai_method")}
                                         </p>
-                                        <p className="text-xs text-[#2A3A4E]/70">
-                                            Comparaison pixel-diff + classification Workers AI (LLaMA 3.2 Vision)
+                                        <p className="text-xs text-[#94A3B8]/70">
+                                            {t("alert_ai_method_desc")}
                                         </p>
                                     </div>
                                 </CardContent>
@@ -372,64 +382,64 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                         <Card>
                             <CardHeader className="pb-3">
                                 <CardTitle className="flex items-center gap-2 text-sm">
-                                    <FileText className="w-4 h-4 text-[#008B8B]" />
-                                    Données techniques
+                                    <FileText className="w-4 h-4 text-[#6366F1]" />
+                                    {t("alert_technical_data")}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <div className="grid grid-cols-2 gap-x-6 gap-y-3">
                                     {[
                                         {
-                                            label: "Superficie détectée",
-                                            value: alert.detectedArea != null ? `${alert.detectedArea} m²` : "Non disponible",
+                                            label: t("alert_detected_area"),
+                                            value: alert.detectedArea != null ? `${alert.detectedArea} m²` : t("alert_not_available"),
                                         },
                                         {
-                                            label: "Superficie autorisée",
+                                            label: t("alert_authorized_area"),
                                             value: alert.authorizedArea != null && alert.authorizedArea > 0
                                                 ? `${alert.authorizedArea} m²`
-                                                : "Non applicable",
+                                                : t("alert_not_applicable"),
                                         },
                                         {
-                                            label: "Zone de règlement",
-                                            value: alert.zone ?? "Non spécifiée",
+                                            label: t("alert_zone"),
+                                            value: alert.zone ?? t("alert_not_specified"),
                                         },
                                         {
-                                            label: "Permis de construction",
-                                            value: alert.hasPermit ? "Oui" : "Non",
+                                            label: t("alert_permit"),
+                                            value: alert.hasPermit ? t("alert_permit_yes") : t("alert_permit_no"),
                                         },
                                         {
-                                            label: "Coordonnées",
+                                            label: t("alert_coordinates"),
                                             value: `${alert.latitude.toFixed(4)}, ${alert.longitude.toFixed(4)}`,
                                         },
                                         {
-                                            label: "Score de risque",
+                                            label: t("alert_risk_score"),
                                             value: `${alert.riskScore}/100`,
                                         },
                                         ...(alert.confidence != null
-                                            ? [{ label: "Confiance IA", value: `${Math.round(alert.confidence * 100)} %` }]
+                                            ? [{ label: t("alert_ai_confidence"), value: `${Math.round(alert.confidence * 100)} %` }]
                                             : []),
                                     ].map(({ label, value }) => (
                                         <div key={label}>
-                                            <p className="text-[10px] text-[#2A3A4E]/50 uppercase font-semibold tracking-wide">{label}</p>
-                                            <p className="text-sm font-medium text-[#1A2332] mt-0.5">{value}</p>
+                                            <p className="text-[10px] text-[#94A3B8]/50 uppercase font-semibold tracking-wide">{label}</p>
+                                            <p className="text-sm font-medium text-[#E2E8F0] mt-0.5">{value}</p>
                                         </div>
                                     ))}
                                 </div>
                             </CardContent>
                         </Card>
 
-                        {/* Action timeline — placeholder since API Alert has no events field */}
+                        {/* Action timeline */}
                         <Card>
                             <CardHeader className="pb-3">
                                 <CardTitle className="flex items-center gap-2 text-sm">
-                                    <Clock className="w-4 h-4 text-[#008B8B]" />
-                                    Historique des actions
+                                    <Clock className="w-4 h-4 text-[#6366F1]" />
+                                    {t("alert_history")}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <div className="relative">
                                     {/* Vertical line */}
-                                    <div className="absolute left-4 top-4 bottom-4 w-px bg-gray-200" />
+                                    <div className="absolute left-4 top-4 bottom-4 w-px bg-slate-700" />
 
                                     <div className="space-y-4">
                                         {/* Detection event derived from detectedAt */}
@@ -438,9 +448,9 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                                                 <AlertTriangle className="w-4 h-4" />
                                             </div>
                                             <div className="flex-1 min-w-0 pt-1">
-                                                <p className="text-xs font-semibold text-[#1A2332]">Détection automatique par satellite</p>
+                                                <p className="text-xs font-semibold text-[#E2E8F0]">{t("alert_auto_detection")}</p>
                                                 <div className="flex items-center gap-2 mt-0.5">
-                                                    <p className="text-[10px] text-[#2A3A4E]/50">{detectedAtDate}</p>
+                                                    <p className="text-[10px] text-[#94A3B8]/50">{detectedAtDate}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -451,14 +461,14 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                                                 <CheckCircle className="w-4 h-4" />
                                             </div>
                                             <div className="flex-1 min-w-0 pt-1">
-                                                <p className="text-xs font-semibold text-[#1A2332]">
-                                                    Alerte créée — statut : {ALERT_STATUS_LABELS[alert.status]}
+                                                <p className="text-xs font-semibold text-[#E2E8F0]">
+                                                    {t("alert_created")} {ALERT_STATUS_LABELS_I18N[alert.status]}
                                                 </p>
                                                 <div className="flex items-center gap-2 mt-0.5">
-                                                    <p className="text-[10px] text-[#2A3A4E]/50">
+                                                    <p className="text-[10px] text-[#94A3B8]/50">
                                                         {new Date(alert.createdAt).toLocaleString("fr-CA")}
                                                     </p>
-                                                    <span className="text-[10px] text-[#2A3A4E]/40">— Système</span>
+                                                    <span className="text-[10px] text-[#94A3B8]/40">— {t("alert_system")}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -474,20 +484,20 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                         <Card>
                             <CardHeader className="pb-2">
                                 <CardTitle className="text-sm flex items-center gap-1.5">
-                                    <MapPin className="w-4 h-4 text-[#008B8B]" />
-                                    Localisation
+                                    <MapPin className="w-4 h-4 text-[#6366F1]" />
+                                    {t("alert_location")}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-3">
                                 <div>
-                                    <p className="text-[10px] text-[#2A3A4E]/50 uppercase font-semibold tracking-wide mb-0.5">Adresse</p>
-                                    <p className="text-sm text-[#1A2332] font-medium leading-snug">
-                                        {alert.address ?? "Adresse non disponible"}
+                                    <p className="text-[10px] text-[#94A3B8]/50 uppercase font-semibold tracking-wide mb-0.5">{t("alert_address")}</p>
+                                    <p className="text-sm text-[#E2E8F0] font-medium leading-snug">
+                                        {alert.address ?? t("alert_address_unavailable")}
                                     </p>
                                 </div>
                                 <div>
-                                    <p className="text-[10px] text-[#2A3A4E]/50 uppercase font-semibold tracking-wide mb-0.5">Coordonnées GPS</p>
-                                    <p className="text-xs font-mono text-[#1A2332]">
+                                    <p className="text-[10px] text-[#94A3B8]/50 uppercase font-semibold tracking-wide mb-0.5">{t("alert_gps")}</p>
+                                    <p className="text-xs font-mono text-[#E2E8F0]">
                                         {alert.latitude}, {alert.longitude}
                                     </p>
                                 </div>
@@ -497,7 +507,7 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                                     className="w-full"
                                     onClick={() => navigate("/tableau-de-bord")}
                                 >
-                                    Voir sur la carte
+                                    {t("alert_view_on_map")}
                                 </Button>
                             </CardContent>
                         </Card>
@@ -506,18 +516,18 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                         <Card>
                             <CardHeader className="pb-2">
                                 <CardTitle className="text-sm flex items-center gap-1.5">
-                                    <Calendar className="w-4 h-4 text-[#008B8B]" />
-                                    Détection
+                                    <Calendar className="w-4 h-4 text-[#6366F1]" />
+                                    {t("alert_detection")}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-2">
                                 <div>
-                                    <p className="text-[10px] text-[#2A3A4E]/50 uppercase font-semibold tracking-wide mb-0.5">Date</p>
-                                    <p className="text-sm text-[#1A2332] font-medium">{detectedAtDate}</p>
+                                    <p className="text-[10px] text-[#94A3B8]/50 uppercase font-semibold tracking-wide mb-0.5">{t("alert_date")}</p>
+                                    <p className="text-sm text-[#E2E8F0] font-medium">{detectedAtDate}</p>
                                 </div>
                                 <div>
-                                    <p className="text-[10px] text-[#2A3A4E]/50 uppercase font-semibold tracking-wide mb-0.5">Méthode</p>
-                                    <p className="text-xs text-[#2A3A4E]/70">Analyse satellite automatique</p>
+                                    <p className="text-[10px] text-[#94A3B8]/50 uppercase font-semibold tracking-wide mb-0.5">{t("alert_method")}</p>
+                                    <p className="text-xs text-[#94A3B8]/70">{t("alert_detection_method")}</p>
                                 </div>
                             </CardContent>
                         </Card>
@@ -525,13 +535,13 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                         {/* Quick actions */}
                         <div className="space-y-2">
                             <Button className="w-full" size="sm">
-                                Générer l'avis officiel
+                                {t("alert_generate_notice")}
                             </Button>
                             <Button variant="outline" className="w-full" size="sm">
-                                Planifier une inspection
+                                {t("alert_schedule_inspection")}
                             </Button>
                             <Button variant="ghost" className="w-full" size="sm">
-                                Télécharger le rapport PDF
+                                {t("alert_download_pdf")}
                             </Button>
                         </div>
                     </div>

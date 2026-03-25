@@ -3,6 +3,7 @@ import { AlertTriangle, Calendar, FileText, Bell, CheckCircle, X, Loader2 } from
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/app/lib/cn";
 import { useNotifications } from "@/app/hooks/useNotifications";
+import { useLanguage } from "@/app/hooks/useLanguage";
 import type { NotificationType } from "@observatoire360/shared";
 
 // Map API notification type to display icon and colours
@@ -16,33 +17,42 @@ const TYPE_META: Record<
 > = {
     new_alert: {
         Icon: AlertTriangle,
-        iconColor: "text-red-600",
-        iconBg: "bg-red-50",
+        iconColor: "text-red-400",
+        iconBg: "bg-red-950/50",
     },
     status_change: {
         Icon: CheckCircle,
-        iconColor: "text-[#008B8B]",
-        iconBg: "bg-[#008B8B]/10",
+        iconColor: "text-[#6366F1]",
+        iconBg: "bg-[#6366F1]/10",
     },
     inspection_due: {
         Icon: Calendar,
-        iconColor: "text-[#008B8B]",
-        iconBg: "bg-[#008B8B]/10",
+        iconColor: "text-[#6366F1]",
+        iconBg: "bg-[#6366F1]/10",
     },
     system: {
         Icon: FileText,
-        iconColor: "text-blue-600",
-        iconBg: "bg-blue-50",
+        iconColor: "text-blue-400",
+        iconBg: "bg-blue-950/50",
     },
 };
 
-/** Format a Unix timestamp (ms or s) into a relative French label */
-function formatTimestamp(createdAt: number): string {
+/** Format a Unix timestamp (ms or s) into a relative label */
+function formatTimestamp(createdAt: number, locale: string): string {
     // API createdAt is in milliseconds (consistent with other entities)
     const now = Date.now();
     const ms = createdAt > 1e12 ? createdAt : createdAt * 1000;
     const diffMs = now - ms;
     const diffMin = Math.floor(diffMs / 60_000);
+    if (locale === "en") {
+        if (diffMin < 1) return "Just now";
+        if (diffMin < 60) return `${diffMin} min ago`;
+        const diffH = Math.floor(diffMin / 60);
+        if (diffH < 24) return `${diffH} h ago`;
+        const diffD = Math.floor(diffH / 24);
+        if (diffD === 1) return "Yesterday";
+        return `${diffD} days ago`;
+    }
     if (diffMin < 1) return "À l'instant";
     if (diffMin < 60) return `Il y a ${diffMin} min`;
     const diffH = Math.floor(diffMin / 60);
@@ -59,6 +69,7 @@ interface NotificationPanelProps {
 
 export function NotificationPanel({ open = true, onClose }: NotificationPanelProps) {
     const navigate = useNavigate();
+    const { t, locale } = useLanguage();
     const {
         notifications,
         unreadCount,
@@ -77,17 +88,17 @@ export function NotificationPanel({ open = true, onClose }: NotificationPanelPro
         <aside
             className={cn(
                 "fixed right-0 top-16 bottom-0 z-40 w-72 flex flex-col",
-                "bg-white border-l border-gray-200 shadow-sm",
+                "bg-slate-900 border-l border-slate-700 shadow-none",
                 "transition-transform duration-300",
                 !open && "translate-x-full",
                 open && "translate-x-0"
             )}
         >
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 shrink-0">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 shrink-0">
                 <div className="flex items-center gap-2">
-                    <Bell className="w-4 h-4 text-[#008B8B]" />
-                    <h2 className="font-bold text-sm text-[#1A2332]">Notifications</h2>
+                    <Bell className="w-4 h-4 text-[#6366F1]" />
+                    <h2 className="font-bold text-sm text-[#E2E8F0]">{t("notifications_title")}</h2>
                     {unreadCount > 0 && (
                         <span className="min-w-[18px] h-4.5 flex items-center justify-center rounded-full bg-[#DC2626] text-white text-[10px] font-bold px-1">
                             {unreadCount}
@@ -97,10 +108,10 @@ export function NotificationPanel({ open = true, onClose }: NotificationPanelPro
                 {onClose && (
                     <button
                         onClick={onClose}
-                        className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
-                        aria-label="Masquer les notifications"
+                        className="p-1 rounded-lg hover:bg-slate-800 transition-colors"
+                        aria-label={t("notifications_hide")}
                     >
-                        <X className="w-4 h-4 text-[#2A3A4E]/50" />
+                        <X className="w-4 h-4 text-[#94A3B8]/50" />
                     </button>
                 )}
             </div>
@@ -108,13 +119,13 @@ export function NotificationPanel({ open = true, onClose }: NotificationPanelPro
             {/* Notification list */}
             <div className="flex-1 overflow-y-auto">
                 {isLoading ? (
-                    <div className="flex items-center justify-center h-32 gap-2 text-[#2A3A4E]/40">
-                        <Loader2 className="w-4 h-4 animate-spin text-[#008B8B]" />
-                        <span className="text-xs">Chargement…</span>
+                    <div className="flex items-center justify-center h-32 gap-2 text-[#94A3B8]/40">
+                        <Loader2 className="w-4 h-4 animate-spin text-[#6366F1]" />
+                        <span className="text-xs">{t("notifications_loading")}</span>
                     </div>
                 ) : notifications.length === 0 ? (
-                    <div className="flex items-center justify-center h-32 text-xs text-[#2A3A4E]/40">
-                        Aucune notification
+                    <div className="flex items-center justify-center h-32 text-xs text-[#94A3B8]/40">
+                        {t("notifications_empty")}
                     </div>
                 ) : (
                     notifications.map((notif) => {
@@ -135,8 +146,8 @@ export function NotificationPanel({ open = true, onClose }: NotificationPanelPro
                                 }}
                                 className={cn(
                                     "w-full flex items-start gap-3 px-4 py-3 text-left",
-                                    "hover:bg-gray-50 transition-colors border-b border-gray-50",
-                                    !notif.isRead && "bg-[#008B8B]/3"
+                                    "hover:bg-slate-800 transition-colors border-b border-slate-800",
+                                    !notif.isRead && "bg-[#6366F1]/3"
                                 )}
                             >
                                 {/* Icon */}
@@ -148,17 +159,17 @@ export function NotificationPanel({ open = true, onClose }: NotificationPanelPro
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-start justify-between gap-1">
                                         <p className={cn(
-                                            "text-xs leading-snug text-[#1A2332]",
+                                            "text-xs leading-snug text-[#E2E8F0]",
                                             !notif.isRead ? "font-semibold" : "font-medium"
                                         )}>
                                             {notif.title}
                                         </p>
                                         {!notif.isRead && (
-                                            <span className="w-2 h-2 rounded-full bg-[#008B8B] shrink-0 mt-1" />
+                                            <span className="w-2 h-2 rounded-full bg-[#6366F1] shrink-0 mt-1" />
                                         )}
                                     </div>
-                                    <p className="text-[11px] text-[#2A3A4E]/50 mt-0.5 truncate">{notif.message}</p>
-                                    <p className="text-[10px] text-[#2A3A4E]/40 mt-1">{formatTimestamp(notif.createdAt)}</p>
+                                    <p className="text-[11px] text-[#94A3B8]/50 mt-0.5 truncate">{notif.message}</p>
+                                    <p className="text-[10px] text-[#94A3B8]/40 mt-1">{formatTimestamp(notif.createdAt, locale)}</p>
                                 </div>
                             </button>
                         );
@@ -167,12 +178,12 @@ export function NotificationPanel({ open = true, onClose }: NotificationPanelPro
             </div>
 
             {/* Footer */}
-            <div className="px-4 py-2.5 border-t border-gray-100 shrink-0">
+            <div className="px-4 py-2.5 border-t border-slate-800 shrink-0">
                 <button
                     onClick={markAllAsRead}
-                    className="w-full text-xs text-[#008B8B] font-medium hover:underline"
+                    className="w-full text-xs text-[#6366F1] font-medium hover:underline"
                 >
-                    Tout marquer comme lu
+                    {t("notifications_mark_all_read")}
                 </button>
             </div>
         </aside>

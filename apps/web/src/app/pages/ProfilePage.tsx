@@ -6,7 +6,8 @@ import { Input } from "@/app/components/ui/input";
 import { Badge } from "@/app/components/ui/badge";
 import { useAuth } from "@/app/hooks/useAuth";
 import { api, ApiRequestError } from "@/app/lib/api";
-import { ROLE_LABELS } from "@observatoire360/shared";
+import { useLanguage } from "@/app/hooks/useLanguage";
+import type { UserRole } from "@observatoire360/shared";
 
 // ---------------------------------------------------------------------------
 // ProfilePage
@@ -14,6 +15,7 @@ import { ROLE_LABELS } from "@observatoire360/shared";
 
 export default function ProfilePage() {
     const { user, updateProfile } = useAuth();
+    const { t } = useLanguage();
 
     // -----------------------------------------------------------------------
     // Personal info form
@@ -43,7 +45,7 @@ export default function ProfilePage() {
             if (err instanceof ApiRequestError) {
                 setInfoError(err.message);
             } else {
-                setInfoError("Une erreur inattendue s'est produite.");
+                setInfoError(t("profile_unexpected_error"));
             }
         } finally {
             setInfoLoading(false);
@@ -62,10 +64,10 @@ export default function ProfilePage() {
 
     function validatePasswordForm(): string | null {
         if (newPassword.length < 8) {
-            return "Le nouveau mot de passe doit contenir au moins 8 caractères.";
+            return t("profile_password_min_length");
         }
         if (newPassword !== confirmPassword) {
-            return "Les mots de passe ne correspondent pas.";
+            return t("profile_password_mismatch");
         }
         return null;
     }
@@ -94,12 +96,19 @@ export default function ProfilePage() {
             if (err instanceof ApiRequestError) {
                 setPasswordError(err.message);
             } else {
-                setPasswordError("Une erreur inattendue s'est produite.");
+                setPasswordError(t("profile_unexpected_error"));
             }
         } finally {
             setPasswordLoading(false);
         }
     }
+
+    const ROLE_LABELS_I18N: Record<UserRole, string> = {
+        inspector: t("role_inspector"),
+        analyst: t("role_analyst"),
+        manager: t("role_manager"),
+        readonly: t("role_readonly"),
+    };
 
     // -----------------------------------------------------------------------
     // Render
@@ -108,9 +117,9 @@ export default function ProfilePage() {
     if (!user) {
         return (
             <div className="p-4 md:p-6 flex items-center justify-center min-h-[300px]">
-                <div className="flex items-center gap-3 text-[#2A3A4E]/60">
-                    <Loader2 className="w-5 h-5 animate-spin text-[#008B8B]" />
-                    <span className="text-sm font-medium">Chargement du profil…</span>
+                <div className="flex items-center gap-3 text-[#94A3B8]/60">
+                    <Loader2 className="w-5 h-5 animate-spin text-[#6366F1]" />
+                    <span className="text-sm font-medium">{t("profile_loading")}</span>
                 </div>
             </div>
         );
@@ -120,9 +129,9 @@ export default function ProfilePage() {
         <div className="p-4 md:p-6 space-y-6 max-w-4xl mx-auto">
             {/* Page header */}
             <div>
-                <h1 className="text-xl font-black uppercase text-[#1A2332]">Mon profil</h1>
-                <p className="text-sm text-[#2A3A4E]/60 mt-0.5">
-                    Gérez vos informations personnelles et votre mot de passe.
+                <h1 className="text-xl font-black uppercase text-[#E2E8F0]">{t("profile_title")}</h1>
+                <p className="text-sm text-[#94A3B8]/60 mt-0.5">
+                    {t("profile_subtitle")}
                 </p>
             </div>
 
@@ -130,52 +139,52 @@ export default function ProfilePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                 {/* ----------------------------------------------------------------
-                    Card 1: Informations personnelles
+                    Card 1: Personal information
                 ---------------------------------------------------------------- */}
                 <Card>
                     <CardHeader>
-                        <CardTitle className="text-base">Informations personnelles</CardTitle>
+                        <CardTitle className="text-base">{t("profile_info")}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleUpdateInfo} className="space-y-4">
                             {/* Name — editable */}
                             <Input
-                                label="Nom"
+                                label={t("profile_name")}
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                placeholder="Votre nom complet"
+                                placeholder={t("profile_name_placeholder")}
                                 required
                             />
 
                             {/* Email — read-only */}
                             <div className="flex flex-col gap-1.5">
-                                <label className="text-sm font-medium text-[#1A2332]">Courriel</label>
+                                <label className="text-sm font-medium text-[#E2E8F0]">{t("profile_email")}</label>
                                 <input
                                     type="email"
                                     value={user.email}
                                     readOnly
-                                    className="w-full h-10 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-[#2A3A4E]/60 cursor-not-allowed"
+                                    className="w-full h-10 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-[#94A3B8]/60 cursor-not-allowed"
                                 />
                             </div>
 
                             {/* Role — read-only badge */}
                             <div className="flex flex-col gap-1.5">
-                                <span className="text-sm font-medium text-[#1A2332]">Rôle</span>
+                                <span className="text-sm font-medium text-[#E2E8F0]">{t("profile_role")}</span>
                                 <div className="h-10 flex items-center">
                                     <Badge variant="default">
-                                        {ROLE_LABELS[user.role]}
+                                        {ROLE_LABELS_I18N[user.role]}
                                     </Badge>
                                 </div>
                             </div>
 
                             {/* Municipality — read-only */}
                             <div className="flex flex-col gap-1.5">
-                                <label className="text-sm font-medium text-[#1A2332]">Municipalité</label>
+                                <label className="text-sm font-medium text-[#E2E8F0]">{t("profile_municipality")}</label>
                                 <input
                                     type="text"
                                     value={user.municipalityId}
                                     readOnly
-                                    className="w-full h-10 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-[#2A3A4E]/60 cursor-not-allowed"
+                                    className="w-full h-10 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-[#94A3B8]/60 cursor-not-allowed"
                                 />
                             </div>
 
@@ -183,7 +192,7 @@ export default function ProfilePage() {
                             {infoSuccess && (
                                 <div className="flex items-center gap-2 text-emerald-700 text-sm p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
                                     <CheckCircle2 className="w-4 h-4 shrink-0" />
-                                    Informations mises à jour.
+                                    {t("profile_updated")}
                                 </div>
                             )}
                             {infoError && (
@@ -195,23 +204,23 @@ export default function ProfilePage() {
 
                             <Button type="submit" disabled={infoLoading} className="w-full">
                                 {infoLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-                                Enregistrer
+                                {t("profile_save")}
                             </Button>
                         </form>
                     </CardContent>
                 </Card>
 
                 {/* ----------------------------------------------------------------
-                    Card 2: Changer le mot de passe
+                    Card 2: Change password
                 ---------------------------------------------------------------- */}
                 <Card>
                     <CardHeader>
-                        <CardTitle className="text-base">Changer le mot de passe</CardTitle>
+                        <CardTitle className="text-base">{t("profile_change_password")}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleChangePassword} className="space-y-4">
                             <Input
-                                label="Mot de passe actuel"
+                                label={t("profile_current_password")}
                                 type="password"
                                 placeholder="••••••••"
                                 value={currentPassword}
@@ -219,16 +228,16 @@ export default function ProfilePage() {
                                 required
                             />
                             <Input
-                                label="Nouveau mot de passe"
+                                label={t("profile_new_password")}
                                 type="password"
                                 placeholder="••••••••"
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
-                                hint="Minimum 8 caractères."
+                                hint={t("profile_password_hint")}
                                 required
                             />
                             <Input
-                                label="Confirmer le nouveau mot de passe"
+                                label={t("profile_confirm_password")}
                                 type="password"
                                 placeholder="••••••••"
                                 value={confirmPassword}
@@ -240,7 +249,7 @@ export default function ProfilePage() {
                             {passwordSuccess && (
                                 <div className="flex items-center gap-2 text-emerald-700 text-sm p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
                                     <CheckCircle2 className="w-4 h-4 shrink-0" />
-                                    Mot de passe modifié avec succès.
+                                    {t("profile_password_changed")}
                                 </div>
                             )}
                             {passwordError && (
@@ -252,7 +261,7 @@ export default function ProfilePage() {
 
                             <Button type="submit" disabled={passwordLoading} className="w-full">
                                 {passwordLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-                                Modifier
+                                {t("profile_edit")}
                             </Button>
                         </form>
                     </CardContent>

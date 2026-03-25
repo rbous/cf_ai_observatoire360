@@ -41,10 +41,10 @@ export function Sidebar({ className }: SidebarProps) {
             {/* Mobile hamburger button */}
             <button
                 onClick={() => setMobileOpen(true)}
-                className="md:hidden fixed top-4 left-4 z-[60] p-2 rounded-lg bg-white shadow-md border border-gray-200"
+                className="md:hidden fixed top-4 left-4 z-[60] p-2 rounded-lg bg-slate-900 border border-slate-700"
                 aria-label="Ouvrir la navigation"
             >
-                <Menu className="w-5 h-5 text-[#1A2332]" />
+                <Menu className="w-5 h-5 text-[#E2E8F0]" />
             </button>
 
             {/* Mobile overlay */}
@@ -59,7 +59,7 @@ export function Sidebar({ className }: SidebarProps) {
             <aside
                 className={cn(
                     "fixed left-0 top-16 bottom-0 z-40 w-56 flex flex-col",
-                    "bg-gradient-to-b from-[#E8F4FD] to-white border-r border-gray-200",
+                    "bg-slate-900 border-r border-slate-700",
                     "transition-transform duration-300",
                     // Mobile: hidden unless open
                     "max-md:-translate-x-full",
@@ -70,10 +70,10 @@ export function Sidebar({ className }: SidebarProps) {
                 {/* Mobile close button */}
                 <button
                     onClick={() => setMobileOpen(false)}
-                    className="md:hidden absolute top-3 right-3 p-1.5 rounded-lg hover:bg-gray-100"
+                    className="md:hidden absolute top-3 right-3 p-1.5 rounded-lg hover:bg-slate-800"
                     aria-label="Fermer la navigation"
                 >
-                    <X className="w-4 h-4 text-[#1A2332]" />
+                    <X className="w-4 h-4 text-[#E2E8F0]" />
                 </button>
 
                 <nav className="flex-1 px-3 py-5 space-y-1 overflow-y-auto">
@@ -87,8 +87,8 @@ export function Sidebar({ className }: SidebarProps) {
                                 cn(
                                     "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150",
                                     isActive
-                                        ? "bg-[#008B8B] text-white shadow-sm"
-                                        : "text-[#2A3A4E] hover:bg-[#008B8B]/10 hover:text-[#008B8B]"
+                                        ? "bg-indigo-600/20 text-indigo-400"
+                                        : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
                                 )
                             }
                         >
@@ -98,7 +98,7 @@ export function Sidebar({ className }: SidebarProps) {
                     ))}
 
                     {/* Separator */}
-                    <div className="my-2 h-px w-full bg-gray-200" />
+                    <div className="my-2 h-px w-full bg-slate-700" />
 
                     {NAV_ITEMS_SECONDARY.map(({ labelKey, href, icon: Icon, managerOnly }) => {
                         if (managerOnly && !isManager) return null;
@@ -111,8 +111,8 @@ export function Sidebar({ className }: SidebarProps) {
                                     cn(
                                         "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150",
                                         isActive
-                                            ? "bg-[#008B8B] text-white shadow-sm"
-                                            : "text-[#2A3A4E] hover:bg-[#008B8B]/10 hover:text-[#008B8B]"
+                                            ? "bg-[#6366F1] text-white shadow-none"
+                                            : "text-[#94A3B8] hover:bg-[#6366F1]/10 hover:text-[#6366F1]"
                                     )
                                 }
                             >
@@ -125,9 +125,9 @@ export function Sidebar({ className }: SidebarProps) {
 
                 {/* Bottom branding */}
                 <div className="px-4 pb-5">
-                    <div className="rounded-xl bg-[#008B8B]/8 p-3 text-center">
-                        <p className="text-xs text-[#2A3A4E]/50 font-medium">Observatoire 360</p>
-                        <p className="text-[10px] text-[#2A3A4E]/30 mt-0.5">v1.0.0</p>
+                    <div className="rounded-xl bg-[#6366F1]/8 p-3 text-center">
+                        <p className="text-xs text-[#94A3B8]/50 font-medium">Observatoire 360</p>
+                        <p className="text-[10px] text-[#94A3B8]/30 mt-0.5">v1.0.0</p>
                     </div>
                 </div>
             </aside>

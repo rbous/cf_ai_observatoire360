@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { MapContainer, TileLayer, WMSTileLayer, Marker, Popup, LayersControl, useMap } from "react-leaflet";
 import L from "leaflet";
@@ -22,6 +22,7 @@ import { BrainCircuit } from "lucide-react";
 import { MapLegend } from "./MapLegend";
 import { useAlerts } from "@/app/hooks/useAlerts";
 import { LoadingSpinner } from "@/app/components/shared/LoadingSpinner";
+import { useLanguage } from "@/app/hooks/useLanguage";
 
 const RISK_COLORS: Record<RiskLevel, string> = {
     high: "#DC2626",
@@ -44,12 +45,6 @@ function createCircleIcon(color: string): L.DivIcon {
         iconAnchor: [10, 10],
     });
 }
-
-const RISK_LABELS: Record<RiskLevel, string> = {
-    high: "Élevé",
-    medium: "Moyen",
-    low: "Faible",
-};
 
 const WMS_OPTIONS = {
     format: "image/png" as const,
@@ -82,6 +77,13 @@ function FitToAlerts({ alerts }: { alerts: { latitude: number; longitude: number
 export function MapView({ className }: MapViewProps) {
     const navigate = useNavigate();
     const { alerts, isLoading, error } = useAlerts();
+    const { t } = useLanguage();
+
+    const RISK_LABELS: Record<RiskLevel, string> = {
+        high: t("risk_high"),
+        medium: t("risk_medium"),
+        low: t("risk_low"),
+    };
 
     // Ensure Leaflet container fills its parent
     useEffect(() => {
@@ -161,7 +163,7 @@ export function MapView({ className }: MapViewProps) {
                         <Popup>
                             <div className="p-1 min-w-[180px]">
                                 <div className="flex items-center justify-between mb-1.5">
-                                    <span className="text-xs font-bold text-[#1A2332]">{alert.id.slice(-6)}</span>
+                                    <span className="text-xs font-bold text-[#E2E8F0]">{alert.id.slice(-6)}</span>
                                     <div className="flex items-center gap-1">
                                         <span
                                             className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
@@ -175,7 +177,7 @@ export function MapView({ className }: MapViewProps) {
                                         {alert.scanJobId !== null && (
                                             <span
                                                 className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-                                                style={{ background: "#008B8B", color: "white" }}
+                                                style={{ background: "#6366F1", color: "white" }}
                                             >
                                                 <BrainCircuit style={{ width: "10px", height: "10px" }} />
                                                 IA
@@ -183,13 +185,13 @@ export function MapView({ className }: MapViewProps) {
                                         )}
                                     </div>
                                 </div>
-                                <p className="text-xs text-[#2A3A4E] font-medium mb-0.5">{alert.address ?? "Adresse inconnue"}</p>
-                                <p className="text-[11px] text-[#2A3A4E]/60 mb-2">{ALERT_TYPE_LABELS[alert.type]}</p>
+                                <p className="text-xs text-[#94A3B8] font-medium mb-0.5">{alert.address ?? t("map_unknown_address")}</p>
+                                <p className="text-[11px] text-[#94A3B8]/60 mb-2">{ALERT_TYPE_LABELS[alert.type]}</p>
                                 <button
                                     onClick={() => navigate(`/tableau-de-bord/alertes/${alert.id}`)}
-                                    className="w-full text-xs bg-[#008B8B] text-white px-3 py-1.5 rounded-lg font-medium hover:bg-[#006666] transition-colors"
+                                    className="w-full text-xs bg-[#6366F1] text-white px-3 py-1.5 rounded-lg font-medium hover:bg-[#4F46E5] transition-colors"
                                 >
-                                    Voir le détail
+                                    {t("map_view_detail")}
                                 </button>
                             </div>
                         </Popup>
@@ -202,8 +204,8 @@ export function MapView({ className }: MapViewProps) {
 
             {/* Loading overlay */}
             {isLoading && (
-                <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-white/60">
-                    <LoadingSpinner text="Chargement des alertes..." />
+                <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-slate-900/60">
+                    <LoadingSpinner text={t("map_loading")} />
                 </div>
             )}
 

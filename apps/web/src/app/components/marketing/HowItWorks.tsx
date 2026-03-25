@@ -16,7 +16,7 @@ const STEPS: Step[] = [
         id: 1,
         title: "SURVEILLANCE",
         icon: Satellite,
-        color: "#008B8B",
+        color: "#6366F1",
         popupItems: [
             "Images satellite",
             "Imagerie haute définition",
@@ -27,7 +27,7 @@ const STEPS: Step[] = [
         id: 2,
         title: "DÉTECTION IA",
         icon: BrainCircuit,
-        color: "#006666",
+        color: "#4F46E5",
         popupItems: [
             "Dernière technologie",
             "Comparaison des imageries",
@@ -78,14 +78,14 @@ function StepCard({ step, index, isActive, onToggle }: StepCardProps) {
             className="relative flex flex-col items-center"
         >
             {/* Step number */}
-            <div className="text-xs font-bold text-[#2A3A4E]/40 mb-2 tracking-widest">
+            <div className="text-xs font-bold text-[#94A3B8]/40 mb-2 tracking-widest">
                 ÉTAPE {step.id}
             </div>
 
             {/* Card */}
             <button
                 onClick={onToggle}
-                className="relative group flex flex-col items-center gap-3 p-6 rounded-2xl bg-white border-2 transition-all duration-300 cursor-pointer w-full max-w-[200px]"
+                className="relative group flex flex-col items-center gap-3 p-6 rounded-2xl bg-slate-900 border-2 transition-all duration-300 cursor-pointer w-full max-w-[200px]"
                 style={{
                     borderColor: isActive ? step.color : "transparent",
                     boxShadow: isActive
@@ -101,7 +101,7 @@ function StepCard({ step, index, isActive, onToggle }: StepCardProps) {
                     <Icon className="w-8 h-8" style={{ color: step.color }} />
                 </div>
 
-                <h3 className="text-sm font-black text-[#1A2332] tracking-wide text-center">
+                <h3 className="text-sm font-black text-[#E2E8F0] tracking-wide text-center">
                     {step.title}
                 </h3>
 
@@ -120,15 +120,15 @@ function StepCard({ step, index, isActive, onToggle }: StepCardProps) {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -8, scale: 0.95 }}
                     transition={{ duration: 0.2 }}
-                    className="absolute top-full mt-3 z-20 w-56 rounded-xl bg-white shadow-xl border border-gray-100 p-4"
+                    className="absolute top-full mt-3 z-20 w-56 rounded-xl bg-slate-900 shadow-none border border-slate-800 p-4"
                     style={{ boxShadow: `0 8px 30px ${step.color}25` }}
                 >
                     <div
-                        className="w-3 h-3 bg-white border-l border-t border-gray-100 absolute -top-1.5 left-1/2 -translate-x-1/2 rotate-45"
+                        className="w-3 h-3 bg-slate-900 border-l border-t border-slate-800 absolute -top-1.5 left-1/2 -translate-x-1/2 rotate-45"
                     />
                     <ul className="space-y-2">
                         {step.popupItems.map((item) => (
-                            <li key={item} className="flex items-start gap-2 text-sm text-[#2A3A4E]">
+                            <li key={item} className="flex items-start gap-2 text-sm text-[#94A3B8]">
                                 <span style={{ color: step.color }} className="mt-0.5 shrink-0">✓</span>
                                 {item}
                             </li>
@@ -153,7 +153,7 @@ export default function HowItWorks() {
     };
 
     return (
-        <section id="comment-ca-marche" className="py-24 lg:py-32 bg-gradient-to-b from-white to-[#f0fafa]">
+        <section id="comment-ca-marche" className="py-24 lg:py-32" style={{ background: "#0F172A" }}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <motion.div
@@ -163,19 +163,19 @@ export default function HowItWorks() {
                     transition={{ duration: 0.6 }}
                     className="text-center mb-16"
                 >
-                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black uppercase text-[#1A2332] mb-4">
+                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black uppercase text-[#E2E8F0] mb-4">
                         COMMENT ÇA MARCHE?
                     </h2>
-                    <p className="text-lg text-[#2A3A4E]/70 max-w-xl mx-auto">
+                    <p className="text-lg text-[#94A3B8]/70 max-w-xl mx-auto">
                         Une technologie simple, une valeur concrète
                     </p>
-                    <div className="mt-4 w-16 h-1 bg-[#008B8B] mx-auto rounded-full" />
+                    <div className="mt-4 w-16 h-1 bg-[#6366F1] mx-auto rounded-full" />
                 </motion.div>
 
                 {/* Steps grid */}
                 <div className="relative">
                     {/* Dashed connecting line (desktop) */}
-                    <div className="hidden lg:block absolute top-[88px] left-[calc(12.5%+40px)] right-[calc(12.5%+40px)] h-0 border-t-2 border-dashed border-[#008B8B]/30 z-0" />
+                    <div className="hidden lg:block absolute top-[88px] left-[calc(12.5%+40px)] right-[calc(12.5%+40px)] h-0 border-t-2 border-dashed border-[#6366F1]/30 z-0" />
 
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-4 relative z-10 pb-24">
                         {STEPS.map((step, index) => (
@@ -202,7 +202,7 @@ export default function HowItWorks() {
                         variant="accent"
                         size="xl"
                         onClick={handleDemoClick}
-                        className="font-bold tracking-wide uppercase shadow-lg shadow-[#D4A843]/30"
+                        className="font-bold tracking-wide uppercase shadow-none shadow-[#D4A843]/30"
                     >
                         DÉMO GRATUITE
                     </Button>

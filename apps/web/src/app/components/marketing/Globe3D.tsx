@@ -65,7 +65,7 @@ function EarthSphere() {
             {/* Outer glow */}
             <Sphere args={[1.65, 32, 32]}>
                 <meshPhongMaterial
-                    color="#008B8B"
+                    color="#6366F1"
                     transparent
                     opacity={0.04}
                     side={2}
@@ -78,7 +78,7 @@ function EarthSphere() {
 function GlobeFallback() {
     return (
         <div className="w-full h-full flex items-center justify-center">
-            <div className="w-48 h-48 rounded-full bg-gradient-to-br from-[#1a6b8a] to-[#008B8B] animate-pulse opacity-60" />
+            <div className="w-48 h-48 rounded-full bg-gradient-to-br from-[#1a6b8a] to-[#6366F1] animate-pulse opacity-60" />
         </div>
     );
 }
@@ -95,7 +95,7 @@ export default function Globe3D() {
                     <ambientLight intensity={0.4} />
                     <pointLight position={[5, 5, 5]} intensity={1.2} color="#ffffff" />
                     <pointLight position={[-5, -2, -3]} intensity={0.3} color="#66ccff" />
-                    <pointLight position={[0, -5, 2]} intensity={0.2} color="#008B8B" />
+                    <pointLight position={[0, -5, 2]} intensity={0.2} color="#6366F1" />
                     <EarthSphere />
                 </Canvas>
             </Suspense>

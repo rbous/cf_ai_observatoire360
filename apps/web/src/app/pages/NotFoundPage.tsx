@@ -7,7 +7,7 @@ export default function NotFoundPage() {
     return (
         <div
             className="min-h-screen flex items-center justify-center px-4"
-            style={{ background: "linear-gradient(160deg, #B3E5FC 0%, #e0f7fa 40%, #ffffff 100%)" }}
+            style={{ background: "#0F172A" }}
         >
             <div className="text-center max-w-lg">
                 <motion.div
@@ -20,7 +20,7 @@ export default function NotFoundPage() {
                         <span
                             className="text-[160px] sm:text-[200px] font-black leading-none select-none"
                             style={{
-                                background: "linear-gradient(135deg, #008B8B, #B3E5FC)",
+                                background: "linear-gradient(135deg, #6366F1, #1E293B)",
                                 WebkitBackgroundClip: "text",
                                 WebkitTextFillColor: "transparent",
                                 backgroundClip: "text",
@@ -35,10 +35,10 @@ export default function NotFoundPage() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.2 }}
                     >
-                        <h1 className="text-2xl sm:text-3xl font-black uppercase text-[#1A2332] mb-3">
+                        <h1 className="text-2xl sm:text-3xl font-black uppercase text-[#E2E8F0] mb-3">
                             Page introuvable
                         </h1>
-                        <p className="text-[#2A3A4E]/70 mb-8 leading-relaxed">
+                        <p className="text-[#94A3B8]/70 mb-8 leading-relaxed">
                             Oops! La page que vous cherchez n'existe pas ou a été déplacée.
                             Retournez à l'accueil pour continuer votre exploration.
                         </p>
@@ -52,7 +52,7 @@ export default function NotFoundPage() {
                             </Link>
                             <button
                                 onClick={() => window.history.back()}
-                                className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-xl border-2 border-[#008B8B] text-[#008B8B] font-semibold hover:bg-[#008B8B] hover:text-white transition-colors"
+                                className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-xl border-2 border-[#6366F1] text-[#6366F1] font-semibold hover:bg-[#6366F1] hover:text-white transition-colors"
                             >
                                 <ArrowLeft className="w-4 h-4" />
                                 Page précédente

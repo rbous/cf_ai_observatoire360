@@ -19,7 +19,7 @@ export default function ForgotPasswordPage() {
     return (
         <div
             className="min-h-screen flex items-center justify-center px-4 py-12"
-            style={{ background: "linear-gradient(160deg, #B3E5FC 0%, #e0f7fa 40%, #ffffff 100%)" }}
+            style={{ background: "#0F172A" }}
         >
             <motion.div
                 initial={{ opacity: 0, y: 30 }}
@@ -30,29 +30,29 @@ export default function ForgotPasswordPage() {
                 {/* Logo */}
                 <div className="text-center mb-8">
                     <Link to="/" className="inline-flex items-center gap-2">
-                        <div className="w-10 h-10 rounded-full bg-[#008B8B] flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full bg-[#6366F1] flex items-center justify-center">
                             <span className="text-white font-bold text-sm">O</span>
                         </div>
-                        <span className="font-bold text-xl tracking-tight text-[#1A2332]">
-                            Observatoire <span className="text-[#008B8B]">360</span>
+                        <span className="font-bold text-xl tracking-tight text-[#E2E8F0]">
+                            Observatoire <span className="text-[#6366F1]">360</span>
                         </span>
                     </Link>
-                    <h1 className="mt-6 text-2xl font-black uppercase text-[#1A2332]">
+                    <h1 className="mt-6 text-2xl font-black uppercase text-[#E2E8F0]">
                         MOT DE PASSE OUBLIÉ
                     </h1>
-                    <p className="text-sm text-[#2A3A4E]/60 mt-1">
+                    <p className="text-sm text-[#94A3B8]/60 mt-1">
                         Entrez votre courriel pour recevoir un lien de réinitialisation
                     </p>
                 </div>
 
-                <div className="bg-white rounded-3xl shadow-xl border border-[#008B8B]/10 p-8">
+                <div className="bg-slate-900 rounded-3xl border border-slate-700 p-8">
                     {isSubmitted ? (
                         <div className="text-center py-4">
                             <div className="w-16 h-16 rounded-full bg-[#10B981]/10 flex items-center justify-center mx-auto mb-4">
                                 <CheckCircle2 className="w-8 h-8 text-[#10B981]" />
                             </div>
-                            <h3 className="font-bold text-[#1A2332] mb-2">Courriel envoyé!</h3>
-                            <p className="text-sm text-[#2A3A4E]/70">
+                            <h3 className="font-bold text-[#E2E8F0] mb-2">Courriel envoyé!</h3>
+                            <p className="text-sm text-[#94A3B8]/70">
                                 Si un compte existe pour {email}, vous recevrez un lien de réinitialisation sous peu.
                             </p>
                         </div>
@@ -81,7 +81,7 @@ export default function ForgotPasswordPage() {
                 <div className="text-center mt-6">
                     <Link
                         to="/connexion"
-                        className="inline-flex items-center gap-1.5 text-sm text-[#008B8B] hover:underline font-medium"
+                        className="inline-flex items-center gap-1.5 text-sm text-[#6366F1] hover:underline font-medium"
                     >
                         <ArrowLeft className="w-4 h-4" />
                         Retour à la connexion

@@ -4,6 +4,7 @@ import { WMS_LAYERS } from "@observatoire360/shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
 import { cn } from "@/app/lib/cn";
+import { useLanguage } from "@/app/hooks/useLanguage";
 
 type LayerKey = keyof typeof WMS_LAYERS;
 
@@ -13,24 +14,6 @@ interface LayerState {
 }
 
 type LayerStates = Record<LayerKey, LayerState>;
-
-const LAYER_CATEGORIES: { label: string; icon: React.ComponentType<{ className?: string }>; keys: LayerKey[] }[] = [
-    {
-        label: "Cadastre et limites",
-        icon: Map,
-        keys: ["cadastre", "limites_municipales", "adresses"],
-    },
-    {
-        label: "Environnement",
-        icon: Droplets,
-        keys: ["hydrographie", "ecoforestiere", "courbes_niveau"],
-    },
-    {
-        label: "Imagerie",
-        icon: Eye,
-        keys: ["orthophotos"],
-    },
-];
 
 function buildInitialState(): LayerStates {
     const state: Partial<LayerStates> = {};
@@ -46,6 +29,25 @@ function buildInitialState(): LayerStates {
 export function LayersPanel() {
     const [layers, setLayers] = useState<LayerStates>(buildInitialState);
     const [applied, setApplied] = useState(false);
+    const { t } = useLanguage();
+
+    const LAYER_CATEGORIES: { label: string; icon: React.ComponentType<{ className?: string }>; keys: LayerKey[] }[] = [
+        {
+            label: t("layers_cat_cadastre"),
+            icon: Map,
+            keys: ["cadastre", "limites_municipales", "adresses"],
+        },
+        {
+            label: t("layers_cat_environment"),
+            icon: Droplets,
+            keys: ["hydrographie", "ecoforestiere", "courbes_niveau"],
+        },
+        {
+            label: t("layers_cat_imagery"),
+            icon: Eye,
+            keys: ["orthophotos"],
+        },
+    ];
 
     function toggleLayer(key: LayerKey) {
         setLayers((prev) => ({
@@ -73,9 +75,9 @@ export function LayersPanel() {
     return (
         <div className="p-4 md:p-6 space-y-6 max-w-3xl mx-auto">
             <div>
-                <h1 className="text-xl font-black uppercase text-[#1A2332]">Gestion des calques</h1>
-                <p className="text-sm text-[#2A3A4E]/60 mt-0.5">
-                    Activez ou désactivez les calques WMS et ajustez leur opacité.
+                <h1 className="text-xl font-black uppercase text-[#E2E8F0]">{t("layers_title")}</h1>
+                <p className="text-sm text-[#94A3B8]/60 mt-0.5">
+                    {t("layers_subtitle")}
                 </p>
             </div>
 
@@ -84,18 +86,18 @@ export function LayersPanel() {
                 "flex items-center justify-between p-3 rounded-xl border transition-all",
                 applied
                     ? "bg-green-50 border-green-200"
-                    : "bg-[#008B8B]/5 border-[#008B8B]/20"
+                    : "bg-[#6366F1]/5 border-[#6366F1]/20"
             )}>
                 <div>
-                    <p className="text-sm font-semibold text-[#1A2332]">
-                        {activeCount} calque{activeCount !== 1 ? "s" : ""} actif{activeCount !== 1 ? "s" : ""}
+                    <p className="text-sm font-semibold text-[#E2E8F0]">
+                        {activeCount} {activeCount !== 1 ? t("layers_active_count_many") : t("layers_active_count_one")}
                     </p>
-                    <p className="text-xs text-[#2A3A4E]/50">
-                        {applied ? "Calques appliqués sur la carte" : "Des modifications non appliquées existent"}
+                    <p className="text-xs text-[#94A3B8]/50">
+                        {applied ? t("layers_applied") : t("layers_pending")}
                     </p>
                 </div>
                 <Button onClick={handleApply} size="sm" className={applied ? "bg-green-600 hover:bg-green-700" : ""}>
-                    {applied ? "Appliqué ✓" : "Appliquer"}
+                    {applied ? t("layers_applied_check") : t("layers_apply")}
                 </Button>
             </div>
 
@@ -104,8 +106,8 @@ export function LayersPanel() {
                 {LAYER_CATEGORIES.map(({ label, icon: Icon, keys }) => (
                     <Card key={label}>
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-bold text-[#1A2332] flex items-center gap-2">
-                                <Icon className="w-4 h-4 text-[#008B8B]" />
+                            <CardTitle className="text-sm font-bold text-[#E2E8F0] flex items-center gap-2">
+                                <Icon className="w-4 h-4 text-[#6366F1]" />
                                 {label}
                             </CardTitle>
                         </CardHeader>
@@ -119,21 +121,21 @@ export function LayersPanel() {
                                         className={cn(
                                             "p-3 rounded-xl border transition-all",
                                             state.enabled
-                                                ? "bg-[#008B8B]/5 border-[#008B8B]/20"
-                                                : "bg-gray-50 border-gray-100"
+                                                ? "bg-[#6366F1]/5 border-[#6366F1]/20"
+                                                : "bg-slate-950 border-slate-800"
                                         )}
                                     >
                                         <div className="flex items-center justify-between mb-2">
                                             <div className="flex items-center gap-2">
                                                 <div
                                                     className={cn(
-                                                        "w-3 h-3 rounded-full border-2 border-white shadow-sm",
-                                                        state.enabled ? "bg-[#008B8B]" : "bg-gray-300"
+                                                        "w-3 h-3 rounded-full border-2 border-white shadow-none",
+                                                        state.enabled ? "bg-[#6366F1]" : "bg-gray-300"
                                                     )}
                                                 />
                                                 <span className={cn(
                                                     "text-sm font-medium",
-                                                    state.enabled ? "text-[#1A2332]" : "text-[#2A3A4E]/50"
+                                                    state.enabled ? "text-[#E2E8F0]" : "text-[#94A3B8]/50"
                                                 )}>
                                                     {layer.label}
                                                 </span>
@@ -144,14 +146,14 @@ export function LayersPanel() {
                                                 onClick={() => toggleLayer(key)}
                                                 className={cn(
                                                     "relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none",
-                                                    state.enabled ? "bg-[#008B8B]" : "bg-gray-300"
+                                                    state.enabled ? "bg-[#6366F1]" : "bg-gray-300"
                                                 )}
                                                 role="switch"
                                                 aria-checked={state.enabled}
                                             >
                                                 <span
                                                     className={cn(
-                                                        "absolute left-0.5 inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform",
+                                                        "absolute left-0.5 inline-block h-4 w-4 rounded-full bg-slate-900 shadow-none transition-transform",
                                                         state.enabled ? "translate-x-4" : "translate-x-0"
                                                     )}
                                                 />
@@ -161,8 +163,8 @@ export function LayersPanel() {
                                         {/* Opacity slider */}
                                         {state.enabled && (
                                             <div className="flex items-center gap-3 mt-1">
-                                                <span className="text-[10px] text-[#2A3A4E]/50 font-medium w-14 shrink-0">
-                                                    Opacité
+                                                <span className="text-[10px] text-[#94A3B8]/50 font-medium w-14 shrink-0">
+                                                    {t("layers_opacity")}
                                                 </span>
                                                 <input
                                                     type="range"
@@ -170,9 +172,9 @@ export function LayersPanel() {
                                                     max={100}
                                                     value={state.opacity}
                                                     onChange={(e) => setOpacity(key, Number(e.target.value))}
-                                                    className="flex-1 h-1.5 accent-[#008B8B] cursor-pointer"
+                                                    className="flex-1 h-1.5 accent-[#6366F1] cursor-pointer"
                                                 />
-                                                <span className="text-[10px] text-[#2A3A4E]/50 font-mono w-8 text-right shrink-0">
+                                                <span className="text-[10px] text-[#94A3B8]/50 font-mono w-8 text-right shrink-0">
                                                     {state.opacity}%
                                                 </span>
                                             </div>
@@ -186,15 +188,14 @@ export function LayersPanel() {
             </div>
 
             {/* Source info */}
-            <Card className="bg-gray-50 border-gray-100">
+            <Card className="bg-slate-950 border-slate-800">
                 <CardContent className="pt-4 pb-4">
                     <div className="flex items-start gap-2">
-                        <Layers className="w-4 h-4 text-[#2A3A4E]/40 shrink-0 mt-0.5" />
+                        <Layers className="w-4 h-4 text-[#94A3B8]/40 shrink-0 mt-0.5" />
                         <div>
-                            <p className="text-xs font-semibold text-[#2A3A4E]/60">Source des données</p>
-                            <p className="text-xs text-[#2A3A4E]/40 mt-0.5">
-                                Gouvernement du Québec — Services WMS Géoinformation
-                                (ws.mapserver.mern.gouv.qc.ca)
+                            <p className="text-xs font-semibold text-[#94A3B8]/60">{t("layers_source_title")}</p>
+                            <p className="text-xs text-[#94A3B8]/40 mt-0.5">
+                                {t("layers_source_desc")}
                             </p>
                         </div>
                     </div>

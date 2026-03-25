@@ -16,12 +16,12 @@ import {
 import { FileText, AlertTriangle, TrendingUp, CheckCircle, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
 import type { ReportStats } from "@observatoire360/shared";
-import { ALERT_TYPE_LABELS, RISK_LEVEL_LABELS } from "@observatoire360/shared";
 import { useApi } from "@/app/hooks/useApi";
+import { useLanguage } from "@/app/hooks/useLanguage";
 
 // Color maps for pie chart types and risk levels
 const TYPE_COLORS: Record<string, string> = {
-    construction: "#008B8B",
+    construction: "#6366F1",
     extension: "#D4A843",
     annexe: "#6366F1",
     piscine: "#10B981",
@@ -35,13 +35,14 @@ const RISK_COLORS: Record<string, string> = {
 
 export function ReportsView() {
     const { data: stats, isLoading, error } = useApi<ReportStats>("/reports/stats");
+    const { t } = useLanguage();
 
     if (isLoading) {
         return (
             <div className="p-4 md:p-6 flex items-center justify-center min-h-[300px]">
-                <div className="flex items-center gap-3 text-[#2A3A4E]/60">
-                    <Loader2 className="w-5 h-5 animate-spin text-[#008B8B]" />
-                    <span className="text-sm font-medium">Chargement des statistiques…</span>
+                <div className="flex items-center gap-3 text-[#94A3B8]/60">
+                    <Loader2 className="w-5 h-5 animate-spin text-[#6366F1]" />
+                    <span className="text-sm font-medium">{t("reports_loading")}</span>
                 </div>
             </div>
         );
@@ -52,36 +53,49 @@ export function ReportsView() {
             <div className="p-4 md:p-6">
                 <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
                     <AlertTriangle className="w-5 h-5 shrink-0" />
-                    <span>{error ?? "Impossible de charger les statistiques."}</span>
+                    <span>{error ?? t("reports_error")}</span>
                 </div>
             </div>
         );
     }
 
+    const ALERT_TYPE_LABELS_I18N: Record<string, string> = {
+        construction: t("type_construction"),
+        extension: t("type_extension"),
+        annexe: t("type_annexe"),
+        piscine: t("type_piscine"),
+    };
+
+    const RISK_LEVEL_LABELS_I18N: Record<string, string> = {
+        high: t("risk_high"),
+        medium: t("risk_medium"),
+        low: t("risk_low"),
+    };
+
     const kpiCards = [
         {
-            label: "Total alertes",
+            label: t("reports_total_alerts"),
             value: String(stats.totalAlerts),
             icon: AlertTriangle,
-            color: "#008B8B",
-            bg: "#008B8B15",
+            color: "#6366F1",
+            bg: "#6366F115",
         },
         {
-            label: "Infractions confirmées",
+            label: t("reports_confirmed"),
             value: String(stats.confirmedInfractions),
             icon: FileText,
             color: "#DC2626",
             bg: "#DC262615",
         },
         {
-            label: "Taux de régularisation",
+            label: t("reports_regularization"),
             value: `${Math.round(stats.regularizationRate)} %`,
             icon: TrendingUp,
             color: "#10B981",
             bg: "#10B98115",
         },
         {
-            label: "Inspections complétées",
+            label: t("reports_inspections"),
             value: String(stats.inspectionsDone),
             icon: CheckCircle,
             color: "#D4A843",
@@ -90,13 +104,13 @@ export function ReportsView() {
     ];
 
     const byTypeData = stats.alertsByType.map((entry) => ({
-        name: ALERT_TYPE_LABELS[entry.type] ?? entry.type,
+        name: ALERT_TYPE_LABELS_I18N[entry.type] ?? entry.type,
         value: entry.count,
         color: TYPE_COLORS[entry.type] ?? "#6366F1",
     }));
 
     const byRiskData = stats.alertsByRiskLevel.map((entry) => ({
-        level: RISK_LEVEL_LABELS[entry.level] ?? entry.level,
+        level: RISK_LEVEL_LABELS_I18N[entry.level] ?? entry.level,
         count: entry.count,
         fill: RISK_COLORS[entry.level] ?? "#6366F1",
     }));
@@ -104,8 +118,8 @@ export function ReportsView() {
     return (
         <div className="p-4 md:p-6 space-y-6 max-w-6xl mx-auto">
             <div>
-                <h1 className="text-xl font-black uppercase text-[#1A2332]">Rapports & Statistiques</h1>
-                <p className="text-sm text-[#2A3A4E]/60 mt-0.5">Vue d'ensemble du territoire</p>
+                <h1 className="text-xl font-black uppercase text-[#E2E8F0]">{t("reports_title")}</h1>
+                <p className="text-sm text-[#94A3B8]/60 mt-0.5">{t("reports_subtitle")}</p>
             </div>
 
             {/* KPI cards */}
@@ -117,7 +131,7 @@ export function ReportsView() {
                             <CardContent className="pt-5 pb-4">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="text-xs text-[#2A3A4E]/60 font-medium">{kpi.label}</p>
+                                        <p className="text-xs text-[#94A3B8]/60 font-medium">{kpi.label}</p>
                                         <p className="text-2xl font-black mt-0.5" style={{ color: kpi.color }}>
                                             {kpi.value}
                                         </p>
@@ -135,11 +149,11 @@ export function ReportsView() {
                 })}
             </div>
 
-            {/* Line chart — détections par mois */}
+            {/* Line chart — detections per month */}
             <Card>
                 <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-bold text-[#1A2332]">
-                        Détections par mois (12 derniers mois)
+                    <CardTitle className="text-sm font-bold text-[#E2E8F0]">
+                        {t("reports_detections_by_month")}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -150,14 +164,14 @@ export function ReportsView() {
                             <YAxis tick={{ fontSize: 11, fill: "#6b7280" }} allowDecimals={false} />
                             <Tooltip
                                 contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e5e7eb" }}
-                                formatter={(val: number) => [`${val} alerte(s)`, "Détections"]}
+                                formatter={(val: number) => [`${val} ${t("reports_alert_count")}`, t("reports_detections")]}
                             />
                             <Line
                                 type="monotone"
                                 dataKey="count"
-                                stroke="#008B8B"
+                                stroke="#6366F1"
                                 strokeWidth={2.5}
-                                dot={{ fill: "#008B8B", r: 4 }}
+                                dot={{ fill: "#6366F1", r: 4 }}
                                 activeDot={{ r: 6 }}
                             />
                         </LineChart>
@@ -170,7 +184,7 @@ export function ReportsView() {
                 {/* Pie — by type */}
                 <Card>
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-bold text-[#1A2332]">Détections par type</CardTitle>
+                        <CardTitle className="text-sm font-bold text-[#E2E8F0]">{t("reports_detections_by_type")}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <ResponsiveContainer width="100%" height={200}>
@@ -190,7 +204,7 @@ export function ReportsView() {
                                 </Pie>
                                 <Tooltip
                                     contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e5e7eb" }}
-                                    formatter={(val: number) => [`${val} alertes`, ""]}
+                                    formatter={(val: number) => [`${val} ${t("reports_alert_count")}`, ""]}
                                 />
                                 <Legend
                                     iconType="circle"
@@ -205,7 +219,7 @@ export function ReportsView() {
                 {/* Bar — by risk level */}
                 <Card>
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-bold text-[#1A2332]">Détections par niveau de risque</CardTitle>
+                        <CardTitle className="text-sm font-bold text-[#E2E8F0]">{t("reports_detections_by_risk")}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <ResponsiveContainer width="100%" height={200}>
@@ -215,7 +229,7 @@ export function ReportsView() {
                                 <YAxis tick={{ fontSize: 11, fill: "#6b7280" }} allowDecimals={false} />
                                 <Tooltip
                                     contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e5e7eb" }}
-                                    formatter={(val: number) => [`${val} alertes`, "Détections"]}
+                                    formatter={(val: number) => [`${val} ${t("reports_alert_count")}`, t("reports_detections")]}
                                 />
                                 <Bar dataKey="count" radius={[6, 6, 0, 0]}>
                                     {byRiskData.map((entry) => (

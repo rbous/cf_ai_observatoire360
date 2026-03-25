@@ -22,7 +22,7 @@ export default function About() {
     };
 
     return (
-        <section id="a-propos" className="py-24 lg:py-32 bg-gradient-to-b from-[#f0fafa] to-white">
+        <section id="a-propos" className="py-24 lg:py-32" style={{ background: "#0F172A" }}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <motion.div
@@ -32,10 +32,10 @@ export default function About() {
                     transition={{ duration: 0.6 }}
                     className="text-center mb-16"
                 >
-                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black uppercase text-[#1A2332] mb-4">
+                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black uppercase text-[#E2E8F0] mb-4">
                         À PROPOS
                     </h2>
-                    <div className="mt-4 w-16 h-1 bg-[#008B8B] mx-auto rounded-full" />
+                    <div className="mt-4 w-16 h-1 bg-[#6366F1] mx-auto rounded-full" />
                 </motion.div>
 
                 {/* Founder card */}
@@ -46,15 +46,15 @@ export default function About() {
                     transition={{ duration: 0.7, delay: 0.1 }}
                     className="max-w-3xl mx-auto"
                 >
-                    <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-[#008B8B]/10">
+                    <div className="bg-slate-900 rounded-3xl shadow-none overflow-hidden border border-[#6366F1]/10">
                         <div className="flex flex-col md:flex-row">
                             {/* Image placeholder */}
-                            <div className="md:w-64 lg:w-80 flex-shrink-0 bg-gradient-to-br from-[#008B8B]/10 to-[#B3E5FC] flex items-center justify-center py-12 md:py-0">
+                            <div className="md:w-64 lg:w-80 flex-shrink-0 bg-gradient-to-br from-[#6366F1]/10 to-[#0F172A] flex items-center justify-center py-12 md:py-0">
                                 <div className="flex flex-col items-center gap-4">
                                     {/* Gray circle with user icon */}
-                                    <div className="w-32 h-32 rounded-full bg-gray-300 flex items-center justify-center shadow-inner">
+                                    <div className="w-32 h-32 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center">
                                         <svg
-                                            className="w-16 h-16 text-gray-500"
+                                            className="w-16 h-16 text-slate-400"
                                             fill="currentColor"
                                             viewBox="0 0 24 24"
                                             aria-hidden="true"
@@ -68,20 +68,20 @@ export default function About() {
                             {/* Content */}
                             <div className="flex-1 p-8 lg:p-10 flex flex-col justify-center">
                                 {/* Quote marks */}
-                                <div className="text-5xl font-black text-[#008B8B]/20 leading-none mb-2 font-serif">
+                                <div className="text-5xl font-black text-[#6366F1]/20 leading-none mb-2 font-serif">
                                     "
                                 </div>
 
-                                <blockquote className="text-lg text-[#2A3A4E] leading-relaxed mb-6 italic">
+                                <blockquote className="text-lg text-[#94A3B8] leading-relaxed mb-6 italic">
                                     Ancien inspecteur pendant plusieurs années, j'ai créé l'outil
                                     que j'aurais voulu avoir. Parlons-en!
                                 </blockquote>
 
                                 <div className="mb-6">
-                                    <p className="text-[#1A2332] font-black text-lg uppercase tracking-wide">
+                                    <p className="text-[#E2E8F0] font-black text-lg uppercase tracking-wide">
                                         WALID BENARBIA
                                     </p>
-                                    <p className="text-[#008B8B] font-semibold text-sm tracking-widest">
+                                    <p className="text-[#6366F1] font-semibold text-sm tracking-widest">
                                         — FONDATEUR
                                     </p>
                                 </div>
@@ -95,7 +95,7 @@ export default function About() {
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             aria-label={label}
-                                            className="w-9 h-9 rounded-full bg-[#1A2332] text-white flex items-center justify-center hover:bg-[#008B8B] transition-colors duration-200"
+                                            className="w-9 h-9 rounded-full bg-[#E2E8F0] text-white flex items-center justify-center hover:bg-[#6366F1] transition-colors duration-200"
                                         >
                                             <Icon className="w-4 h-4" />
                                         </a>

@@ -70,7 +70,7 @@ export default function LoginPage() {
     return (
         <div
             className="min-h-screen flex items-center justify-center px-4 py-12"
-            style={{ background: "linear-gradient(160deg, #B3E5FC 0%, #e0f7fa 40%, #ffffff 100%)" }}
+            style={{ background: "#0F172A" }}
         >
             <motion.div
                 initial={{ opacity: 0, y: 30 }}
@@ -81,26 +81,26 @@ export default function LoginPage() {
                 {/* Logo */}
                 <div className="text-center mb-8">
                     <Link to="/" className="inline-flex items-center gap-2 group">
-                        <div className="w-10 h-10 rounded-full bg-[#008B8B] flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full bg-[#6366F1] flex items-center justify-center">
                             <span className="text-white font-bold text-sm">O</span>
                         </div>
-                        <span className="font-bold text-xl tracking-tight text-[#1A2332]">
-                            Observatoire <span className="text-[#008B8B]">360</span>
+                        <span className="font-bold text-xl tracking-tight text-[#E2E8F0]">
+                            Observatoire <span className="text-[#6366F1]">360</span>
                         </span>
                     </Link>
-                    <h1 className="mt-6 text-2xl font-black uppercase text-[#1A2332]">
+                    <h1 className="mt-6 text-2xl font-black uppercase text-[#E2E8F0]">
                         {t("login_title")}
                     </h1>
-                    <p className="text-sm text-[#2A3A4E]/60 mt-1">
+                    <p className="text-sm text-[#94A3B8]/60 mt-1">
                         {t("login_subtitle")}
                     </p>
                 </div>
 
                 {/* Form card */}
-                <div className="bg-white rounded-3xl shadow-xl border border-[#008B8B]/10 p-8">
+                <div className="bg-slate-900 rounded-3xl shadow-none border border-slate-700 p-8">
                     <form onSubmit={handleSubmit} className="space-y-5">
                         {error && (
-                            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+                            <div className="bg-red-950/40 border border-red-700/50 text-red-400 px-4 py-3 rounded-xl text-sm">
                                 {error}
                             </div>
                         )}
@@ -128,7 +128,7 @@ export default function LoginPage() {
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-3 top-8 text-gray-400 hover:text-[#008B8B] transition-colors"
+                                className="absolute right-3 top-8 text-slate-400 hover:text-[#6366F1] transition-colors"
                                 aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
                             >
                                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -138,7 +138,7 @@ export default function LoginPage() {
                         <div className="flex justify-end">
                             <Link
                                 to="/mot-de-passe-oublie"
-                                className="text-sm text-[#008B8B] hover:underline font-medium"
+                                className="text-sm text-[#6366F1] hover:underline font-medium"
                             >
                                 {t("login_forgot")}
                             </Link>
@@ -160,10 +160,10 @@ export default function LoginPage() {
                 <div className="mt-6">
                     <div className="relative mb-4">
                         <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-gray-200" />
+                            <div className="w-full border-t border-slate-700" />
                         </div>
                         <div className="relative flex justify-center text-xs uppercase">
-                            <span className="bg-transparent px-3 text-[#2A3A4E]/40 font-semibold tracking-wider">
+                            <span className="bg-transparent px-3 text-[#94A3B8]/40 font-semibold tracking-wider">
                                 {t("login_or_demo")}
                             </span>
                         </div>
@@ -175,21 +175,21 @@ export default function LoginPage() {
                                 key={city.email}
                                 onClick={() => handleDemoLogin(city.email)}
                                 disabled={demoLoading !== null}
-                                className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-gray-200 bg-white hover:border-[#008B8B]/40 hover:bg-[#008B8B]/5 transition-all text-left disabled:opacity-50"
+                                className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-slate-700 bg-slate-900 hover:border-[#6366F1]/40 hover:bg-[#6366F1]/5 transition-all text-left disabled:opacity-50"
                             >
                                 <span className="text-lg">{city.flag}</span>
                                 <div className="min-w-0">
-                                    <p className="text-xs font-semibold text-[#1A2332] truncate">
+                                    <p className="text-xs font-semibold text-[#E2E8F0] truncate">
                                         {demoLoading === city.email ? t("login_submitting") : city.label}
                                     </p>
-                                    <p className="text-[10px] text-[#2A3A4E]/40">{t("login_free_demo")}</p>
+                                    <p className="text-[10px] text-[#94A3B8]/40">{t("login_free_demo")}</p>
                                 </div>
                             </button>
                         ))}
                     </div>
                 </div>
 
-                <p className="text-center text-sm text-[#2A3A4E]/60 mt-4">
+                <p className="text-center text-sm text-[#94A3B8]/60 mt-4">
                     {t("login_no_account")}{" "}
                     <a
                         href="#contact"
@@ -197,7 +197,7 @@ export default function LoginPage() {
                             e.preventDefault();
                             window.location.href = "/#contact";
                         }}
-                        className="text-[#008B8B] hover:underline font-medium"
+                        className="text-[#6366F1] hover:underline font-medium"
                     >
                         {t("login_book_demo")}
                     </a>

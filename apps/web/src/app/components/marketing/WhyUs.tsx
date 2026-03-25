@@ -15,7 +15,7 @@ const BLOBS: BlobData[] = [
     {
         problem: "Inspections manuelles coûteuses",
         solution: "Détection automatique par satellite",
-        color: "#008B8B",
+        color: "#6366F1",
         delay: 0,
         floatY: [0, -16, 0],
         floatX: [0, 6, 0],
@@ -24,7 +24,7 @@ const BLOBS: BlobData[] = [
     {
         problem: "Constructions illégales non détectées",
         solution: "Alertes en temps réel avec preuves",
-        color: "#006666",
+        color: "#4F46E5",
         delay: 0.4,
         floatY: [0, -12, 0],
         floatX: [0, -8, 0],
@@ -33,7 +33,7 @@ const BLOBS: BlobData[] = [
     {
         problem: "Perte de revenus municipaux",
         solution: "Récupération des revenus perdus",
-        color: "#00BFBF",
+        color: "#818CF8",
         delay: 0.8,
         floatY: [0, -20, 0],
         floatX: [0, 5, 0],
@@ -101,7 +101,7 @@ function FloatingBlob({ data, index }: FloatingBlobProps) {
                                 {data.problem}
                             </p>
                         </div>
-                        <div className="w-8 h-px bg-white/40 mx-auto my-2" />
+                        <div className="w-8 h-px bg-slate-900/40 mx-auto my-2" />
                         <div>
                             <span className="text-white/60 text-xs font-semibold uppercase tracking-wide block mb-1">
                                 Solution
@@ -124,7 +124,7 @@ export default function WhyUs() {
     };
 
     return (
-        <section className="py-24 lg:py-32 bg-gradient-to-b from-[#f0fafa] to-white overflow-hidden">
+        <section className="py-24 lg:py-32 overflow-hidden" style={{ background: "#0F172A" }}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <motion.div
@@ -134,13 +134,13 @@ export default function WhyUs() {
                     transition={{ duration: 0.6 }}
                     className="text-center mb-16"
                 >
-                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black uppercase text-[#1A2332] mb-4">
+                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black uppercase text-[#E2E8F0] mb-4">
                         PKOI NOUS?
                     </h2>
-                    <p className="text-lg text-[#2A3A4E]/70 max-w-xl mx-auto">
+                    <p className="text-lg text-[#94A3B8]/70 max-w-xl mx-auto">
                         Nous transformons vos défis municipaux en opportunités grâce à la technologie satellite
                     </p>
-                    <div className="mt-4 w-16 h-1 bg-[#008B8B] mx-auto rounded-full" />
+                    <div className="mt-4 w-16 h-1 bg-[#6366F1] mx-auto rounded-full" />
                 </motion.div>
 
                 {/* Blobs grid */}
@@ -165,10 +165,10 @@ export default function WhyUs() {
                     ].map((stat) => (
                         <div
                             key={stat.label}
-                            className="text-center p-6 rounded-2xl bg-white shadow-md border border-[#008B8B]/10"
+                            className="text-center p-6 rounded-2xl bg-slate-900 border border-slate-700"
                         >
-                            <div className="text-3xl font-black text-[#008B8B] mb-2">{stat.value}</div>
-                            <div className="text-sm text-[#2A3A4E]/70">{stat.label}</div>
+                            <div className="text-3xl font-black text-[#6366F1] mb-2">{stat.value}</div>
+                            <div className="text-sm text-[#94A3B8]/70">{stat.label}</div>
                         </div>
                     ))}
                 </motion.div>
@@ -185,7 +185,7 @@ export default function WhyUs() {
                         variant="accent"
                         size="xl"
                         onClick={handleDemoClick}
-                        className="font-bold tracking-wide uppercase shadow-lg shadow-[#D4A843]/30"
+                        className="font-bold tracking-wide uppercase shadow-none shadow-[#D4A843]/30"
                     >
                         DÉMO GRATUITE
                     </Button>

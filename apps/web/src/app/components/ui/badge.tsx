@@ -8,9 +8,9 @@ const badgeVariants = cva(
         variants: {
             variant: {
                 default:
-                    "bg-[#008B8B]/10 text-[#008B8B] border border-[#008B8B]/20",
+                    "bg-[#6366F1]/10 text-[#6366F1] border border-[#6366F1]/20",
                 secondary:
-                    "bg-gray-100 text-gray-700 border border-gray-200",
+                    "bg-slate-800 text-slate-300 border border-slate-700",
                 outline:
                     "border border-current bg-transparent",
                 // Risk levels
@@ -24,7 +24,7 @@ const badgeVariants = cva(
                 active:
                     "bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20",
                 inactive:
-                    "bg-gray-100 text-gray-500 border border-gray-200",
+                    "bg-slate-800 text-slate-400 border border-slate-700",
                 pending:
                     "bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/20",
                 // Accent

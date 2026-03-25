@@ -19,6 +19,7 @@ import { API_BASE_URL } from "@/app/lib/constants";
 import type { ScanJob, PaginatedResponse } from "@observatoire360/shared";
 import { SCAN_JOB_STATUS_LABELS } from "@observatoire360/shared";
 import type { ScanJobStatus } from "@observatoire360/shared";
+import { useLanguage } from "@/app/hooks/useLanguage";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -81,6 +82,7 @@ function getDefaultEndDate(): string {
 
 export default function ScansPage() {
     const { user } = useAuth();
+    const { t } = useLanguage();
     const isManager = user?.role === "manager";
 
     const { data: scansResponse, isLoading, error, refetch } =
@@ -127,12 +129,12 @@ export default function ScansPage() {
             const lat = parseFloat(latitude);
             const lng = parseFloat(longitude);
             if (isNaN(lat) || isNaN(lng)) {
-                setTriggerError("Latitude et longitude sont requis.");
+                setTriggerError(t("scans_lat_lng_required"));
                 return;
             }
         }
         if (scanMode === "address" && !address.trim()) {
-            setTriggerError("L'adresse est requise.");
+            setTriggerError(t("scans_address_required"));
             return;
         }
         setTriggerLoading(true);
@@ -152,7 +154,7 @@ export default function ScansPage() {
                 );
                 const geoData = await geoRes.json() as Array<{ lat: string; lon: string }>;
                 if (!geoData.length) {
-                    setTriggerError("Adresse introuvable. Vérifiez l'adresse ou utilisez le mode coordonnées.");
+                    setTriggerError(t("scans_address_not_found"));
                     setTriggerLoading(false);
                     return;
                 }
@@ -173,7 +175,7 @@ export default function ScansPage() {
             if (err instanceof ApiRequestError) {
                 setTriggerError(err.message);
             } else {
-                setTriggerError("Une erreur inattendue s'est produite.");
+                setTriggerError(t("scans_unexpected_error"));
             }
         } finally {
             setTriggerLoading(false);
@@ -187,9 +189,9 @@ export default function ScansPage() {
     if (isLoading) {
         return (
             <div className="p-4 md:p-6 flex items-center justify-center min-h-[300px]">
-                <div className="flex items-center gap-3 text-[#2A3A4E]/60">
-                    <Loader2 className="w-5 h-5 animate-spin text-[#008B8B]" />
-                    <span className="text-sm font-medium">Chargement des analyses…</span>
+                <div className="flex items-center gap-3 text-[#94A3B8]/60">
+                    <Loader2 className="w-5 h-5 animate-spin text-[#6366F1]" />
+                    <span className="text-sm font-medium">{t("scans_loading")}</span>
                 </div>
             </div>
         );
@@ -207,6 +209,7 @@ export default function ScansPage() {
     }
 
     const scans = scansResponse?.data ?? [];
+    const totalCount = scansResponse?.total ?? 0;
 
     // -----------------------------------------------------------------------
     // Render: main
@@ -217,15 +220,15 @@ export default function ScansPage() {
             {/* Page header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-xl font-black uppercase text-[#1A2332]">Historique des analyses</h1>
-                    <p className="text-sm text-[#2A3A4E]/60 mt-0.5">
-                        {scansResponse?.total ?? 0} analyse{(scansResponse?.total ?? 0) !== 1 ? "s" : ""} au total
+                    <h1 className="text-xl font-black uppercase text-[#E2E8F0]">{t("scans_title")}</h1>
+                    <p className="text-sm text-[#94A3B8]/60 mt-0.5">
+                        {totalCount} {totalCount !== 1 ? t("scans_count_many") : t("scans_count_one")} {t("scans_total")}
                     </p>
                 </div>
                 {isManager && (
                     <Button onClick={openTriggerDialog}>
                         <ScanLine className="w-4 h-4" />
-                        Lancer une analyse
+                        {t("scans_trigger")}
                     </Button>
                 )}
             </div>
@@ -234,7 +237,7 @@ export default function ScansPage() {
             {triggerSuccess && (
                 <div className="flex items-center gap-3 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 text-sm">
                     <CheckCircle2 className="w-4 h-4 shrink-0" />
-                    <span>Analyse lancée avec succès. Elle apparaîtra dans la liste ci-dessous.</span>
+                    <span>{t("scans_launched_success")}</span>
                 </div>
             )}
 
@@ -242,15 +245,15 @@ export default function ScansPage() {
             {scans.length === 0 ? (
                 <Card>
                     <CardContent className="py-16 flex flex-col items-center gap-3 text-center">
-                        <div className="w-12 h-12 rounded-2xl bg-[#008B8B]/10 flex items-center justify-center">
-                            <Clock className="w-6 h-6 text-[#008B8B]" />
+                        <div className="w-12 h-12 rounded-2xl bg-[#6366F1]/10 flex items-center justify-center">
+                            <Clock className="w-6 h-6 text-[#6366F1]" />
                         </div>
-                        <p className="text-sm font-medium text-[#2A3A4E]/70">
-                            Aucune analyse enregistrée pour le moment.
+                        <p className="text-sm font-medium text-[#94A3B8]/70">
+                            {t("scans_empty")}
                         </p>
                         {isManager && (
-                            <p className="text-xs text-[#2A3A4E]/40">
-                                Cliquez sur "Lancer une analyse" pour démarrer la première analyse.
+                            <p className="text-xs text-[#94A3B8]/40">
+                                {t("scans_empty_hint")}
                             </p>
                         )}
                     </CardContent>
@@ -258,32 +261,32 @@ export default function ScansPage() {
             ) : (
                 <Card>
                     <CardHeader className="pb-0">
-                        <CardTitle className="text-sm font-bold text-[#1A2332]">
-                            Résultats des analyses
+                        <CardTitle className="text-sm font-bold text-[#E2E8F0]">
+                            {t("scans_results")}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-0 mt-4">
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm">
                                 <thead>
-                                    <tr className="border-b border-gray-100">
-                                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">Date</th>
-                                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">Adresse</th>
-                                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">Statut</th>
-                                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">Période</th>
-                                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">Détections</th>
-                                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">Résultat IA</th>
-                                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">Images</th>
-                                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">Erreur</th>
+                                    <tr className="border-b border-slate-800">
+                                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#94A3B8]/60 uppercase tracking-wide">{t("scans_col_date")}</th>
+                                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#94A3B8]/60 uppercase tracking-wide">{t("scans_col_address")}</th>
+                                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#94A3B8]/60 uppercase tracking-wide">{t("scans_col_status")}</th>
+                                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#94A3B8]/60 uppercase tracking-wide">{t("scans_col_period")}</th>
+                                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#94A3B8]/60 uppercase tracking-wide">{t("scans_col_detections")}</th>
+                                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#94A3B8]/60 uppercase tracking-wide">{t("scans_col_ai_result")}</th>
+                                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#94A3B8]/60 uppercase tracking-wide">{t("scans_col_images")}</th>
+                                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#94A3B8]/60 uppercase tracking-wide">{t("scans_col_error")}</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-50">
+                                <tbody className="divide-y divide-slate-800">
                                     {scans.map((scan) => (
-                                        <tr key={scan.id} className="hover:bg-gray-50/60 transition-colors">
-                                            <td className="px-5 py-3.5 text-[#2A3A4E]/80 whitespace-nowrap">
+                                        <tr key={scan.id} className="hover:bg-slate-950/60 transition-colors">
+                                            <td className="px-5 py-3.5 text-[#94A3B8]/80 whitespace-nowrap">
                                                 {formatDate(scan.createdAt)}
                                             </td>
-                                            <td className="px-5 py-3.5 text-xs text-[#2A3A4E]/70 max-w-[200px] truncate">
+                                            <td className="px-5 py-3.5 text-xs text-[#94A3B8]/70 max-w-[200px] truncate">
                                                 {scan.address ?? "—"}
                                             </td>
                                             <td className="px-5 py-3.5">
@@ -293,33 +296,33 @@ export default function ScansPage() {
                                             </td>
                                             <td className="px-5 py-3.5 whitespace-nowrap">
                                                 {scan.startDate && scan.endDate ? (
-                                                    <span className="inline-flex items-center gap-1.5 text-xs text-[#2A3A4E]/70">
+                                                    <span className="inline-flex items-center gap-1.5 text-xs text-[#94A3B8]/70">
                                                         <span>{scan.startDate}</span>
-                                                        <ArrowRight className="w-3 h-3 shrink-0 text-[#2A3A4E]/40" />
+                                                        <ArrowRight className="w-3 h-3 shrink-0 text-[#94A3B8]/40" />
                                                         <span>{scan.endDate}</span>
                                                     </span>
                                                 ) : (
-                                                    <span className="text-[#2A3A4E]/30">—</span>
+                                                    <span className="text-[#94A3B8]/30">—</span>
                                                 )}
                                             </td>
-                                            <td className="px-5 py-3.5 font-medium text-[#1A2332]">
+                                            <td className="px-5 py-3.5 font-medium text-[#E2E8F0]">
                                                 {scan.status === "completed"
                                                     ? scan.detectionsCount
                                                     : "—"}
                                             </td>
                                             <td className="px-5 py-3.5">
                                                 {scan.status === "failed" ? (
-                                                    <Badge variant="high">Echec</Badge>
+                                                    <Badge variant="high">{t("scans_failed_badge")}</Badge>
                                                 ) : scan.status === "analyzing" ? (
-                                                    <Badge variant="pending">Analyse en cours...</Badge>
+                                                    <Badge variant="pending">{t("scans_analyzing_badge")}</Badge>
                                                 ) : scan.status === "completed" && scan.detectionsCount > 0 ? (
                                                     <Badge variant="active">
                                                         &#10003; {scan.detectionsCount} detection{scan.detectionsCount > 1 ? "s" : ""}
                                                     </Badge>
                                                 ) : scan.status === "completed" && scan.detectionsCount === 0 ? (
-                                                    <Badge variant="secondary">Aucun changement</Badge>
+                                                    <Badge variant="secondary">{t("scans_no_change")}</Badge>
                                                 ) : (
-                                                    <span className="text-[#2A3A4E]/30">—</span>
+                                                    <span className="text-[#94A3B8]/30">—</span>
                                                 )}
                                             </td>
                                             <td className="px-5 py-3.5">
@@ -327,14 +330,14 @@ export default function ScansPage() {
                                                     <Button
                                                         size="sm"
                                                         variant="outline"
-                                                        className="h-7 text-xs px-2.5 border-[#008B8B]/40 text-[#008B8B] hover:bg-[#008B8B]/5"
+                                                        className="h-7 text-xs px-2.5 border-[#6366F1]/40 text-[#6366F1] hover:bg-[#6366F1]/5"
                                                         onClick={() => setCompareScan(scan)}
                                                     >
                                                         <Layers className="w-3.5 h-3.5" />
-                                                        Comparer
+                                                        {t("scans_compare")}
                                                     </Button>
                                                 ) : (
-                                                    <span className="text-[#2A3A4E]/30">—</span>
+                                                    <span className="text-[#94A3B8]/30">—</span>
                                                 )}
                                             </td>
                                             <td className="px-5 py-3.5 text-red-600 text-xs max-w-[240px] truncate">
@@ -355,25 +358,25 @@ export default function ScansPage() {
             <Dialog open={triggerDialogOpen} onOpenChange={setTriggerDialogOpen}>
                 <DialogContent className="max-w-sm">
                     <DialogHeader>
-                        <DialogTitle>Nouvelle analyse</DialogTitle>
+                        <DialogTitle>{t("scans_new")}</DialogTitle>
                     </DialogHeader>
 
                     <div className="space-y-4">
                         {/* Mode selector */}
-                        <div className="flex gap-1 rounded-lg bg-gray-100 p-1">
+                        <div className="flex gap-1 rounded-lg bg-slate-800 p-1">
                             {([
-                                { value: "municipality", label: "Municipalité" },
-                                { value: "address", label: "Adresse" },
-                                { value: "coordinates", label: "Coordonnées" },
-                            ] as const).map((opt) => (
+                                { value: "municipality" as const, label: t("scans_municipality") },
+                                { value: "address" as const, label: t("scans_address") },
+                                { value: "coordinates" as const, label: t("scans_coordinates") },
+                            ]).map((opt) => (
                                 <button
                                     key={opt.value}
                                     type="button"
                                     onClick={() => setScanMode(opt.value)}
                                     className={`flex-1 text-xs font-medium py-2 px-3 rounded-md transition-colors ${
                                         scanMode === opt.value
-                                            ? "bg-white text-[#008B8B] shadow-sm"
-                                            : "text-[#2A3A4E]/60 hover:text-[#2A3A4E]"
+                                            ? "bg-slate-900 text-[#6366F1] shadow-none"
+                                            : "text-[#94A3B8]/60 hover:text-[#94A3B8]"
                                     }`}
                                 >
                                     {opt.label}
@@ -382,22 +385,22 @@ export default function ScansPage() {
                         </div>
 
                         {scanMode === "municipality" && (
-                            <p className="text-sm text-[#2A3A4E]/70 bg-amber-50 border border-amber-200 rounded-lg p-3">
-                                L'analyse portera sur l'ensemble du territoire de votre municipalité. La résolution sera plus faible qu'une analyse ciblée.
+                            <p className="text-sm text-[#94A3B8]/70 bg-amber-50 border border-amber-200 rounded-lg p-3">
+                                {t("scans_municipality_warning")}
                             </p>
                         )}
 
                         {scanMode === "address" && (
                             <>
                                 <Input
-                                    label="Adresse"
-                                    placeholder="Ex: 125 Boul. de la Cité-des-Jeunes, Gatineau"
+                                    label={t("scans_address")}
+                                    placeholder={t("scans_address_placeholder")}
                                     value={address}
                                     onChange={(e) => setAddress(e.target.value)}
                                     required
                                 />
-                                <p className="text-xs text-[#2A3A4E]/50">
-                                    L'adresse sera automatiquement géolocalisée. L'analyse portera sur un rayon de 200m.
+                                <p className="text-xs text-[#94A3B8]/50">
+                                    {t("scans_address_hint")}
                                 </p>
                             </>
                         )}
@@ -406,7 +409,7 @@ export default function ScansPage() {
                             <>
                                 <div className="grid grid-cols-2 gap-3">
                                     <Input
-                                        label="Latitude"
+                                        label={t("scans_lat_label")}
                                         type="number"
                                         step="any"
                                         placeholder="45.4765"
@@ -415,7 +418,7 @@ export default function ScansPage() {
                                         required
                                     />
                                     <Input
-                                        label="Longitude"
+                                        label={t("scans_lng_label")}
                                         type="number"
                                         step="any"
                                         placeholder="-75.7013"
@@ -424,8 +427,8 @@ export default function ScansPage() {
                                         required
                                     />
                                 </div>
-                                <p className="text-xs text-[#2A3A4E]/50">
-                                    L'analyse portera sur un rayon de 200m autour des coordonnées.
+                                <p className="text-xs text-[#94A3B8]/50">
+                                    {t("scans_coord_hint")}
                                 </p>
                             </>
                         )}
@@ -433,14 +436,14 @@ export default function ScansPage() {
                         <div className="grid grid-cols-2 gap-3">
                             <Input
                                 type="date"
-                                label="Date de début"
+                                label={t("scans_start_date")}
                                 value={startDate}
                                 onChange={(e) => setStartDate(e.target.value)}
                                 max={endDate}
                             />
                             <Input
                                 type="date"
-                                label="Date de fin"
+                                label={t("scans_end_date")}
                                 value={endDate}
                                 onChange={(e) => setEndDate(e.target.value)}
                                 min={startDate}
@@ -462,7 +465,7 @@ export default function ScansPage() {
                             onClick={() => setTriggerDialogOpen(false)}
                             disabled={triggerLoading}
                         >
-                            Annuler
+                            {t("cancel")}
                         </Button>
                         <Button
                             onClick={handleTriggerScan}
@@ -477,7 +480,7 @@ export default function ScansPage() {
                             ) : (
                                 <ScanLine className="w-4 h-4" />
                             )}
-                            Lancer
+                            {t("scans_launch")}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -489,12 +492,12 @@ export default function ScansPage() {
             <Dialog open={compareScan !== null} onOpenChange={(open) => { if (!open) setCompareScan(null); }}>
                 <DialogContent className="max-w-2xl">
                     <DialogHeader>
-                        <DialogTitle className="text-lg">Comparaison avant / après</DialogTitle>
+                        <DialogTitle className="text-lg">{t("scans_comparison")}</DialogTitle>
                         {compareScan?.address && (
-                            <p className="text-sm text-[#2A3A4E]/60">{compareScan.address}</p>
+                            <p className="text-sm text-[#94A3B8]/60">{compareScan.address}</p>
                         )}
                         {compareScan?.startDate && compareScan?.endDate && (
-                            <p className="text-xs text-[#2A3A4E]/40">{compareScan.startDate} → {compareScan.endDate}</p>
+                            <p className="text-xs text-[#94A3B8]/40">{compareScan.startDate} → {compareScan.endDate}</p>
                         )}
                     </DialogHeader>
 
@@ -506,8 +509,8 @@ export default function ScansPage() {
                             afterLabel={compareScan.endDate ? `APRÈS (${compareScan.endDate})` : "APRÈS"}
                         />
                     ) : (
-                        <div className="flex items-center justify-center py-12 text-sm text-[#2A3A4E]/40">
-                            Aucune image disponible pour cette analyse.
+                        <div className="flex items-center justify-center py-12 text-sm text-[#94A3B8]/40">
+                            {t("scans_no_images")}
                         </div>
                     )}
                 </DialogContent>

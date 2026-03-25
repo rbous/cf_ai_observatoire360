@@ -54,14 +54,14 @@ const TESTIMONIALS = [
 
 function VideoPlaceholder({ label }: { label?: string }) {
     return (
-        <div className="relative w-full aspect-video bg-gray-200 rounded-2xl overflow-hidden flex items-center justify-center group cursor-pointer hover:bg-gray-300 transition-colors">
-            <div className="absolute inset-0 bg-gradient-to-br from-gray-300 to-gray-400" />
+        <div className="relative w-full aspect-video bg-slate-800 rounded-2xl overflow-hidden flex items-center justify-center group cursor-pointer hover:bg-slate-700 transition-colors">
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-900" />
             <div className="relative z-10 flex flex-col items-center gap-3">
-                <div className="w-16 h-16 rounded-full bg-[#008B8B] flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                <div className="w-16 h-16 rounded-full bg-[#6366F1] flex items-center justify-center shadow-none group-hover:scale-110 transition-transform">
                     <Play className="w-8 h-8 text-white ml-1" fill="white" />
                 </div>
                 {label && (
-                    <span className="text-sm font-semibold text-gray-600">{label}</span>
+                    <span className="text-sm font-semibold text-slate-300">{label}</span>
                 )}
             </div>
         </div>
@@ -70,7 +70,7 @@ function VideoPlaceholder({ label }: { label?: string }) {
 
 export default function Resources() {
     return (
-        <section id="ressources" className="py-24 lg:py-32 bg-gradient-to-b from-white to-[#f0fafa]">
+        <section id="ressources" className="py-24 lg:py-32" style={{ background: "#0F172A" }}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <motion.div
@@ -80,13 +80,13 @@ export default function Resources() {
                     transition={{ duration: 0.6 }}
                     className="text-center mb-16"
                 >
-                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black uppercase text-[#1A2332] mb-4">
+                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black uppercase text-[#E2E8F0] mb-4">
                         RESSOURCES ET QUESTIONS FRÉQUENTES
                     </h2>
-                    <p className="text-lg text-[#2A3A4E]/70 max-w-xl mx-auto">
+                    <p className="text-lg text-[#94A3B8]/70 max-w-xl mx-auto">
                         Tout ce que vous devez savoir pour prendre votre décision
                     </p>
-                    <div className="mt-4 w-16 h-1 bg-[#008B8B] mx-auto rounded-full" />
+                    <div className="mt-4 w-16 h-1 bg-[#6366F1] mx-auto rounded-full" />
                 </motion.div>
 
                 {/* Main video */}
@@ -108,7 +108,7 @@ export default function Resources() {
                     transition={{ duration: 0.6, delay: 0.15 }}
                     className="mb-16"
                 >
-                    <h3 className="text-xl font-black uppercase text-[#1A2332] mb-8 text-center">
+                    <h3 className="text-xl font-black uppercase text-[#E2E8F0] mb-8 text-center">
                         CE QUE DISENT NOS CLIENTS
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -119,14 +119,14 @@ export default function Resources() {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                                className="bg-white rounded-2xl shadow-md border border-[#008B8B]/10 overflow-hidden"
+                                className="bg-slate-900 rounded-2xl border border-slate-700 overflow-hidden"
                             >
                                 <VideoPlaceholder />
                                 <div className="p-5">
-                                    <p className="font-black text-[#008B8B] text-sm uppercase tracking-wide mb-2">
+                                    <p className="font-black text-[#6366F1] text-sm uppercase tracking-wide mb-2">
                                         {t.municipality}
                                     </p>
-                                    <p className="text-sm text-[#2A3A4E]/80 italic leading-relaxed">
+                                    <p className="text-sm text-[#94A3B8]/80 italic leading-relaxed">
                                         "{t.quote}"
                                     </p>
                                 </div>
@@ -143,17 +143,17 @@ export default function Resources() {
                     transition={{ duration: 0.6, delay: 0.2 }}
                     className="max-w-3xl mx-auto"
                 >
-                    <h3 className="text-xl font-black uppercase text-[#1A2332] mb-8 text-center">
+                    <h3 className="text-xl font-black uppercase text-[#E2E8F0] mb-8 text-center">
                         QUESTIONS FRÉQUENTES
                     </h3>
-                    <div className="bg-white rounded-2xl shadow-md border border-[#008B8B]/10 overflow-hidden px-6">
+                    <div className="bg-slate-900 rounded-2xl border border-slate-700 overflow-hidden px-6">
                         <Accordion type="single" collapsible>
                             {FAQ_ITEMS.map((item) => (
                                 <AccordionItem key={item.id} value={item.id}>
                                     <AccordionTrigger className="text-base font-semibold">
                                         {item.question}
                                     </AccordionTrigger>
-                                    <AccordionContent className="text-[#2A3A4E]/80 leading-relaxed">
+                                    <AccordionContent className="text-[#94A3B8]/80 leading-relaxed">
                                         {item.answer}
                                     </AccordionContent>
                                 </AccordionItem>

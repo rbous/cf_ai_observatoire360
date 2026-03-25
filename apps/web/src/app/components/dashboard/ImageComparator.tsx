@@ -122,7 +122,7 @@ export function ImageComparator({
         <div
             ref={containerRef}
             className={cn(
-                "relative overflow-hidden rounded-xl border border-gray-200 h-[400px] select-none",
+                "relative overflow-hidden rounded-xl border border-slate-700 h-[400px] select-none",
                 "cursor-col-resize",
                 className
             )}
@@ -152,7 +152,7 @@ export function ImageComparator({
 
             {/* Divider line */}
             <div
-                className="absolute top-0 bottom-0 w-0.5 bg-white shadow-[0_0_8px_rgba(0,0,0,0.5)]"
+                className="absolute top-0 bottom-0 w-0.5 bg-slate-900 shadow-[0_0_8px_rgba(0,0,0,0.5)]"
                 style={{ left: `calc(${position}% - 1px)`, pointerEvents: "none" }}
             />
 
@@ -160,7 +160,7 @@ export function ImageComparator({
             <div
                 className={cn(
                     "absolute top-1/2 -translate-y-1/2 -translate-x-1/2",
-                    "w-10 h-10 rounded-full bg-white shadow-lg border-2 border-[#008B8B]",
+                    "w-10 h-10 rounded-full bg-slate-900 shadow-none border-2 border-[#6366F1]",
                     "flex items-center justify-center",
                     "transition-transform duration-75",
                     isDragging
@@ -172,7 +172,7 @@ export function ImageComparator({
                 onMouseDown={handleMouseDown}
                 onTouchStart={handleTouchStart}
             >
-                <ChevronsLeftRight className="w-5 h-5 text-[#008B8B]" />
+                <ChevronsLeftRight className="w-5 h-5 text-[#6366F1]" />
             </div>
 
             {/* AVANT label */}

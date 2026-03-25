@@ -1,13 +1,14 @@
 :root {
-    --color-primary: #008B8B;        /* Teal */
-    --color-primary-light: #00BFBF;
-    --color-primary-dark: #006666;
-    --color-accent: #D4A843;         /* Gold/orange for CTAs */
-    --color-accent-hover: #C49B38;
-    --color-bg-gradient-start: #B3E5FC; /* Light blue */
-    --color-bg-gradient-end: #FFFFFF;
-    --color-navy: #1A2332;           /* Dark navy for text */
-    --color-navy-light: #2A3A4E;
+    --color-primary: #6366F1;
+    --color-primary-light: #818CF8;
+    --color-primary-dark: #4F46E5;
+    --color-accent: #F59E0B;
+    --color-accent-hover: #D97706;
+    --color-bg: #0F172A;
+    --color-bg-card: #1E293B;
+    --color-text: #E2E8F0;
+    --color-text-muted: #94A3B8;
+    --color-border: #334155;
     --color-danger: #DC2626;
     --color-warning: #F59E0B;
     --color-success: #10B981;

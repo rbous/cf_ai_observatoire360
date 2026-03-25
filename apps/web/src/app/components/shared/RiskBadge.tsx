@@ -1,6 +1,6 @@
 import type { RiskLevel } from "@observatoire360/shared";
-import { RISK_LEVEL_LABELS } from "@observatoire360/shared";
 import { cn } from "@/app/lib/cn";
+import { useLanguage } from "@/app/hooks/useLanguage";
 
 interface RiskBadgeProps {
     level: RiskLevel;
@@ -14,6 +14,14 @@ const RISK_STYLES: Record<RiskLevel, string> = {
 };
 
 export function RiskBadge({ level, className }: RiskBadgeProps) {
+    const { t } = useLanguage();
+
+    const RISK_LABELS: Record<RiskLevel, string> = {
+        high: t("risk_high"),
+        medium: t("risk_medium"),
+        low: t("risk_low"),
+    };
+
     return (
         <span
             className={cn(
@@ -22,7 +30,7 @@ export function RiskBadge({ level, className }: RiskBadgeProps) {
                 className
             )}
         >
-            {RISK_LEVEL_LABELS[level]}
+            {RISK_LABELS[level]}
         </span>
     );
 }

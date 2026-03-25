@@ -14,7 +14,7 @@ export default function DashboardLayout() {
     const [notifOpen, setNotifOpen] = useState(true);
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-slate-950">
             {/* Fixed top bar */}
             <Topbar
                 onNotificationToggle={() => setNotifOpen((v) => !v)}
@@ -28,8 +28,8 @@ export default function DashboardLayout() {
                 onClick={() => setNotifOpen((v) => !v)}
                 className={cn(
                     "fixed z-40 hidden md:flex items-center justify-center",
-                    "w-6 h-10 rounded-l-lg bg-white border border-r-0 border-gray-200 shadow-sm",
-                    "hover:bg-gray-50 transition-all duration-300",
+                    "w-6 h-10 rounded-l-lg bg-slate-900 border border-r-0 border-slate-700 shadow-none",
+                    "hover:bg-slate-950 transition-all duration-300",
                 )}
                 style={{
                     top: TOPBAR_HEIGHT + 24,
@@ -38,9 +38,9 @@ export default function DashboardLayout() {
                 aria-label={notifOpen ? "Masquer les notifications" : "Afficher les notifications"}
             >
                 {notifOpen ? (
-                    <PanelRightOpen className="w-3.5 h-3.5 text-[#2A3A4E]/50" />
+                    <PanelRightOpen className="w-3.5 h-3.5 text-[#94A3B8]/50" />
                 ) : (
-                    <PanelRightClose className="w-3.5 h-3.5 text-[#2A3A4E]/50" />
+                    <PanelRightClose className="w-3.5 h-3.5 text-[#94A3B8]/50" />
                 )}
             </button>
 

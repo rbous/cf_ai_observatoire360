@@ -9,16 +9,25 @@ import {
     DropdownMenuTrigger,
 } from "@/app/components/ui/dropdown-menu";
 import { useAuth } from "@/app/hooks/useAuth";
-import { ROLE_LABELS } from "@observatoire360/shared";
+import { useLanguage } from "@/app/hooks/useLanguage";
+import type { UserRole } from "@observatoire360/shared";
 
 export function ProfileMenu() {
     const { user, logout } = useAuth();
+    const { t } = useLanguage();
 
-    const name = user?.name ?? "Utilisateur";
-    const role = user?.role ? ROLE_LABELS[user.role] : "Inspecteur";
+    const ROLE_LABELS_I18N: Record<UserRole, string> = {
+        inspector: t("role_inspector"),
+        analyst: t("role_analyst"),
+        manager: t("role_manager"),
+        readonly: t("role_readonly"),
+    };
+
+    const name = user?.name ?? t("profile_menu_user");
+    const role = user?.role ? ROLE_LABELS_I18N[user.role] : t("profile_menu_inspector");
     const municipality = user?.municipalityName
-        ? `Municipalité de ${user.municipalityName}`
-        : "Municipalité";
+        ? `${t("topbar_municipality_of")} ${user.municipalityName}`
+        : t("profile_menu_municipality");
 
     const initials = name
         .split(" ")
@@ -30,24 +39,24 @@ export function ProfileMenu() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none">
-                    <div className="w-8 h-8 rounded-full bg-[#1A2332] flex items-center justify-center text-white text-xs font-bold shrink-0">
+                <button className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-800 transition-colors focus:outline-none">
+                    <div className="w-8 h-8 rounded-full bg-[#E2E8F0] flex items-center justify-center text-white text-xs font-bold shrink-0">
                         {initials}
                     </div>
                     <div className="hidden sm:flex flex-col items-start leading-tight">
-                        <span className="text-sm font-semibold text-[#1A2332] leading-none">{name}</span>
-                        <span className="text-xs text-[#2A3A4E]/50 leading-none mt-0.5">{role}</span>
+                        <span className="text-sm font-semibold text-[#E2E8F0] leading-none">{name}</span>
+                        <span className="text-xs text-[#94A3B8]/50 leading-none mt-0.5">{role}</span>
                     </div>
-                    <ChevronDown className="w-4 h-4 text-[#2A3A4E]/50 hidden sm:block" />
+                    <ChevronDown className="w-4 h-4 text-[#94A3B8]/50 hidden sm:block" />
                 </button>
             </DropdownMenuTrigger>
 
             <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel className="font-normal pb-0">
                     <div className="flex flex-col gap-0.5">
-                        <p className="text-sm font-semibold text-[#1A2332]">{name}</p>
-                        <p className="text-xs text-[#2A3A4E]/50">{role}</p>
-                        <p className="text-xs text-[#2A3A4E]/40">{municipality}</p>
+                        <p className="text-sm font-semibold text-[#E2E8F0]">{name}</p>
+                        <p className="text-xs text-[#94A3B8]/50">{role}</p>
+                        <p className="text-xs text-[#94A3B8]/40">{municipality}</p>
                     </div>
                 </DropdownMenuLabel>
 
@@ -55,15 +64,15 @@ export function ProfileMenu() {
 
                 <DropdownMenuItem asChild>
                     <Link to="/tableau-de-bord/parametres" className="flex items-center gap-2">
-                        <Settings className="w-4 h-4 text-[#2A3A4E]/50" />
-                        Paramètres
+                        <Settings className="w-4 h-4 text-[#94A3B8]/50" />
+                        {t("profile_menu_settings")}
                     </Link>
                 </DropdownMenuItem>
 
                 <DropdownMenuItem asChild>
                     <Link to="/profil" className="flex items-center gap-2">
-                        <User className="w-4 h-4 text-[#2A3A4E]/50" />
-                        Mon profil
+                        <User className="w-4 h-4 text-[#94A3B8]/50" />
+                        {t("profile_menu_my_profile")}
                     </Link>
                 </DropdownMenuItem>
 
@@ -74,7 +83,7 @@ export function ProfileMenu() {
                     onSelect={() => logout()}
                 >
                     <LogOut className="w-4 h-4" />
-                    Se déconnecter
+                    {t("profile_menu_logout")}
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
