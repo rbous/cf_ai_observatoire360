@@ -97,27 +97,43 @@ function findClosestRelease(releases: WaybackRelease[], targetDate: string): Way
 // Tile math
 // ---------------------------------------------------------------------------
 
-function latLngToTile(lat: number, lng: number, zoom: number): { x: number; y: number } {
-    const x = Math.floor((lng + 180) / 360 * Math.pow(2, zoom));
-    const y = Math.floor(
-        (1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) /
-        2 * Math.pow(2, zoom),
-    );
+/**
+ * Convert lat/lng to the tile that places the point closest to center.
+ * Uses Math.round instead of Math.floor so the point gravitates toward
+ * the middle of the returned tile rather than always the top-left.
+ */
+function latLngToTileCentered(lat: number, lng: number, zoom: number): { x: number; y: number } {
+    const n = Math.pow(2, zoom);
+    const rawX = (lng + 180) / 360 * n;
+    const rawY = (1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * n;
+
+    // Check if rounding gives a better centering than flooring
+    const floorX = Math.floor(rawX);
+    const floorY = Math.floor(rawY);
+
+    // Pick the tile where the fractional position is closest to 0.5 (center)
+    const fracX = rawX - floorX;
+    const fracY = rawY - floorY;
+
+    // If point is in the left 25% of the tile, use the tile to the left
+    // If in the right 25%, use the tile to the right. Otherwise keep current.
+    const x = fracX < 0.25 && floorX > 0 ? floorX - 1 : fracX > 0.75 ? floorX + 1 : floorX;
+    const y = fracY < 0.25 && floorY > 0 ? floorY - 1 : fracY > 0.75 ? floorY + 1 : floorY;
+
     return { x, y };
 }
 
 /**
  * Fetch a single tile centered as close as possible to the target point.
- * z=19 gives ~75m coverage per tile — the target point is within ~37m of
- * the tile center, which is good enough for address-level centering.
+ * z=20 gives ~37m coverage — the target is within ~18m of tile center.
  */
 async function fetchTileImage(
     releaseId: string,
     lat: number,
     lng: number,
-    zoom = 19,
+    zoom = 20,
 ): Promise<ArrayBuffer | null> {
-    const { x, y } = latLngToTile(lat, lng, zoom);
+    const { x, y } = latLngToTileCentered(lat, lng, zoom);
     const url = `${TILE_BASE}/${releaseId}/${zoom}/${y}/${x}`;
 
     const res = await fetch(url);
