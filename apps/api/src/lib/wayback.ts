@@ -124,31 +124,31 @@ function latLngToTileCentered(lat: number, lng: number, zoom: number): { x: numb
 }
 
 /**
- * Fetch a single tile centered as close as possible to the target point.
- * z=20 gives ~37m coverage — the target is within ~18m of tile center.
+ * Fetch a tile, trying z=20 first then falling back to z=19 and z=18.
+ * Not all Wayback releases have tiles at high zoom levels.
  */
 async function fetchTileImage(
     releaseId: string,
     lat: number,
     lng: number,
-    zoom = 20,
 ): Promise<ArrayBuffer | null> {
-    const { x, y } = latLngToTileCentered(lat, lng, zoom);
-    const url = `${TILE_BASE}/${releaseId}/${zoom}/${y}/${x}`;
+    for (const zoom of [20, 19, 18]) {
+        const { x, y } = latLngToTileCentered(lat, lng, zoom);
+        const url = `${TILE_BASE}/${releaseId}/${zoom}/${y}/${x}`;
 
-    const res = await fetch(url);
-    if (!res.ok) {
-        console.warn(`[wayback] Tile fetch failed: ${url} → ${res.status}`);
-        return null;
+        const res = await fetch(url);
+        if (res.ok) {
+            const buffer = await res.arrayBuffer();
+            if (buffer.byteLength >= 500) {
+                console.log(`[wayback] Tile fetched at z=${zoom}`);
+                return buffer;
+            }
+        }
+        console.log(`[wayback] z=${zoom} not available for release ${releaseId}, trying lower...`);
     }
-
-    const buffer = await res.arrayBuffer();
-    if (buffer.byteLength < 500) {
-        return null;
-    }
-
-    return buffer;
+    return null;
 }
+
 
 // ---------------------------------------------------------------------------
 // Public API
