@@ -107,18 +107,15 @@ function latLngToTile(lat: number, lng: number, zoom: number): { x: number; y: n
 }
 
 /**
- * Fetch a grid of tiles and concatenate them into a single image.
- * Since Workers can't do Canvas compositing, we fetch a 3x3 grid
- * and return the center tile for simplicity. At z=18, one tile ≈ 150m.
- *
- * For better coverage, we use z=17 (≈300m per tile) which matches
- * the 200m analysis radius well.
+ * Fetch a single tile centered as close as possible to the target point.
+ * z=19 gives ~75m coverage per tile — the target point is within ~37m of
+ * the tile center, which is good enough for address-level centering.
  */
 async function fetchTileImage(
     releaseId: string,
     lat: number,
     lng: number,
-    zoom = 17,
+    zoom = 19,
 ): Promise<ArrayBuffer | null> {
     const { x, y } = latLngToTile(lat, lng, zoom);
     const url = `${TILE_BASE}/${releaseId}/${zoom}/${y}/${x}`;
