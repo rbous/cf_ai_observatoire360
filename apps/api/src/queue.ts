@@ -29,7 +29,7 @@ import {
     type BBox,
     type SentinelHubConfig,
 } from "./lib/sentinel.js";
-import { detectChanges, type DetectionResult } from "./lib/ai-detection.js";
+import { computeDiffScore, classifyChange, type ClassificationResult } from "./lib/change-detection.js";
 import { fetchOrthophoto } from "./lib/orthophoto.js";
 import { fetchWaybackImage } from "./lib/wayback.js";
 import {
@@ -284,26 +284,76 @@ async function processMessage(
         .where(eq(scanJobs.id, jobId));
 
     // ------------------------------------------------------------------
-    // 6. Run AI change detection
+    // 6. TWO-STAGE CHANGE DETECTION
+    //    Stage 1: Fast pixel-diff (no AI) — gate to avoid false positives
+    //    Stage 2: AI classification — only when pixel-diff flags a change
     // ------------------------------------------------------------------
-    let detections: DetectionResult[];
-    try {
-        detections = await detectChanges(
-            env.AI,
-            beforeImageKey,
-            afterImageKey,
-            env.IMAGES_BUCKET,
-            bounds,
-        );
-    } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : String(err);
-        await markJobFailed(db, jobId, `detectChanges failed: ${errorMsg}`);
+
+    // Stage 1: Pixel-diff
+    if (!beforeImageKey || !afterImageKey) {
+        console.log(`[queue] Job ${jobId}: missing before/after images, skipping detection.`);
+        await db.update(scanJobs).set({ status: "completed", detectionsCount: 0, completedAt: now }).where(eq(scanJobs.id, jobId));
         return;
     }
 
-    console.log(
-        `[queue] Job ${jobId}: ${detections.length} detection(s) found.`,
-    );
+    const [beforeObj, afterObj] = await Promise.all([
+        env.IMAGES_BUCKET.get(beforeImageKey),
+        env.IMAGES_BUCKET.get(afterImageKey),
+    ]);
+
+    if (!beforeObj || !afterObj) {
+        console.log(`[queue] Job ${jobId}: could not retrieve images from R2, skipping.`);
+        await db.update(scanJobs).set({ status: "completed", detectionsCount: 0, completedAt: now }).where(eq(scanJobs.id, jobId));
+        return;
+    }
+
+    const beforeBytes = new Uint8Array(await beforeObj.arrayBuffer());
+    const afterBytes = new Uint8Array(await afterObj.arrayBuffer());
+
+    const diff = computeDiffScore(beforeBytes, afterBytes);
+    console.log(`[queue] Job ${jobId} pixel-diff: ${diff.summary}`);
+
+    type Detection = {
+        type: "construction" | "extension" | "annexe" | "piscine";
+        riskLevel: "low" | "medium" | "high";
+        riskScore: number;
+        confidence: number;
+        description: string;
+    };
+
+    const detections: Detection[] = [];
+
+    if (diff.changed) {
+        // Stage 2: AI classification — what type of change is it?
+        console.log(`[queue] Job ${jobId}: change detected, running AI classification...`);
+
+        const classification = await classifyChange(env.AI, afterBytes);
+
+        if (classification && classification.type !== "other") {
+            detections.push({
+                type: classification.type as Detection["type"],
+                riskLevel: classification.riskLevel,
+                riskScore: classification.riskScore,
+                confidence: classification.confidence,
+                description: classification.description,
+            });
+            console.log(`[queue] Job ${jobId}: AI classified as ${classification.type} (${classification.riskLevel}, confidence: ${classification.confidence})`);
+        } else if (classification) {
+            console.log(`[queue] Job ${jobId}: AI classified as "other" (non-construction change) — skipping alert.`);
+        } else {
+            // AI failed but pixel-diff was positive — create a generic alert
+            console.log(`[queue] Job ${jobId}: AI classification failed, creating generic alert from pixel-diff.`);
+            detections.push({
+                type: "construction",
+                riskLevel: "medium",
+                riskScore: Math.round(diff.score * 100),
+                confidence: diff.score,
+                description: `Changement détecté par analyse d'image (score: ${(diff.score * 100).toFixed(0)}%)`,
+            });
+        }
+    }
+
+    console.log(`[queue] Job ${jobId}: ${detections.length} detection(s) after two-stage analysis.`);
 
     // ------------------------------------------------------------------
     // 6. Persist detections as alerts + notifications + emails
@@ -352,51 +402,35 @@ async function processMessage(
 
     let skippedDuplicates = 0;
 
+    // Use scan center point as the alert location
+    const alertLat = latitude ?? (bounds.north + bounds.south) / 2;
+    const alertLng = longitude ?? (bounds.east + bounds.west) / 2;
+
     for (const detection of detections) {
         // 6a. Deduplication — skip if an open alert already exists nearby
-        if (isDuplicate(detection.latitude, detection.longitude)) {
+        if (isDuplicate(alertLat, alertLng)) {
             skippedDuplicates++;
             continue;
         }
 
-        // 6b. Fetch high-res Wayback images for this specific detection point
-        let alertBeforeKey = beforeImageKey;
-        let alertAfterKey = afterImageKey;
-        try {
-            const effectiveStart = startDate ?? new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-            const effectiveEnd = endDate ?? new Date().toISOString().slice(0, 10);
-            const alertPrefix = `wayback/${municipalityRow.code}/alert-${ulid()}`;
-
-            const [wbAfter, wbBefore] = await Promise.all([
-                fetchWaybackImage(detection.latitude, detection.longitude, effectiveEnd, env.IMAGES_BUCKET, `${alertPrefix}-after`),
-                fetchWaybackImage(detection.latitude, detection.longitude, effectiveStart, env.IMAGES_BUCKET, `${alertPrefix}-before`),
-            ]);
-
-            if (wbAfter) alertAfterKey = wbAfter.imageKey;
-            if (wbBefore) alertBeforeKey = wbBefore.imageKey;
-            console.log(`[queue] Wayback drill-down for detection at ${detection.latitude.toFixed(4)},${detection.longitude.toFixed(4)}: before=${wbBefore?.releaseDate ?? "none"}, after=${wbAfter?.releaseDate ?? "none"}`);
-        } catch (err) {
-            console.warn("[queue] Wayback drill-down failed (non-fatal, keeping Sentinel-2 images):", err);
-        }
-
-        // 6c. Create alert with high-res images
+        // 6b. Create alert
         const alertId = ulid();
         await db.insert(alerts).values({
             id: alertId,
             municipalityId,
-            latitude: detection.latitude,
-            longitude: detection.longitude,
+            latitude: alertLat,
+            longitude: alertLng,
             riskLevel: detection.riskLevel,
             riskScore: detection.riskScore,
             status: "a_analyser",
             type: detection.type,
-            detectedArea: detection.detectedArea,
-            address: detection.address ?? null,
+            detectedArea: null,
+            address: body.alertId ? null : (municipalityRow.name ?? null),
             detectedAt,
             images: JSON.stringify([]),
             scanJobId: jobId,
-            beforeImageKey: alertBeforeKey,
-            afterImageKey: alertAfterKey,
+            beforeImageKey,
+            afterImageKey,
             confidence: detection.confidence,
             createdAt: now,
         });
@@ -413,9 +447,7 @@ async function processMessage(
                 type: "new_alert",
                 title: `Nouvelle détection : ${typeLabel}`,
                 message:
-                    `Une nouvelle ${typeLabel.toLowerCase()} a été détectée` +
-                    (detection.address ? ` au ${detection.address}` : "") +
-                    ` avec un risque ${formatRiskLabel(detection.riskLevel)}.`,
+                    `${detection.description} — risque ${formatRiskLabel(detection.riskLevel)}.`,
                 isRead: false,
                 createdAt: now,
             });
@@ -429,8 +461,8 @@ async function processMessage(
                 riskLevel: detection.riskLevel,
                 riskScore: detection.riskScore,
                 confidence: detection.confidence,
-                address: detection.address ?? null,
-                detectedArea: detection.detectedArea,
+                address: null,
+                detectedArea: null,
             };
 
             const html = buildAlertEmailHtml(alertSummary, municipalitySummary);
@@ -506,7 +538,7 @@ async function markJobFailed(
         .where(eq(scanJobs.id, jobId));
 }
 
-function formatTypeLabel(type: DetectionResult["type"]): string {
+function formatTypeLabel(type: string): string {
     switch (type) {
         case "construction": return "Construction";
         case "extension":    return "Extension";
@@ -516,7 +548,7 @@ function formatTypeLabel(type: DetectionResult["type"]): string {
     }
 }
 
-function formatRiskLabel(level: DetectionResult["riskLevel"]): string {
+function formatRiskLabel(level: string): string {
     switch (level) {
         case "low":    return "faible";
         case "medium": return "moyen";
