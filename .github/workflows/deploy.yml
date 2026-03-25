@@ -15,6 +15,8 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Inject D1 database ID
+        run: sed -i 's/YOUR_D1_DATABASE_ID/${{ secrets.D1_DATABASE_ID }}/g' apps/api/wrangler.toml
       - name: Build shared package
         run: pnpm --filter @observatoire360/shared build
       - name: Run D1 migrations
