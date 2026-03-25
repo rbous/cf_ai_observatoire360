@@ -135,20 +135,18 @@ async function processMessage(
         const effectiveStartDate = startDate ?? new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
         try {
-            // "After" = current Esri World Imagery (latest, 1024px, exact bbox)
-            const afterOrtho = await fetchOrthophoto(
-                bounds, env.IMAGES_BUCKET, `hires/${municipalityRow.code}/${jobId}-after`, 1024,
-            );
-            // "Before" = Wayback historical at start date
-            const beforeWb = await fetchWaybackImage(
-                latitude, longitude, effectiveStartDate, env.IMAGES_BUCKET, `wayback/${municipalityRow.code}/${jobId}-before`,
-            );
+            // Both before AND after use Wayback tiles at the same zoom level
+            // This ensures identical coverage area and resolution for comparison
+            const [afterWb, beforeWb] = await Promise.all([
+                fetchWaybackImage(latitude, longitude, effectiveEndDate, env.IMAGES_BUCKET, `wayback/${municipalityRow.code}/${jobId}-after`),
+                fetchWaybackImage(latitude, longitude, effectiveStartDate, env.IMAGES_BUCKET, `wayback/${municipalityRow.code}/${jobId}-before`),
+            ]);
 
-            afterImageKey = afterOrtho?.imageKey ?? null;
+            afterImageKey = afterWb?.imageKey ?? null;
             beforeImageKey = beforeWb?.imageKey ?? null;
-            imageryDate = effectiveEndDate;
+            imageryDate = afterWb?.releaseDate ?? effectiveEndDate;
 
-            console.log(`[queue] High-res: before=Wayback(${beforeWb?.releaseDate ?? "none"}), after=Esri(latest)`);
+            console.log(`[queue] Wayback: before=${beforeWb?.releaseDate ?? "none"}, after=${afterWb?.releaseDate ?? "none"}`);
         } catch (err) {
             const errorMsg = err instanceof Error ? err.message : String(err);
             await markJobFailed(db, jobId, `High-res image fetch failed: ${errorMsg}`);
