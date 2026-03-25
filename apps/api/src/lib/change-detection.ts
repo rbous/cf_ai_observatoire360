@@ -152,27 +152,42 @@ export async function classifyChange(
             },
         );
 
-        // Workers AI can return string, { response: string }, or other shapes
-        let content: string;
-        if (typeof response === "string") {
-            content = response;
-        } else if (response && typeof response === "object") {
+        // Workers AI returns various shapes — extract the classification result
+        console.log("[classify] Raw AI response:", JSON.stringify(response).slice(0, 500));
+
+        let parsed: Record<string, unknown>;
+
+        if (response && typeof response === "object") {
             const resp = response as Record<string, unknown>;
-            content = String(resp.response ?? resp.text ?? resp.content ?? JSON.stringify(resp));
+
+            // Workers AI returns { response: { type, riskLevel, ... } } — object directly
+            if (resp.response && typeof resp.response === "object" && "type" in (resp.response as object)) {
+                parsed = resp.response as Record<string, unknown>;
+            }
+            // Or { response: "json string" }
+            else if (typeof resp.response === "string") {
+                const jsonMatch = resp.response.match(/\{[\s\S]*\}/);
+                if (!jsonMatch) { console.warn("[classify] No JSON in string response:", resp.response.slice(0, 200)); return null; }
+                parsed = JSON.parse(jsonMatch[0]);
+            }
+            // Or the response itself has the fields
+            else if ("type" in resp) {
+                parsed = resp;
+            }
+            else {
+                // Last resort: stringify and extract JSON
+                const raw = JSON.stringify(response);
+                const jsonMatch = raw.match(/\{[\s\S]*"type"[\s\S]*\}/);
+                if (!jsonMatch) { console.warn("[classify] No JSON found in response:", raw.slice(0, 300)); return null; }
+                parsed = JSON.parse(jsonMatch[0]);
+            }
+        } else if (typeof response === "string") {
+            const jsonMatch = response.match(/\{[\s\S]*\}/);
+            if (!jsonMatch) { console.warn("[classify] No JSON in string:", response.slice(0, 200)); return null; }
+            parsed = JSON.parse(jsonMatch[0]);
         } else {
             return null;
         }
-
-        if (!content || content === "undefined" || content === "null") return null;
-
-        // Extract JSON from response
-        const jsonMatch = content.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) {
-            console.warn("[classify] No JSON found in AI response:", content.slice(0, 200));
-            return null;
-        }
-
-        const parsed = JSON.parse(jsonMatch[0]) as Record<string, unknown>;
 
         const validTypes = new Set(["construction", "extension", "annexe", "piscine", "other"]);
         const validRisk = new Set(["low", "medium", "high"]);

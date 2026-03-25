@@ -21,6 +21,8 @@ export interface Bindings {
     COPERNICUS_CLIENT_SECRET: string;
     /** Resend API key for email */
     RESEND_API_KEY: string;
+    /** Email from address (e.g. "Observatoire 360 <alerts@yourdomain.com>") */
+    EMAIL_FROM: string;
     /** Cloudflare Workers AI (free, built-in) */
     AI: Ai;
 }

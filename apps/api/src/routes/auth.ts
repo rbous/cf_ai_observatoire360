@@ -282,7 +282,7 @@ auth.post("/forgot-password", async (c) => {
                         </div>
                     </div>
                 `.trim(),
-            });
+            }, c.env.EMAIL_FROM);
         } catch (err) {
             console.error("[auth] Failed to send password reset email:", err);
         }

@@ -470,7 +470,7 @@ async function processMessage(
                 to: toAddresses,
                 subject: `[Observatoire 360] Nouvelle détection — ${municipalityRow.name}`,
                 html,
-            });
+            }, env.EMAIL_FROM);
 
             if (!emailResult.success) {
                 // Log but do not fail the job — email delivery is best-effort

@@ -42,7 +42,7 @@ export interface MunicipalitySummary {
 // sendEmail
 // ---------------------------------------------------------------------------
 
-const FROM_ADDRESS = "Observatoire 360 <alerts@observatoire360.com>";
+const DEFAULT_FROM = "Observatoire 360 <noreply@example.com>";
 const RESEND_API_URL = "https://api.resend.com/emails";
 
 /**
@@ -54,9 +54,10 @@ const RESEND_API_URL = "https://api.resend.com/emails";
 export async function sendEmail(
     apiKey: string,
     options: EmailOptions,
+    fromAddress?: string,
 ): Promise<SendEmailResult> {
     const payload = {
-        from: FROM_ADDRESS,
+        from: fromAddress ?? DEFAULT_FROM,
         to: options.to,
         subject: options.subject,
         html: options.html,
