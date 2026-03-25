@@ -3,25 +3,27 @@ import { NavLink } from "react-router-dom";
 import { Map, BarChart3, Calendar, Layers, Menu, X, ScanLine, Users, UserCircle } from "lucide-react";
 import { cn } from "@/app/lib/cn";
 import { useAuth } from "@/app/hooks/useAuth";
+import { useLanguage } from "@/app/hooks/useLanguage";
+import type { TranslationKey } from "@/app/i18n/translations";
 
 interface NavItem {
-    label: string;
+    labelKey: TranslationKey;
     href: string;
     icon: React.ComponentType<{ className?: string }>;
     managerOnly?: boolean;
 }
 
 const NAV_ITEMS_PRIMARY: NavItem[] = [
-    { label: "Carte", href: "/tableau-de-bord", icon: Map },
-    { label: "Rapport et Stat", href: "/tableau-de-bord/rapports", icon: BarChart3 },
-    { label: "Planification", href: "/tableau-de-bord/planification", icon: Calendar },
-    { label: "Calques", href: "/tableau-de-bord/calques", icon: Layers },
+    { labelKey: "sidebar_map", href: "/tableau-de-bord", icon: Map },
+    { labelKey: "sidebar_reports", href: "/tableau-de-bord/rapports", icon: BarChart3 },
+    { labelKey: "sidebar_planning", href: "/tableau-de-bord/planification", icon: Calendar },
+    { labelKey: "sidebar_layers", href: "/tableau-de-bord/calques", icon: Layers },
 ];
 
 const NAV_ITEMS_SECONDARY: NavItem[] = [
-    { label: "Analyses", href: "/tableau-de-bord/analyses", icon: ScanLine },
-    { label: "Utilisateurs", href: "/tableau-de-bord/utilisateurs", icon: Users, managerOnly: true },
-    { label: "Mon profil", href: "/tableau-de-bord/profil", icon: UserCircle },
+    { labelKey: "sidebar_scans", href: "/tableau-de-bord/analyses", icon: ScanLine },
+    { labelKey: "sidebar_users", href: "/tableau-de-bord/utilisateurs", icon: Users, managerOnly: true },
+    { labelKey: "sidebar_profile", href: "/tableau-de-bord/profil", icon: UserCircle },
 ];
 
 interface SidebarProps {
@@ -31,6 +33,7 @@ interface SidebarProps {
 export function Sidebar({ className }: SidebarProps) {
     const [mobileOpen, setMobileOpen] = useState(false);
     const { user } = useAuth();
+    const { t } = useLanguage();
     const isManager = user?.role === "manager";
 
     return (
@@ -74,7 +77,7 @@ export function Sidebar({ className }: SidebarProps) {
                 </button>
 
                 <nav className="flex-1 px-3 py-5 space-y-1 overflow-y-auto">
-                    {NAV_ITEMS_PRIMARY.map(({ label, href, icon: Icon }) => (
+                    {NAV_ITEMS_PRIMARY.map(({ labelKey, href, icon: Icon }) => (
                         <NavLink
                             key={href}
                             to={href}
@@ -90,14 +93,14 @@ export function Sidebar({ className }: SidebarProps) {
                             }
                         >
                             <Icon className="w-4.5 h-4.5 shrink-0" />
-                            <span>{label}</span>
+                            <span>{t(labelKey)}</span>
                         </NavLink>
                     ))}
 
                     {/* Separator */}
                     <div className="my-2 h-px w-full bg-gray-200" />
 
-                    {NAV_ITEMS_SECONDARY.map(({ label, href, icon: Icon, managerOnly }) => {
+                    {NAV_ITEMS_SECONDARY.map(({ labelKey, href, icon: Icon, managerOnly }) => {
                         if (managerOnly && !isManager) return null;
                         return (
                             <NavLink
@@ -114,7 +117,7 @@ export function Sidebar({ className }: SidebarProps) {
                                 }
                             >
                                 <Icon className="w-4.5 h-4.5 shrink-0" />
-                                <span>{label}</span>
+                                <span>{t(labelKey)}</span>
                             </NavLink>
                         );
                     })}

@@ -11,6 +11,7 @@ import {
 import { ProfileMenu } from "./ProfileMenu";
 import { useNotifications } from "@/app/hooks/useNotifications";
 import { useAuth } from "@/app/hooks/useAuth";
+import { useLanguage } from "@/app/hooks/useLanguage";
 
 interface TopbarProps {
     onNotificationToggle?: () => void;
@@ -45,6 +46,9 @@ export function Topbar({
     const [selectedSector, setSelectedSector] = useState("Tous les secteurs");
     const [selectedStatus, setSelectedStatus] = useState("Tous les statuts");
     const { unreadCount } = useNotifications();
+    const { locale, setLocale } = useLanguage();
+
+    const toggleLocale = () => setLocale(locale === "fr" ? "en" : "fr");
 
     return (
         <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-white shadow-sm border-b border-gray-200 flex items-center px-4 gap-3">
@@ -115,6 +119,15 @@ export function Topbar({
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
+
+            {/* Language toggle */}
+            <button
+                onClick={toggleLocale}
+                className="px-2.5 py-1 rounded-full border border-gray-200 text-xs font-bold text-[#2A3A4E] hover:border-[#008B8B] hover:text-[#008B8B] transition-colors tracking-wide"
+                aria-label="Toggle language"
+            >
+                {locale === "fr" ? "FR" : "EN"}
+            </button>
 
             {/* Notification bell */}
             <button

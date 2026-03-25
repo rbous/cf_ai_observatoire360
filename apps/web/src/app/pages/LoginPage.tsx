@@ -6,6 +6,7 @@ import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import { useAuth } from "@/app/hooks/useAuth";
 import { DASHBOARD_ROUTES } from "@/app/lib/constants";
+import { useLanguage } from "@/app/hooks/useLanguage";
 
 const DEMO_CITIES = [
     { label: "Gatineau, QC", flag: "\u{1F1E8}\u{1F1E6}", email: "demo@observatoire360.com" },
@@ -22,6 +23,7 @@ export default function LoginPage() {
     const [demoLoading, setDemoLoading] = useState<string | null>(null);
     const { login, isAuthenticated } = useAuth();
     const navigate = useNavigate();
+    const { t } = useLanguage();
 
     const handleDemoLogin = async (email: string) => {
         setError(null);
@@ -58,7 +60,7 @@ export default function LoginPage() {
             setError(
                 err instanceof Error
                     ? err.message
-                    : "Courriel ou mot de passe incorrect."
+                    : t("login_error_default")
             );
         } finally {
             setIsSubmitting(false);
@@ -87,10 +89,10 @@ export default function LoginPage() {
                         </span>
                     </Link>
                     <h1 className="mt-6 text-2xl font-black uppercase text-[#1A2332]">
-                        ESPACE CLIENT
+                        {t("login_title")}
                     </h1>
                     <p className="text-sm text-[#2A3A4E]/60 mt-1">
-                        Connectez-vous à votre tableau de bord
+                        {t("login_subtitle")}
                     </p>
                 </div>
 
@@ -104,7 +106,7 @@ export default function LoginPage() {
                         )}
 
                         <Input
-                            label="Courriel"
+                            label={t("login_email")}
                             name="email"
                             type="email"
                             value={form.email}
@@ -115,7 +117,7 @@ export default function LoginPage() {
 
                         <div className="relative">
                             <Input
-                                label="Mot de passe"
+                                label={t("login_password")}
                                 name="password"
                                 type={showPassword ? "text" : "password"}
                                 value={form.password}
@@ -138,7 +140,7 @@ export default function LoginPage() {
                                 to="/mot-de-passe-oublie"
                                 className="text-sm text-[#008B8B] hover:underline font-medium"
                             >
-                                Mot de passe oublié?
+                                {t("login_forgot")}
                             </Link>
                         </div>
 
@@ -149,7 +151,7 @@ export default function LoginPage() {
                             className="w-full font-bold tracking-wide uppercase"
                             disabled={isSubmitting}
                         >
-                            {isSubmitting ? "CONNEXION..." : "SE CONNECTER"}
+                            {isSubmitting ? t("login_submitting") : t("login_submit")}
                         </Button>
                     </form>
                 </div>
@@ -162,7 +164,7 @@ export default function LoginPage() {
                         </div>
                         <div className="relative flex justify-center text-xs uppercase">
                             <span className="bg-transparent px-3 text-[#2A3A4E]/40 font-semibold tracking-wider">
-                                ou essayer la démo
+                                {t("login_or_demo")}
                             </span>
                         </div>
                     </div>
@@ -178,9 +180,9 @@ export default function LoginPage() {
                                 <span className="text-lg">{city.flag}</span>
                                 <div className="min-w-0">
                                     <p className="text-xs font-semibold text-[#1A2332] truncate">
-                                        {demoLoading === city.email ? "Connexion..." : city.label}
+                                        {demoLoading === city.email ? t("login_submitting") : city.label}
                                     </p>
-                                    <p className="text-[10px] text-[#2A3A4E]/40">Démo gratuite</p>
+                                    <p className="text-[10px] text-[#2A3A4E]/40">{t("login_free_demo")}</p>
                                 </div>
                             </button>
                         ))}
@@ -188,7 +190,7 @@ export default function LoginPage() {
                 </div>
 
                 <p className="text-center text-sm text-[#2A3A4E]/60 mt-4">
-                    Pas encore client?{" "}
+                    {t("login_no_account")}{" "}
                     <a
                         href="#contact"
                         onClick={(e) => {
@@ -197,7 +199,7 @@ export default function LoginPage() {
                         }}
                         className="text-[#008B8B] hover:underline font-medium"
                     >
-                        Réservez une démo
+                        {t("login_book_demo")}
                     </a>
                 </p>
             </motion.div>

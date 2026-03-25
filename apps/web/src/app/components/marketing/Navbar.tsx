@@ -4,10 +4,14 @@ import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/app/components/ui/button";
 import { NAV_LINKS } from "@/app/lib/constants";
+import { useLanguage } from "@/app/hooks/useLanguage";
 
 export default function Navbar() {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileOpen, setIsMobileOpen] = useState(false);
+    const { locale, setLocale, t } = useLanguage();
+
+    const toggleLocale = () => setLocale(locale === "fr" ? "en" : "fr");
 
     useEffect(() => {
         const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -64,9 +68,19 @@ export default function Navbar() {
 
                         {/* CTA + hamburger */}
                         <div className="flex items-center gap-3">
+                            {/* Language toggle */}
+                            <button
+                                onClick={toggleLocale}
+                                className="hidden sm:flex items-center gap-1 text-xs font-semibold text-[#1A2332]/60 hover:text-[#008B8B] transition-colors tracking-wide"
+                                aria-label="Toggle language"
+                            >
+                                <span className={locale === "fr" ? "text-[#008B8B] font-bold" : ""}>FR</span>
+                                <span className="text-[#1A2332]/30">|</span>
+                                <span className={locale === "en" ? "text-[#008B8B] font-bold" : ""}>EN</span>
+                            </button>
                             <Link to="/connexion" className="hidden sm:block">
                                 <Button variant="accent" size="default" className="font-bold tracking-wide text-xs uppercase">
-                                    ESPACE CLIENT
+                                    {t("nav_client_area")}
                                 </Button>
                             </Link>
                             <button
@@ -101,10 +115,19 @@ export default function Navbar() {
                                     {link.label}
                                 </button>
                             ))}
-                            <div className="pt-2 border-t border-gray-100 mt-2">
+                            <div className="pt-2 border-t border-gray-100 mt-2 flex flex-col gap-2">
+                                <button
+                                    onClick={toggleLocale}
+                                    className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-[#1A2332]/60 hover:text-[#008B8B] transition-colors"
+                                    aria-label="Toggle language"
+                                >
+                                    <span className={locale === "fr" ? "text-[#008B8B] font-bold" : ""}>FR</span>
+                                    <span className="text-[#1A2332]/30">|</span>
+                                    <span className={locale === "en" ? "text-[#008B8B] font-bold" : ""}>EN</span>
+                                </button>
                                 <Link to="/connexion" onClick={() => setIsMobileOpen(false)}>
                                     <Button variant="accent" size="lg" className="w-full font-bold tracking-wide text-sm uppercase">
-                                        ESPACE CLIENT
+                                        {t("nav_client_area")}
                                     </Button>
                                 </Link>
                             </div>
