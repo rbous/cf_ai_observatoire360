@@ -471,40 +471,27 @@ export default function ScansPage() {
             {/* Image comparator dialog                                           */}
             {/* ---------------------------------------------------------------- */}
             <Dialog open={compareScan !== null} onOpenChange={(open) => { if (!open) setCompareScan(null); }}>
-                <DialogContent className="max-w-3xl">
+                <DialogContent className="max-w-2xl">
                     <DialogHeader>
-                        <DialogTitle>Comparaison d'images</DialogTitle>
+                        <DialogTitle className="text-lg">Comparaison avant / après</DialogTitle>
+                        {compareScan?.address && (
+                            <p className="text-sm text-[#2A3A4E]/60">{compareScan.address}</p>
+                        )}
+                        {compareScan?.startDate && compareScan?.endDate && (
+                            <p className="text-xs text-[#2A3A4E]/40">{compareScan.startDate} → {compareScan.endDate}</p>
+                        )}
                     </DialogHeader>
 
-                    {compareScan?.beforeImageKey && compareScan?.afterImageKey && (
-                        (() => {
-                            const isHighRes = compareScan.beforeImageKey.startsWith("wayback/");
-                            return (
-                                <>
-                                    <p className="text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide">
-                                        {isHighRes
-                                            ? "Comparaison avant / après (haute résolution)"
-                                            : "Comparaison avant / après (basse résolution — relancez l'analyse pour obtenir des images HD)"}
-                                    </p>
-                                    <ImageComparator
-                                        beforeSrc={`${API_BASE_URL}/images/${compareScan.beforeImageKey}`}
-                                        afterSrc={`${API_BASE_URL}/images/${compareScan.afterImageKey}`}
-                                        beforeLabel={compareScan.startDate ? `AVANT (${compareScan.startDate})` : "AVANT"}
-                                        afterLabel={compareScan.endDate ? `APRÈS (${compareScan.endDate})` : "APRÈS"}
-                                    />
-                                </>
-                            );
-                        })()
-                    )}
-
-                    {compareScan?.orthoImageKey && (
-                        <div className="mt-4">
-                            <p className="text-xs font-semibold text-[#2A3A4E]/60 uppercase tracking-wide mb-2">Vue aérienne haute résolution (Esri World Imagery)</p>
-                            <img
-                                src={`${API_BASE_URL}/images/${compareScan.orthoImageKey}`}
-                                alt="Orthophoto haute résolution"
-                                className="w-full rounded-xl border border-gray-200"
-                            />
+                    {compareScan?.beforeImageKey && compareScan?.afterImageKey ? (
+                        <ImageComparator
+                            beforeSrc={`${API_BASE_URL}/images/${compareScan.beforeImageKey}`}
+                            afterSrc={`${API_BASE_URL}/images/${compareScan.afterImageKey}`}
+                            beforeLabel={compareScan.startDate ? `AVANT (${compareScan.startDate})` : "AVANT"}
+                            afterLabel={compareScan.endDate ? `APRÈS (${compareScan.endDate})` : "APRÈS"}
+                        />
+                    ) : (
+                        <div className="flex items-center justify-center py-12 text-sm text-[#2A3A4E]/40">
+                            Aucune image disponible pour cette analyse.
                         </div>
                     )}
                 </DialogContent>
