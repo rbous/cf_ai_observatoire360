@@ -157,13 +157,6 @@ async function fetchTileImage(
 /**
  * Fetch a high-resolution historical aerial image for a location
  * at the closest available date to the target.
- *
- * @param lat        - Latitude of the center point.
- * @param lng        - Longitude of the center point.
- * @param targetDate - Target date (ISO string, e.g. "2024-06-15").
- * @param bucket     - R2 bucket to store the image.
- * @param keyPrefix  - R2 key prefix.
- * @returns Image key and the actual release date used.
  */
 export async function fetchWaybackImage(
     lat: number,
@@ -206,4 +199,77 @@ export async function fetchWaybackImage(
 export async function getAvailableReleaseDates(): Promise<string[]> {
     const releases = await getReleases();
     return releases.map((r) => r.date);
+}
+
+/**
+ * Fetch a PAIR of before/after images at the SAME zoom level.
+ * This guarantees both images cover the exact same geographic area.
+ */
+export async function fetchWaybackPair(
+    lat: number,
+    lng: number,
+    startDate: string,
+    endDate: string,
+    bucket: R2Bucket,
+    keyPrefix: string,
+): Promise<{ before: WaybackImageResult | null; after: WaybackImageResult | null }> {
+    const releases = await getReleases();
+    const beforeRelease = findClosestRelease(releases, startDate);
+    const afterRelease = findClosestRelease(releases, endDate);
+
+    console.log(`[wayback-pair] before: ${beforeRelease.date}, after: ${afterRelease.date}`);
+
+    // Find a zoom level that works for BOTH releases
+    for (const zoom of [20, 19, 18, 17]) {
+        const { x, y } = latLngToTileCentered(lat, lng, zoom);
+
+        const beforeUrl = `${TILE_BASE}/${beforeRelease.releaseId}/${zoom}/${y}/${x}`;
+        const afterUrl = `${TILE_BASE}/${afterRelease.releaseId}/${zoom}/${y}/${x}`;
+
+        const [beforeRes, afterRes] = await Promise.all([
+            fetch(beforeUrl),
+            fetch(afterUrl),
+        ]);
+
+        if (!beforeRes.ok || !afterRes.ok) {
+            console.log(`[wayback-pair] z=${zoom} not available for both releases, trying lower...`);
+            continue;
+        }
+
+        const [beforeBuf, afterBuf] = await Promise.all([
+            beforeRes.arrayBuffer(),
+            afterRes.arrayBuffer(),
+        ]);
+
+        if (beforeBuf.byteLength < 500 || afterBuf.byteLength < 500) {
+            console.log(`[wayback-pair] z=${zoom} returned empty tiles, trying lower...`);
+            continue;
+        }
+
+        console.log(`[wayback-pair] Both tiles fetched at z=${zoom}`);
+
+        // Store both
+        const suffix = Math.random().toString(36).slice(2, 8);
+        const beforeKey = `${keyPrefix}-before-${beforeRelease.date}-${suffix}.jpg`;
+        const afterKey = `${keyPrefix}-after-${afterRelease.date}-${suffix}.jpg`;
+
+        await Promise.all([
+            bucket.put(beforeKey, beforeBuf, {
+                httpMetadata: { contentType: "image/jpeg" },
+                customMetadata: { source: "esri-wayback", releaseDate: beforeRelease.date },
+            }),
+            bucket.put(afterKey, afterBuf, {
+                httpMetadata: { contentType: "image/jpeg" },
+                customMetadata: { source: "esri-wayback", releaseDate: afterRelease.date },
+            }),
+        ]);
+
+        return {
+            before: { imageKey: beforeKey, releaseDate: beforeRelease.date },
+            after: { imageKey: afterKey, releaseDate: afterRelease.date },
+        };
+    }
+
+    console.warn("[wayback-pair] No common zoom level found for both releases");
+    return { before: null, after: null };
 }

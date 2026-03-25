@@ -31,7 +31,7 @@ import {
 } from "./lib/sentinel.js";
 import { computeDiffScore, classifyChange, type ClassificationResult } from "./lib/change-detection.js";
 import { fetchOrthophoto } from "./lib/orthophoto.js";
-import { fetchWaybackImage } from "./lib/wayback.js";
+import { fetchWaybackPair } from "./lib/wayback.js";
 import {
     sendEmail,
     buildAlertEmailHtml,
@@ -135,18 +135,18 @@ async function processMessage(
         const effectiveStartDate = startDate ?? new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
         try {
-            // Both before AND after use Wayback tiles at the same zoom level
-            // This ensures identical coverage area and resolution for comparison
-            const [afterWb, beforeWb] = await Promise.all([
-                fetchWaybackImage(latitude, longitude, effectiveEndDate, env.IMAGES_BUCKET, `wayback/${municipalityRow.code}/${jobId}-after`),
-                fetchWaybackImage(latitude, longitude, effectiveStartDate, env.IMAGES_BUCKET, `wayback/${municipalityRow.code}/${jobId}-before`),
-            ]);
+            // Fetch BOTH images at the SAME zoom level to guarantee identical area
+            const pair = await fetchWaybackPair(
+                latitude, longitude,
+                effectiveStartDate, effectiveEndDate,
+                env.IMAGES_BUCKET, `wayback/${municipalityRow.code}/${jobId}`,
+            );
 
-            afterImageKey = afterWb?.imageKey ?? null;
-            beforeImageKey = beforeWb?.imageKey ?? null;
-            imageryDate = afterWb?.releaseDate ?? effectiveEndDate;
+            beforeImageKey = pair.before?.imageKey ?? null;
+            afterImageKey = pair.after?.imageKey ?? null;
+            imageryDate = pair.after?.releaseDate ?? effectiveEndDate;
 
-            console.log(`[queue] Wayback: before=${beforeWb?.releaseDate ?? "none"}, after=${afterWb?.releaseDate ?? "none"}`);
+            console.log(`[queue] Wayback pair: before=${pair.before?.releaseDate ?? "none"}, after=${pair.after?.releaseDate ?? "none"}`);
         } catch (err) {
             const errorMsg = err instanceof Error ? err.message : String(err);
             await markJobFailed(db, jobId, `High-res image fetch failed: ${errorMsg}`);
