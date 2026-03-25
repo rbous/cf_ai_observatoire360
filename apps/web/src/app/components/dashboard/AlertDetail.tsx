@@ -158,7 +158,7 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
 
     const eventColors = {
         detection: "text-red-500 bg-red-50",
-        status: "text-[#6366F1] bg-[#6366F1]/10",
+        status: "text-[#137fec] bg-[#137fec]/10",
         assign: "text-blue-500 bg-blue-50",
         inspect: "text-amber-500 bg-amber-50",
     };
@@ -167,7 +167,7 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
         return (
             <div className="min-h-full bg-slate-950 p-4 md:p-6 flex items-center justify-center">
                 <div className="flex items-center gap-3 text-[#94A3B8]/60">
-                    <Loader2 className="w-5 h-5 animate-spin text-[#6366F1]" />
+                    <Loader2 className="w-5 h-5 animate-spin text-[#137fec]" />
                     <span className="text-sm font-medium">{t("alert_loading")}</span>
                 </div>
             </div>
@@ -180,7 +180,7 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                 <div className="max-w-5xl mx-auto">
                     <button
                         onClick={() => navigate("/tableau-de-bord")}
-                        className="inline-flex items-center gap-1.5 text-sm text-[#6366F1] hover:underline mb-5"
+                        className="inline-flex items-center gap-1.5 text-sm text-[#137fec] hover:underline mb-5"
                     >
                         <ArrowLeft className="w-4 h-4" />
                         {t("alert_back_to_map")}
@@ -202,7 +202,7 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                 {/* Back button */}
                 <button
                     onClick={() => navigate("/tableau-de-bord")}
-                    className="inline-flex items-center gap-1.5 text-sm text-[#6366F1] hover:underline mb-5"
+                    className="inline-flex items-center gap-1.5 text-sm text-[#137fec] hover:underline mb-5"
                 >
                     <ArrowLeft className="w-4 h-4" />
                     {t("alert_back_to_map")}
@@ -224,7 +224,7 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                         <select
                             value={effectiveStatus}
                             onChange={(e) => setCurrentStatus(e.target.value as AlertStatus)}
-                            className="text-sm border border-slate-700 rounded-lg px-3 py-1.5 bg-slate-900 text-[#E2E8F0] focus:outline-none focus:ring-1 focus:ring-[#6366F1]"
+                            className="text-sm border border-slate-700 rounded-lg px-3 py-1.5 bg-slate-900 text-[#E2E8F0] focus:outline-none focus:ring-1 focus:ring-[#137fec]"
                         >
                             {STATUS_OPTIONS.map((s) => (
                                 <option key={s} value={s}>{ALERT_STATUS_LABELS_I18N[s]}</option>
@@ -248,7 +248,7 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                         <Card>
                             <CardHeader className="pb-3">
                                 <CardTitle className="flex items-center gap-2 text-sm">
-                                    <Image className="w-4 h-4 text-[#6366F1]" />
+                                    <Image className="w-4 h-4 text-[#137fec]" />
                                     {t("alert_comparison")}
                                 </CardTitle>
                             </CardHeader>
@@ -287,7 +287,7 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                             <Card>
                                 <CardHeader className="pb-3">
                                     <CardTitle className="flex items-center gap-2 text-sm">
-                                        <BrainCircuit className="w-4 h-4 text-[#6366F1]" />
+                                        <BrainCircuit className="w-4 h-4 text-[#137fec]" />
                                         {t("alert_ai_analysis")}
                                     </CardTitle>
                                 </CardHeader>
@@ -357,7 +357,7 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                                             <p className="text-[10px] text-[#94A3B8]/50 uppercase font-semibold tracking-wide mb-1">
                                                 {t("alert_ai_summary")}
                                             </p>
-                                            <div className="bg-[#6366F1]/5 border border-[#6366F1]/15 rounded-lg p-3">
+                                            <div className="bg-[#137fec]/5 border border-[#137fec]/15 rounded-lg p-3">
                                                 <p className="text-sm text-[#E2E8F0] leading-relaxed">
                                                     {alert.aiSummary}
                                                 </p>
@@ -382,7 +382,7 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                         <Card>
                             <CardHeader className="pb-3">
                                 <CardTitle className="flex items-center gap-2 text-sm">
-                                    <FileText className="w-4 h-4 text-[#6366F1]" />
+                                    <FileText className="w-4 h-4 text-[#137fec]" />
                                     {t("alert_technical_data")}
                                 </CardTitle>
                             </CardHeader>
@@ -432,7 +432,7 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                         <Card>
                             <CardHeader className="pb-3">
                                 <CardTitle className="flex items-center gap-2 text-sm">
-                                    <Clock className="w-4 h-4 text-[#6366F1]" />
+                                    <Clock className="w-4 h-4 text-[#137fec]" />
                                     {t("alert_history")}
                                 </CardTitle>
                             </CardHeader>
@@ -484,7 +484,7 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                         <Card>
                             <CardHeader className="pb-2">
                                 <CardTitle className="text-sm flex items-center gap-1.5">
-                                    <MapPin className="w-4 h-4 text-[#6366F1]" />
+                                    <MapPin className="w-4 h-4 text-[#137fec]" />
                                     {t("alert_location")}
                                 </CardTitle>
                             </CardHeader>
@@ -516,7 +516,7 @@ export function AlertDetail({ alertId = "ALT-001" }: AlertDetailProps) {
                         <Card>
                             <CardHeader className="pb-2">
                                 <CardTitle className="text-sm flex items-center gap-1.5">
-                                    <Calendar className="w-4 h-4 text-[#6366F1]" />
+                                    <Calendar className="w-4 h-4 text-[#137fec]" />
                                     {t("alert_detection")}
                                 </CardTitle>
                             </CardHeader>

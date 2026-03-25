@@ -41,15 +41,15 @@ export default function Navbar() {
                     <div className="flex items-center justify-between h-16 lg:h-20">
                         {/* Logo */}
                         <Link to="/" className="flex items-center gap-2 group">
-                            <div className="w-8 h-8 rounded-full bg-[#6366F1] flex items-center justify-center">
+                            <div className="w-8 h-8 rounded-full bg-[#137fec] flex items-center justify-center">
                                 <span className="text-white font-bold text-xs">O</span>
                             </div>
                             <span
                                 className={`font-bold text-lg tracking-tight transition-colors ${
                                     isScrolled ? "text-[#E2E8F0]" : "text-[#E2E8F0]"
-                                } group-hover:text-[#6366F1]`}
+                                } group-hover:text-[#137fec]`}
                             >
-                                Observatoire <span className="text-[#6366F1]">360</span>
+                                Observatoire <span className="text-[#137fec]">360</span>
                             </span>
                         </Link>
 
@@ -59,7 +59,7 @@ export default function Navbar() {
                                 <button
                                     key={link.label}
                                     onClick={() => handleNavClick(link.href)}
-                                    className="text-xs font-semibold tracking-wide text-[#E2E8F0] hover:text-[#6366F1] transition-colors cursor-pointer whitespace-nowrap"
+                                    className="text-xs font-semibold tracking-wide text-[#E2E8F0] hover:text-[#137fec] transition-colors cursor-pointer whitespace-nowrap"
                                 >
                                     {link.label}
                                 </button>
@@ -71,12 +71,12 @@ export default function Navbar() {
                             {/* Language toggle */}
                             <button
                                 onClick={toggleLocale}
-                                className="hidden sm:flex items-center gap-1 text-xs font-semibold text-[#E2E8F0]/60 hover:text-[#6366F1] transition-colors tracking-wide"
+                                className="hidden sm:flex items-center gap-1 text-xs font-semibold text-[#E2E8F0]/60 hover:text-[#137fec] transition-colors tracking-wide"
                                 aria-label="Toggle language"
                             >
-                                <span className={locale === "fr" ? "text-[#6366F1] font-bold" : ""}>FR</span>
+                                <span className={locale === "fr" ? "text-[#137fec] font-bold" : ""}>FR</span>
                                 <span className="text-[#E2E8F0]/30">|</span>
-                                <span className={locale === "en" ? "text-[#6366F1] font-bold" : ""}>EN</span>
+                                <span className={locale === "en" ? "text-[#137fec] font-bold" : ""}>EN</span>
                             </button>
                             <Link to="/connexion" className="hidden sm:block">
                                 <Button variant="accent" size="default" className="font-bold tracking-wide text-xs uppercase">
@@ -85,7 +85,7 @@ export default function Navbar() {
                             </Link>
                             <button
                                 onClick={() => setIsMobileOpen(!isMobileOpen)}
-                                className="lg:hidden p-2 rounded-lg text-[#E2E8F0] hover:bg-[#6366F1]/10 transition-colors"
+                                className="lg:hidden p-2 rounded-lg text-[#E2E8F0] hover:bg-[#137fec]/10 transition-colors"
                                 aria-label="Menu"
                             >
                                 {isMobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -110,7 +110,7 @@ export default function Navbar() {
                                 <button
                                     key={link.label}
                                     onClick={() => handleNavClick(link.href)}
-                                    className="text-left px-4 py-3 text-sm font-semibold text-[#E2E8F0] hover:text-[#6366F1] hover:bg-[#6366F1]/5 rounded-lg transition-colors tracking-wide"
+                                    className="text-left px-4 py-3 text-sm font-semibold text-[#E2E8F0] hover:text-[#137fec] hover:bg-[#137fec]/5 rounded-lg transition-colors tracking-wide"
                                 >
                                     {link.label}
                                 </button>
@@ -118,12 +118,12 @@ export default function Navbar() {
                             <div className="pt-2 border-t border-slate-800 mt-2 flex flex-col gap-2">
                                 <button
                                     onClick={toggleLocale}
-                                    className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-[#E2E8F0]/60 hover:text-[#6366F1] transition-colors"
+                                    className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-[#E2E8F0]/60 hover:text-[#137fec] transition-colors"
                                     aria-label="Toggle language"
                                 >
-                                    <span className={locale === "fr" ? "text-[#6366F1] font-bold" : ""}>FR</span>
+                                    <span className={locale === "fr" ? "text-[#137fec] font-bold" : ""}>FR</span>
                                     <span className="text-[#E2E8F0]/30">|</span>
-                                    <span className={locale === "en" ? "text-[#6366F1] font-bold" : ""}>EN</span>
+                                    <span className={locale === "en" ? "text-[#137fec] font-bold" : ""}>EN</span>
                                 </button>
                                 <Link to="/connexion" onClick={() => setIsMobileOpen(false)}>
                                     <Button variant="accent" size="lg" className="w-full font-bold tracking-wide text-sm uppercase">

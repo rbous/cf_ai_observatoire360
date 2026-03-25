@@ -92,12 +92,12 @@ export function PlanningView() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-xs text-[#94A3B8]/60 font-medium">{t("planning_this_week")}</p>
-                                <p className="text-2xl font-black text-[#6366F1]">
+                                <p className="text-2xl font-black text-[#137fec]">
                                     {isLoading ? "…" : thisWeekCount}
                                 </p>
                             </div>
-                            <div className="w-9 h-9 rounded-xl bg-[#6366F1]/10 flex items-center justify-center">
-                                <Calendar className="w-4.5 h-4.5 text-[#6366F1]" />
+                            <div className="w-9 h-9 rounded-xl bg-[#137fec]/10 flex items-center justify-center">
+                                <Calendar className="w-4.5 h-4.5 text-[#137fec]" />
                             </div>
                         </div>
                     </CardContent>
@@ -152,14 +152,14 @@ export function PlanningView() {
                 <Card className="xl:col-span-3">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-bold text-[#E2E8F0] flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-[#6366F1]" />
+                            <Calendar className="w-4 h-4 text-[#137fec]" />
                             {t("planning_calendar")}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="overflow-x-auto">
                         {isLoading ? (
                             <div className="flex items-center justify-center h-32 gap-2 text-[#94A3B8]/40">
-                                <Loader2 className="w-4 h-4 animate-spin text-[#6366F1]" />
+                                <Loader2 className="w-4 h-4 animate-spin text-[#137fec]" />
                                 <span className="text-xs">{t("planning_loading")}</span>
                             </div>
                         ) : (
@@ -192,15 +192,15 @@ export function PlanningView() {
                                                             className={cn(
                                                                 "min-h-[38px] rounded-lg border cursor-pointer transition-all text-left px-2 py-1",
                                                                 insp
-                                                                    ? "bg-[#6366F1]/10 border-[#6366F1]/30 hover:bg-[#6366F1]/15"
+                                                                    ? "bg-[#137fec]/10 border-[#137fec]/30 hover:bg-[#137fec]/15"
                                                                     : isSelected
-                                                                    ? "bg-[#6366F1]/5 border-[#6366F1]/50 border-dashed"
+                                                                    ? "bg-[#137fec]/5 border-[#137fec]/50 border-dashed"
                                                                     : "bg-slate-950 border-slate-800 hover:bg-slate-800 hover:border-slate-700"
                                                             )}
                                                         >
                                                             {insp ? (
                                                                 <div>
-                                                                    <p className="text-[10px] font-bold text-[#6366F1] leading-tight">{insp.alertId}</p>
+                                                                    <p className="text-[10px] font-bold text-[#137fec] leading-tight">{insp.alertId}</p>
                                                                     <p className="text-[10px] text-[#94A3B8]/60 truncate leading-tight">
                                                                         {insp.id}
                                                                     </p>
@@ -209,7 +209,7 @@ export function PlanningView() {
                                                                     </p>
                                                                 </div>
                                                             ) : isSelected ? (
-                                                                <p className="text-[10px] text-[#6366F1]/60 font-medium">{t("planning_add")}</p>
+                                                                <p className="text-[10px] text-[#137fec]/60 font-medium">{t("planning_add")}</p>
                                                             ) : null}
                                                         </div>
                                                     </td>
@@ -235,7 +235,7 @@ export function PlanningView() {
                         <CardContent className="space-y-2">
                             {isLoadingPlanned ? (
                                 <div className="flex items-center justify-center h-16 gap-2 text-[#94A3B8]/40">
-                                    <Loader2 className="w-3.5 h-3.5 animate-spin text-[#6366F1]" />
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin text-[#137fec]" />
                                     <span className="text-xs">{t("planning_loading")}</span>
                                 </div>
                             ) : plannedInspections.length === 0 ? (
@@ -247,7 +247,7 @@ export function PlanningView() {
                                         className="p-3 rounded-xl border border-slate-800 bg-slate-950 hover:bg-slate-800 transition-colors"
                                     >
                                         <div className="flex items-center justify-between mb-1">
-                                            <span className="text-xs font-bold text-[#6366F1]">{item.alertId}</span>
+                                            <span className="text-xs font-bold text-[#137fec]">{item.alertId}</span>
                                             <span className={cn("text-[10px] font-semibold px-2 py-0.5 rounded-full", RISK_COLORS.high)}>
                                                 {t("planning_planned")}
                                             </span>
@@ -270,9 +270,9 @@ export function PlanningView() {
 
                     {/* Selected cell detail */}
                     {selectedCell && (
-                        <Card className="border-[#6366F1]/30">
+                        <Card className="border-[#137fec]/30">
                             <CardHeader className="pb-2">
-                                <CardTitle className="text-xs font-bold text-[#6366F1]">
+                                <CardTitle className="text-xs font-bold text-[#137fec]">
                                     {selectedCell.day} {t("planning_at")} {selectedCell.time}
                                 </CardTitle>
                             </CardHeader>

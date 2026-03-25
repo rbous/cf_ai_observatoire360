@@ -17,52 +17,44 @@ export default function Hero() {
                 className="absolute inset-0 pointer-events-none"
                 style={{
                     backgroundImage:
-                        "linear-gradient(rgba(99,102,241,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.06) 1px, transparent 1px)",
+                        "linear-gradient(rgba(19,127,236,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(19,127,236,0.06) 1px, transparent 1px)",
                     backgroundSize: "48px 48px",
                 }}
             />
 
-            {/* Radial glow behind text */}
+            {/* Blue radial glow behind main text */}
             <div
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] pointer-events-none"
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] pointer-events-none"
                 style={{
-                    background: "radial-gradient(ellipse at center, rgba(99,102,241,0.12) 0%, transparent 70%)",
+                    background: "radial-gradient(ellipse at center, rgba(19,127,236,0.10) 0%, transparent 68%)",
                 }}
             />
 
-            {/* Amber accent glow */}
-            <div
-                className="absolute bottom-1/3 right-1/4 w-64 h-64 pointer-events-none opacity-20 blur-3xl"
-                style={{ background: "radial-gradient(circle, #D4A843, transparent)" }}
-            />
-
             <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center py-20">
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.7, ease: "easeOut" }}
-                >
-                    <span className="inline-block text-xs font-bold tracking-widest text-[#6366F1] uppercase mb-6 bg-[#6366F1]/10 px-4 py-1.5 rounded-full border border-[#6366F1]/20">
-                        Technologie québécoise
-                    </span>
-                </motion.div>
-
                 <motion.h1
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
-                    className="text-6xl sm:text-7xl lg:text-8xl font-black uppercase tracking-tight text-white leading-none mb-4"
+                    transition={{ duration: 0.7, ease: "easeOut" }}
+                    className="text-7xl sm:text-8xl lg:text-[9rem] font-black uppercase tracking-tight text-white leading-none mb-0"
                 >
                     OBSERVATOIRE
-                    <br />
-                    <span className="text-[#6366F1]">360</span>
                 </motion.h1>
+
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.7, delay: 0.08, ease: "easeOut" }}
+                    className="text-7xl sm:text-8xl lg:text-[9rem] font-black uppercase tracking-tight leading-none mb-6"
+                    style={{ color: "#137fec" }}
+                >
+                    360
+                </motion.div>
 
                 <motion.p
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
-                    className="text-lg sm:text-xl text-slate-400 max-w-2xl mb-4 leading-relaxed"
+                    transition={{ duration: 0.6, delay: 0.18, ease: "easeOut" }}
+                    className="text-base sm:text-lg text-slate-400 font-semibold tracking-widest mb-4 uppercase"
                 >
                     — VOTRE SOLUTION DE SURVEILLANCE TERRITORIALE
                 </motion.p>
@@ -70,8 +62,8 @@ export default function Hero() {
                 <motion.p
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.7, delay: 0.25, ease: "easeOut" }}
-                    className="text-base text-slate-500 max-w-xl mb-10 leading-relaxed"
+                    transition={{ duration: 0.6, delay: 0.25, ease: "easeOut" }}
+                    className="text-sm sm:text-base text-slate-500 max-w-xl mb-10 leading-relaxed"
                 >
                     Détectez automatiquement les constructions sans permis, recevez des alertes,
                     récupérez vos revenus et libérez votre équipe.
@@ -80,14 +72,14 @@ export default function Hero() {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
-                    className="flex flex-col sm:flex-row gap-4 justify-center"
+                    transition={{ duration: 0.6, delay: 0.32, ease: "easeOut" }}
+                    className="flex flex-col sm:flex-row gap-3 justify-center"
                 >
                     <Button
                         variant="accent"
                         size="xl"
                         onClick={handleDemoClick}
-                        className="font-bold tracking-wide uppercase"
+                        className="font-bold tracking-widest uppercase rounded-full px-8"
                     >
                         DÉMO GRATUITE
                     </Button>
@@ -98,6 +90,7 @@ export default function Hero() {
                             const el = document.getElementById("comment-ca-marche");
                             if (el) el.scrollIntoView({ behavior: "smooth" });
                         }}
+                        className="rounded-full px-8"
                     >
                         Comment ça marche
                     </Button>
@@ -107,17 +100,17 @@ export default function Hero() {
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ duration: 0.7, delay: 0.5 }}
-                    className="mt-16 flex flex-wrap gap-10 justify-center"
+                    transition={{ duration: 0.7, delay: 0.52 }}
+                    className="mt-16 flex flex-wrap gap-0 justify-center divide-x divide-slate-700"
                 >
                     {[
-                        { value: "100%", label: "Couverture territoire" },
-                        { value: "24/7", label: "Surveillance automatique" },
-                        { value: "48h", label: "Délai de réponse" },
+                        { value: "100%", label: "COUVERTURE TERRITOIRE" },
+                        { value: "24/7", label: "SURVEILLANCE AUTOMATIQUE" },
+                        { value: "48h", label: "DÉLAI DE RÉPONSE" },
                     ].map((stat) => (
-                        <div key={stat.label} className="text-center">
-                            <div className="text-3xl font-black text-[#6366F1]">{stat.value}</div>
-                            <div className="text-xs text-slate-500 font-medium mt-1 uppercase tracking-wider">{stat.label}</div>
+                        <div key={stat.label} className="text-center px-8 py-2">
+                            <div className="text-2xl font-black text-[#E2E8F0]">{stat.value}</div>
+                            <div className="text-[10px] text-slate-500 font-semibold mt-1 uppercase tracking-widest">{stat.label}</div>
                         </div>
                     ))}
                 </motion.div>
@@ -133,9 +126,9 @@ export default function Hero() {
                 <motion.div
                     animate={{ y: [0, 8, 0] }}
                     transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-                    className="w-6 h-10 rounded-full border-2 border-[#6366F1]/40 flex items-start justify-center p-1.5"
+                    className="w-6 h-10 rounded-full border-2 border-[#137fec]/40 flex items-start justify-center p-1.5"
                 >
-                    <div className="w-1 h-2 rounded-full bg-[#6366F1]" />
+                    <div className="w-1 h-2 rounded-full bg-[#137fec]" />
                 </motion.div>
             </motion.div>
         </section>

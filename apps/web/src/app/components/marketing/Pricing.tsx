@@ -16,7 +16,7 @@ const TIERS: PricingTier[] = [
     {
         name: "ESSENTIEL",
         tagline: "Pour les petites municipalités",
-        color: "#6366F1",
+        color: "#137fec",
         features: [
             "Surveillance satellite mensuelle",
             "Détection automatique de constructions",
@@ -81,7 +81,7 @@ function ROICalculator() {
     };
 
     return (
-        <div className="bg-slate-900 rounded-3xl shadow-none border border-[#6366F1]/10 p-8 max-w-2xl mx-auto mt-16">
+        <div className="bg-slate-900 rounded-3xl shadow-none border border-[#137fec]/10 p-8 max-w-2xl mx-auto mt-16">
             <h3 className="text-xl font-black uppercase text-[#E2E8F0] mb-2 text-center">
                 CALCULATEUR DE ROI
             </h3>
@@ -100,7 +100,7 @@ function ROICalculator() {
                         min="0"
                         value={values.constructions}
                         onChange={handleChange}
-                        className="h-10 rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
+                        className="h-10 rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#137fec] focus:border-transparent"
                     />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -113,7 +113,7 @@ function ROICalculator() {
                         min="0"
                         value={values.amendes}
                         onChange={handleChange}
-                        className="h-10 rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
+                        className="h-10 rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#137fec] focus:border-transparent"
                     />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -127,12 +127,12 @@ function ROICalculator() {
                         step="100"
                         value={values.estimation}
                         onChange={handleChange}
-                        className="h-10 rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#6366F1] focus:border-transparent"
+                        className="h-10 rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#137fec] focus:border-transparent"
                     />
                 </div>
             </div>
 
-            <div className="rounded-2xl p-6 text-center" style={{ background: "linear-gradient(135deg, #6366F1, #4F46E5)" }}>
+            <div className="rounded-2xl p-6 text-center" style={{ background: "linear-gradient(135deg, #137fec, #0D6BD6)" }}>
                 <p className="text-white/80 text-sm mb-2">Estimation de gains annuels</p>
                 <p className="text-4xl font-black text-white">
                     {roi.toLocaleString("fr-CA", { style: "currency", currency: "CAD", maximumFractionDigits: 0 })}
@@ -352,12 +352,12 @@ export default function Pricing() {
                 >
                     <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black uppercase text-[#E2E8F0] mb-4">
                         FORFAITS:{" "}
-                        <span className="text-[#6366F1]">UN INVESTISSEMENT RENTABLE!</span>
+                        <span className="text-[#137fec]">UN INVESTISSEMENT RENTABLE!</span>
                     </h2>
                     <p className="text-lg text-[#94A3B8]/70 max-w-xl mx-auto">
                         Choisissez le forfait adapté à la taille et aux besoins de votre municipalité
                     </p>
-                    <div className="mt-4 w-16 h-1 bg-[#6366F1] mx-auto rounded-full" />
+                    <div className="mt-4 w-16 h-1 bg-[#137fec] mx-auto rounded-full" />
                 </motion.div>
 
                 {/* Pricing cards */}

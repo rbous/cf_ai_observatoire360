@@ -22,13 +22,13 @@ const TYPE_META: Record<
     },
     status_change: {
         Icon: CheckCircle,
-        iconColor: "text-[#6366F1]",
-        iconBg: "bg-[#6366F1]/10",
+        iconColor: "text-[#137fec]",
+        iconBg: "bg-[#137fec]/10",
     },
     inspection_due: {
         Icon: Calendar,
-        iconColor: "text-[#6366F1]",
-        iconBg: "bg-[#6366F1]/10",
+        iconColor: "text-[#137fec]",
+        iconBg: "bg-[#137fec]/10",
     },
     system: {
         Icon: FileText,
@@ -97,7 +97,7 @@ export function NotificationPanel({ open = true, onClose }: NotificationPanelPro
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 shrink-0">
                 <div className="flex items-center gap-2">
-                    <Bell className="w-4 h-4 text-[#6366F1]" />
+                    <Bell className="w-4 h-4 text-[#137fec]" />
                     <h2 className="font-bold text-sm text-[#E2E8F0]">{t("notifications_title")}</h2>
                     {unreadCount > 0 && (
                         <span className="min-w-[18px] h-4.5 flex items-center justify-center rounded-full bg-[#DC2626] text-white text-[10px] font-bold px-1">
@@ -120,7 +120,7 @@ export function NotificationPanel({ open = true, onClose }: NotificationPanelPro
             <div className="flex-1 overflow-y-auto">
                 {isLoading ? (
                     <div className="flex items-center justify-center h-32 gap-2 text-[#94A3B8]/40">
-                        <Loader2 className="w-4 h-4 animate-spin text-[#6366F1]" />
+                        <Loader2 className="w-4 h-4 animate-spin text-[#137fec]" />
                         <span className="text-xs">{t("notifications_loading")}</span>
                     </div>
                 ) : notifications.length === 0 ? (
@@ -147,7 +147,7 @@ export function NotificationPanel({ open = true, onClose }: NotificationPanelPro
                                 className={cn(
                                     "w-full flex items-start gap-3 px-4 py-3 text-left",
                                     "hover:bg-slate-800 transition-colors border-b border-slate-800",
-                                    !notif.isRead && "bg-[#6366F1]/3"
+                                    !notif.isRead && "bg-[#137fec]/3"
                                 )}
                             >
                                 {/* Icon */}
@@ -165,7 +165,7 @@ export function NotificationPanel({ open = true, onClose }: NotificationPanelPro
                                             {notif.title}
                                         </p>
                                         {!notif.isRead && (
-                                            <span className="w-2 h-2 rounded-full bg-[#6366F1] shrink-0 mt-1" />
+                                            <span className="w-2 h-2 rounded-full bg-[#137fec] shrink-0 mt-1" />
                                         )}
                                     </div>
                                     <p className="text-[11px] text-[#94A3B8]/50 mt-0.5 truncate">{notif.message}</p>
@@ -181,7 +181,7 @@ export function NotificationPanel({ open = true, onClose }: NotificationPanelPro
             <div className="px-4 py-2.5 border-t border-slate-800 shrink-0">
                 <button
                     onClick={markAllAsRead}
-                    className="w-full text-xs text-[#6366F1] font-medium hover:underline"
+                    className="w-full text-xs text-[#137fec] font-medium hover:underline"
                 >
                     {t("notifications_mark_all_read")}
                 </button>

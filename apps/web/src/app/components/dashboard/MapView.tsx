@@ -177,7 +177,7 @@ export function MapView({ className }: MapViewProps) {
                                         {alert.scanJobId !== null && (
                                             <span
                                                 className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-                                                style={{ background: "#6366F1", color: "white" }}
+                                                style={{ background: "#137fec", color: "white" }}
                                             >
                                                 <BrainCircuit style={{ width: "10px", height: "10px" }} />
                                                 IA
@@ -189,7 +189,7 @@ export function MapView({ className }: MapViewProps) {
                                 <p className="text-[11px] text-[#94A3B8]/60 mb-2">{ALERT_TYPE_LABELS[alert.type]}</p>
                                 <button
                                     onClick={() => navigate(`/tableau-de-bord/alertes/${alert.id}`)}
-                                    className="w-full text-xs bg-[#6366F1] text-white px-3 py-1.5 rounded-lg font-medium hover:bg-[#4F46E5] transition-colors"
+                                    className="w-full text-xs bg-[#137fec] text-white px-3 py-1.5 rounded-lg font-medium hover:bg-[#0D6BD6] transition-colors"
                                 >
                                     {t("map_view_detail")}
                                 </button>

@@ -35,7 +35,7 @@ export default function About() {
                     <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black uppercase text-[#E2E8F0] mb-4">
                         À PROPOS
                     </h2>
-                    <div className="mt-4 w-16 h-1 bg-[#6366F1] mx-auto rounded-full" />
+                    <div className="mt-4 w-16 h-1 bg-[#137fec] mx-auto rounded-full" />
                 </motion.div>
 
                 {/* Founder card */}
@@ -46,10 +46,10 @@ export default function About() {
                     transition={{ duration: 0.7, delay: 0.1 }}
                     className="max-w-3xl mx-auto"
                 >
-                    <div className="bg-slate-900 rounded-3xl shadow-none overflow-hidden border border-[#6366F1]/10">
+                    <div className="bg-slate-900 rounded-3xl shadow-none overflow-hidden border border-[#137fec]/10">
                         <div className="flex flex-col md:flex-row">
                             {/* Image placeholder */}
-                            <div className="md:w-64 lg:w-80 flex-shrink-0 bg-gradient-to-br from-[#6366F1]/10 to-[#0F172A] flex items-center justify-center py-12 md:py-0">
+                            <div className="md:w-64 lg:w-80 flex-shrink-0 bg-gradient-to-br from-[#137fec]/10 to-[#0F172A] flex items-center justify-center py-12 md:py-0">
                                 <div className="flex flex-col items-center gap-4">
                                     {/* Gray circle with user icon */}
                                     <div className="w-32 h-32 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center">
@@ -68,7 +68,7 @@ export default function About() {
                             {/* Content */}
                             <div className="flex-1 p-8 lg:p-10 flex flex-col justify-center">
                                 {/* Quote marks */}
-                                <div className="text-5xl font-black text-[#6366F1]/20 leading-none mb-2 font-serif">
+                                <div className="text-5xl font-black text-[#137fec]/20 leading-none mb-2 font-serif">
                                     "
                                 </div>
 
@@ -81,7 +81,7 @@ export default function About() {
                                     <p className="text-[#E2E8F0] font-black text-lg uppercase tracking-wide">
                                         WALID BENARBIA
                                     </p>
-                                    <p className="text-[#6366F1] font-semibold text-sm tracking-widest">
+                                    <p className="text-[#137fec] font-semibold text-sm tracking-widest">
                                         — FONDATEUR
                                     </p>
                                 </div>
@@ -95,7 +95,7 @@ export default function About() {
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             aria-label={label}
-                                            className="w-9 h-9 rounded-full bg-[#E2E8F0] text-white flex items-center justify-center hover:bg-[#6366F1] transition-colors duration-200"
+                                            className="w-9 h-9 rounded-full bg-[#E2E8F0] text-white flex items-center justify-center hover:bg-[#137fec] transition-colors duration-200"
                                         >
                                             <Icon className="w-4 h-4" />
                                         </a>

@@ -57,7 +57,7 @@ function VideoPlaceholder({ label }: { label?: string }) {
         <div className="relative w-full aspect-video bg-slate-800 rounded-2xl overflow-hidden flex items-center justify-center group cursor-pointer hover:bg-slate-700 transition-colors">
             <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-900" />
             <div className="relative z-10 flex flex-col items-center gap-3">
-                <div className="w-16 h-16 rounded-full bg-[#6366F1] flex items-center justify-center shadow-none group-hover:scale-110 transition-transform">
+                <div className="w-16 h-16 rounded-full bg-[#137fec] flex items-center justify-center shadow-none group-hover:scale-110 transition-transform">
                     <Play className="w-8 h-8 text-white ml-1" fill="white" />
                 </div>
                 {label && (
@@ -86,7 +86,7 @@ export default function Resources() {
                     <p className="text-lg text-[#94A3B8]/70 max-w-xl mx-auto">
                         Tout ce que vous devez savoir pour prendre votre décision
                     </p>
-                    <div className="mt-4 w-16 h-1 bg-[#6366F1] mx-auto rounded-full" />
+                    <div className="mt-4 w-16 h-1 bg-[#137fec] mx-auto rounded-full" />
                 </motion.div>
 
                 {/* Main video */}
@@ -123,7 +123,7 @@ export default function Resources() {
                             >
                                 <VideoPlaceholder />
                                 <div className="p-5">
-                                    <p className="font-black text-[#6366F1] text-sm uppercase tracking-wide mb-2">
+                                    <p className="font-black text-[#137fec] text-sm uppercase tracking-wide mb-2">
                                         {t.municipality}
                                     </p>
                                     <p className="text-sm text-[#94A3B8]/80 italic leading-relaxed">

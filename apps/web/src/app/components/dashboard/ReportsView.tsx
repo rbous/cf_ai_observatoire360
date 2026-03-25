@@ -21,9 +21,9 @@ import { useLanguage } from "@/app/hooks/useLanguage";
 
 // Color maps for pie chart types and risk levels
 const TYPE_COLORS: Record<string, string> = {
-    construction: "#6366F1",
+    construction: "#137fec",
     extension: "#D4A843",
-    annexe: "#6366F1",
+    annexe: "#137fec",
     piscine: "#10B981",
 };
 
@@ -41,7 +41,7 @@ export function ReportsView() {
         return (
             <div className="p-4 md:p-6 flex items-center justify-center min-h-[300px]">
                 <div className="flex items-center gap-3 text-[#94A3B8]/60">
-                    <Loader2 className="w-5 h-5 animate-spin text-[#6366F1]" />
+                    <Loader2 className="w-5 h-5 animate-spin text-[#137fec]" />
                     <span className="text-sm font-medium">{t("reports_loading")}</span>
                 </div>
             </div>
@@ -77,8 +77,8 @@ export function ReportsView() {
             label: t("reports_total_alerts"),
             value: String(stats.totalAlerts),
             icon: AlertTriangle,
-            color: "#6366F1",
-            bg: "#6366F115",
+            color: "#137fec",
+            bg: "#137fec15",
         },
         {
             label: t("reports_confirmed"),
@@ -106,13 +106,13 @@ export function ReportsView() {
     const byTypeData = stats.alertsByType.map((entry) => ({
         name: ALERT_TYPE_LABELS_I18N[entry.type] ?? entry.type,
         value: entry.count,
-        color: TYPE_COLORS[entry.type] ?? "#6366F1",
+        color: TYPE_COLORS[entry.type] ?? "#137fec",
     }));
 
     const byRiskData = stats.alertsByRiskLevel.map((entry) => ({
         level: RISK_LEVEL_LABELS_I18N[entry.level] ?? entry.level,
         count: entry.count,
-        fill: RISK_COLORS[entry.level] ?? "#6366F1",
+        fill: RISK_COLORS[entry.level] ?? "#137fec",
     }));
 
     return (
@@ -169,9 +169,9 @@ export function ReportsView() {
                             <Line
                                 type="monotone"
                                 dataKey="count"
-                                stroke="#6366F1"
+                                stroke="#137fec"
                                 strokeWidth={2.5}
-                                dot={{ fill: "#6366F1", r: 4 }}
+                                dot={{ fill: "#137fec", r: 4 }}
                                 activeDot={{ r: 6 }}
                             />
                         </LineChart>

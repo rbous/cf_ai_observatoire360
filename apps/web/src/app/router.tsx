@@ -27,7 +27,7 @@ function PageLoader() {
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0F172A] to-white">
             <div className="flex flex-col items-center gap-4">
                 <div
-                    className="w-12 h-12 rounded-full border-4 border-[#6366F1] border-t-transparent animate-spin"
+                    className="w-12 h-12 rounded-full border-4 border-[#137fec] border-t-transparent animate-spin"
                 />
                 <p className="text-[#E2E8F0] font-medium">Chargement…</p>
             </div>

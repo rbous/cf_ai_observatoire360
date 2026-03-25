@@ -160,7 +160,7 @@ export function ImageComparator({
             <div
                 className={cn(
                     "absolute top-1/2 -translate-y-1/2 -translate-x-1/2",
-                    "w-10 h-10 rounded-full bg-slate-900 shadow-none border-2 border-[#6366F1]",
+                    "w-10 h-10 rounded-full bg-slate-900 shadow-none border-2 border-[#137fec]",
                     "flex items-center justify-center",
                     "transition-transform duration-75",
                     isDragging
@@ -172,7 +172,7 @@ export function ImageComparator({
                 onMouseDown={handleMouseDown}
                 onTouchStart={handleTouchStart}
             >
-                <ChevronsLeftRight className="w-5 h-5 text-[#6366F1]" />
+                <ChevronsLeftRight className="w-5 h-5 text-[#137fec]" />
             </div>
 
             {/* AVANT label */}

@@ -81,11 +81,11 @@ export default function LoginPage() {
                 {/* Logo */}
                 <div className="text-center mb-8">
                     <Link to="/" className="inline-flex items-center gap-2 group">
-                        <div className="w-10 h-10 rounded-full bg-[#6366F1] flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full bg-[#137fec] flex items-center justify-center">
                             <span className="text-white font-bold text-sm">O</span>
                         </div>
                         <span className="font-bold text-xl tracking-tight text-[#E2E8F0]">
-                            Observatoire <span className="text-[#6366F1]">360</span>
+                            Observatoire <span className="text-[#137fec]">360</span>
                         </span>
                     </Link>
                     <h1 className="mt-6 text-2xl font-black uppercase text-[#E2E8F0]">
@@ -128,7 +128,7 @@ export default function LoginPage() {
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-3 top-8 text-slate-400 hover:text-[#6366F1] transition-colors"
+                                className="absolute right-3 top-8 text-slate-400 hover:text-[#137fec] transition-colors"
                                 aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
                             >
                                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -138,7 +138,7 @@ export default function LoginPage() {
                         <div className="flex justify-end">
                             <Link
                                 to="/mot-de-passe-oublie"
-                                className="text-sm text-[#6366F1] hover:underline font-medium"
+                                className="text-sm text-[#137fec] hover:underline font-medium"
                             >
                                 {t("login_forgot")}
                             </Link>
@@ -175,7 +175,7 @@ export default function LoginPage() {
                                 key={city.email}
                                 onClick={() => handleDemoLogin(city.email)}
                                 disabled={demoLoading !== null}
-                                className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-slate-700 bg-slate-900 hover:border-[#6366F1]/40 hover:bg-[#6366F1]/5 transition-all text-left disabled:opacity-50"
+                                className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-slate-700 bg-slate-900 hover:border-[#137fec]/40 hover:bg-[#137fec]/5 transition-all text-left disabled:opacity-50"
                             >
                                 <span className="text-lg">{city.flag}</span>
                                 <div className="min-w-0">
@@ -197,7 +197,7 @@ export default function LoginPage() {
                             e.preventDefault();
                             window.location.href = "/#contact";
                         }}
-                        className="text-[#6366F1] hover:underline font-medium"
+                        className="text-[#137fec] hover:underline font-medium"
                     >
                         {t("login_book_demo")}
                     </a>

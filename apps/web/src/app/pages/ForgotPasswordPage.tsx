@@ -30,11 +30,11 @@ export default function ForgotPasswordPage() {
                 {/* Logo */}
                 <div className="text-center mb-8">
                     <Link to="/" className="inline-flex items-center gap-2">
-                        <div className="w-10 h-10 rounded-full bg-[#6366F1] flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full bg-[#137fec] flex items-center justify-center">
                             <span className="text-white font-bold text-sm">O</span>
                         </div>
                         <span className="font-bold text-xl tracking-tight text-[#E2E8F0]">
-                            Observatoire <span className="text-[#6366F1]">360</span>
+                            Observatoire <span className="text-[#137fec]">360</span>
                         </span>
                     </Link>
                     <h1 className="mt-6 text-2xl font-black uppercase text-[#E2E8F0]">
@@ -81,7 +81,7 @@ export default function ForgotPasswordPage() {
                 <div className="text-center mt-6">
                     <Link
                         to="/connexion"
-                        className="inline-flex items-center gap-1.5 text-sm text-[#6366F1] hover:underline font-medium"
+                        className="inline-flex items-center gap-1.5 text-sm text-[#137fec] hover:underline font-medium"
                     >
                         <ArrowLeft className="w-4 h-4" />
                         Retour à la connexion

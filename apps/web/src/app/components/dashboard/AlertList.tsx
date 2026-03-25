@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, SlidersHorizontal, Loader2, BrainCircuit } from "lucide-react";
+import { Search, Loader2, BrainCircuit } from "lucide-react";
 import type { RiskLevel, AlertStatus, AlertType } from "@observatoire360/shared";
-import { RiskBadge } from "@/app/components/shared/RiskBadge";
 import { StatusBadge } from "@/app/components/shared/StatusBadge";
 import { Badge } from "@/app/components/ui/badge";
 import { cn } from "@/app/lib/cn";
@@ -10,6 +9,12 @@ import { useAlerts } from "@/app/hooks/useAlerts";
 import { useLanguage } from "@/app/hooks/useLanguage";
 
 const ALL_OPTION = "all";
+
+const RISK_DOT: Record<RiskLevel, string> = {
+    high: "bg-red-500",
+    medium: "bg-amber-400",
+    low: "bg-green-500",
+};
 
 export function AlertList() {
     const navigate = useNavigate();
@@ -48,18 +53,17 @@ export function AlertList() {
     };
 
     return (
-        <div className="flex flex-col h-full bg-slate-900 border-r border-slate-700">
-            {/* Header */}
-            <div className="px-4 py-3 border-b border-slate-800 shrink-0">
+        <div className="flex flex-col h-full">
+            {/* Header with search */}
+            <div className="px-3 pt-3 pb-2 shrink-0 border-b border-slate-700/60">
                 <div className="flex items-center justify-between mb-2">
-                    <h2 className="text-sm font-bold text-[#E2E8F0]">
+                    <h2 className="text-xs font-bold text-[#E2E8F0] tracking-wide uppercase">
                         {t("dashboard_alerts")}{" "}
-                        <span className="text-[#6366F1] font-black">{isLoading ? "…" : total}</span>
+                        <span className="text-[#137fec]">{isLoading ? "…" : total}</span>
                     </h2>
-                    <SlidersHorizontal className="w-4 h-4 text-[#94A3B8]/40" />
                 </div>
 
-                {/* Search */}
+                {/* Search bar */}
                 <div className="relative mb-2">
                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#94A3B8]/40" />
                     <input
@@ -67,16 +71,16 @@ export function AlertList() {
                         placeholder={t("dashboard_search_address")}
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-700 bg-slate-950 focus:outline-none focus:ring-1 focus:ring-[#6366F1] focus:border-[#6366F1] text-[#E2E8F0] placeholder:text-[#94A3B8]/40"
+                        className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-700 bg-slate-800/60 focus:outline-none focus:ring-1 focus:ring-[#137fec] focus:border-[#137fec] text-[#E2E8F0] placeholder:text-[#94A3B8]/40"
                     />
                 </div>
 
-                {/* Filters */}
-                <div className="flex gap-1.5 flex-wrap">
+                {/* Compact filters */}
+                <div className="flex gap-1.5">
                     <select
                         value={filterRisk}
                         onChange={(e) => setFilterRisk(e.target.value as RiskLevel | "all")}
-                        className="flex-1 min-w-0 text-xs border border-slate-700 rounded-lg px-2 py-1 bg-slate-900 text-[#94A3B8] focus:outline-none focus:ring-1 focus:ring-[#6366F1]"
+                        className="flex-1 min-w-0 text-[11px] border border-slate-700 rounded-md px-1.5 py-1 bg-slate-800/60 text-[#94A3B8] focus:outline-none focus:ring-1 focus:ring-[#137fec]"
                     >
                         <option value={ALL_OPTION}>{t("dashboard_all_risks")}</option>
                         {(["high", "medium", "low"] as RiskLevel[]).map((r) => (
@@ -87,7 +91,7 @@ export function AlertList() {
                     <select
                         value={filterStatus}
                         onChange={(e) => setFilterStatus(e.target.value as AlertStatus | "all")}
-                        className="flex-1 min-w-0 text-xs border border-slate-700 rounded-lg px-2 py-1 bg-slate-900 text-[#94A3B8] focus:outline-none focus:ring-1 focus:ring-[#6366F1]"
+                        className="flex-1 min-w-0 text-[11px] border border-slate-700 rounded-md px-1.5 py-1 bg-slate-800/60 text-[#94A3B8] focus:outline-none focus:ring-1 focus:ring-[#137fec]"
                     >
                         <option value={ALL_OPTION}>{t("dashboard_all_statuses")}</option>
                         {(["a_analyser", "a_inspecter", "en_cours", "infraction_confirmee", "cloturee"] as AlertStatus[]).map((s) => (
@@ -98,7 +102,7 @@ export function AlertList() {
                     <select
                         value={filterType}
                         onChange={(e) => setFilterType(e.target.value as AlertType | "all")}
-                        className="flex-1 min-w-0 text-xs border border-slate-700 rounded-lg px-2 py-1 bg-slate-900 text-[#94A3B8] focus:outline-none focus:ring-1 focus:ring-[#6366F1]"
+                        className="flex-1 min-w-0 text-[11px] border border-slate-700 rounded-md px-1.5 py-1 bg-slate-800/60 text-[#94A3B8] focus:outline-none focus:ring-1 focus:ring-[#137fec]"
                     >
                         <option value={ALL_OPTION}>{t("dashboard_all_types")}</option>
                         {(["construction", "extension", "annexe", "piscine"] as AlertType[]).map((tp) => (
@@ -108,11 +112,11 @@ export function AlertList() {
                 </div>
             </div>
 
-            {/* Alert items */}
-            <div className="flex-1 overflow-y-auto">
+            {/* Alert cards list */}
+            <div className="flex-1 overflow-y-auto px-2 py-2 space-y-1.5">
                 {isLoading ? (
                     <div className="flex items-center justify-center h-32 gap-2 text-[#94A3B8]/40">
-                        <Loader2 className="w-4 h-4 animate-spin text-[#6366F1]" />
+                        <Loader2 className="w-4 h-4 animate-spin text-[#137fec]" />
                         <span className="text-xs">{t("dashboard_loading_alerts")}</span>
                     </div>
                 ) : error ? (
@@ -129,36 +133,39 @@ export function AlertList() {
                             key={alert.id}
                             onClick={() => navigate(`/tableau-de-bord/alertes/${alert.id}`)}
                             className={cn(
-                                "w-full flex flex-col gap-1.5 px-4 py-3 text-left",
-                                "border-b border-gray-50 hover:bg-slate-950 transition-colors",
-                                "focus:outline-none focus:bg-[#6366F1]/5"
+                                "w-full flex flex-col gap-1.5 px-3 py-2.5 text-left",
+                                "bg-slate-800/80 border border-slate-700 rounded-lg",
+                                "hover:bg-slate-700/60 hover:border-slate-600 transition-colors",
+                                "focus:outline-none focus:ring-1 focus:ring-[#137fec]"
                             )}
                         >
+                            {/* Alert ID in monospace */}
+                            <span className="text-[10px] font-mono font-semibold text-[#94A3B8] truncate block">
+                                {alert.id}
+                            </span>
+
+                            {/* Risk dot + risk label + status badge */}
                             <div className="flex items-center justify-between gap-2">
-                                <span className="text-[11px] font-bold text-[#6366F1]">{alert.id}</span>
-                                <div className="flex items-center gap-1">
-                                    <RiskBadge level={alert.riskLevel} />
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                    <span className={cn("w-2 h-2 rounded-full shrink-0", RISK_DOT[alert.riskLevel])} />
+                                    <span className="text-[11px] text-[#94A3B8] font-medium truncate">
+                                        {RISK_LEVEL_LABELS_I18N[alert.riskLevel]}
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-1 shrink-0">
+                                    <StatusBadge status={alert.status} />
                                     {alert.scanJobId !== null && (
                                         <Badge
-                                            className="gap-0.5 px-1.5 py-0.5 text-[10px] font-bold leading-none"
-                                            style={{ background: "#6366F1", color: "white", border: "none" }}
+                                            className="gap-0.5 px-1.5 py-0.5 text-[9px] font-bold leading-none"
+                                            style={{ background: "#137fec", color: "white", border: "none" }}
                                         >
-                                            <BrainCircuit className="w-2.5 h-2.5 shrink-0" />
+                                            <BrainCircuit className="w-2 h-2 shrink-0" />
                                             {alert.confidence != null
                                                 ? `IA ${Math.round(alert.confidence * 100)}%`
                                                 : "IA"}
                                         </Badge>
                                     )}
                                 </div>
-                            </div>
-                            <p className="text-xs font-semibold text-[#E2E8F0] leading-snug">
-                                {alert.address ?? `${alert.latitude.toFixed(4)}, ${alert.longitude.toFixed(4)}`}
-                            </p>
-                            <div className="flex items-center justify-between gap-2">
-                                <StatusBadge status={alert.status} />
-                                <span className="text-[10px] text-[#94A3B8]/40">
-                                    {new Date(alert.detectedAt).toLocaleDateString("fr-CA")}
-                                </span>
                             </div>
                         </button>
                     ))

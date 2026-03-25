@@ -20,7 +20,7 @@ export default function NotFoundPage() {
                         <span
                             className="text-[160px] sm:text-[200px] font-black leading-none select-none"
                             style={{
-                                background: "linear-gradient(135deg, #6366F1, #1E293B)",
+                                background: "linear-gradient(135deg, #137fec, #1E293B)",
                                 WebkitBackgroundClip: "text",
                                 WebkitTextFillColor: "transparent",
                                 backgroundClip: "text",
@@ -52,7 +52,7 @@ export default function NotFoundPage() {
                             </Link>
                             <button
                                 onClick={() => window.history.back()}
-                                className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-xl border-2 border-[#6366F1] text-[#6366F1] font-semibold hover:bg-[#6366F1] hover:text-white transition-colors"
+                                className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-xl border-2 border-[#137fec] text-[#137fec] font-semibold hover:bg-[#137fec] hover:text-white transition-colors"
                             >
                                 <ArrowLeft className="w-4 h-4" />
                                 Page précédente

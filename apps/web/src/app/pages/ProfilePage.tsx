@@ -118,7 +118,7 @@ export default function ProfilePage() {
         return (
             <div className="p-4 md:p-6 flex items-center justify-center min-h-[300px]">
                 <div className="flex items-center gap-3 text-[#94A3B8]/60">
-                    <Loader2 className="w-5 h-5 animate-spin text-[#6366F1]" />
+                    <Loader2 className="w-5 h-5 animate-spin text-[#137fec]" />
                     <span className="text-sm font-medium">{t("profile_loading")}</span>
                 </div>
             </div>

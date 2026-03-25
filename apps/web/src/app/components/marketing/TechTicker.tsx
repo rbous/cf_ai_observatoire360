@@ -15,7 +15,7 @@ export default function TechTicker() {
     const trackRef = useRef<HTMLDivElement>(null);
 
     return (
-        <div className="w-full bg-[#6366F1] py-4 overflow-hidden select-none" aria-hidden="true">
+        <div className="w-full bg-[#137fec] py-4 overflow-hidden select-none" aria-hidden="true">
             <div
                 className="flex whitespace-nowrap"
                 style={{

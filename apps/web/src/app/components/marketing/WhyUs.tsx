@@ -15,7 +15,7 @@ const BLOBS: BlobData[] = [
     {
         problem: "Inspections manuelles coûteuses",
         solution: "Détection automatique par satellite",
-        color: "#6366F1",
+        color: "#137fec",
         delay: 0,
         floatY: [0, -16, 0],
         floatX: [0, 6, 0],
@@ -24,7 +24,7 @@ const BLOBS: BlobData[] = [
     {
         problem: "Constructions illégales non détectées",
         solution: "Alertes en temps réel avec preuves",
-        color: "#4F46E5",
+        color: "#0D6BD6",
         delay: 0.4,
         floatY: [0, -12, 0],
         floatX: [0, -8, 0],
@@ -33,7 +33,7 @@ const BLOBS: BlobData[] = [
     {
         problem: "Perte de revenus municipaux",
         solution: "Récupération des revenus perdus",
-        color: "#818CF8",
+        color: "#3B9AFF",
         delay: 0.8,
         floatY: [0, -20, 0],
         floatX: [0, 5, 0],
@@ -140,7 +140,7 @@ export default function WhyUs() {
                     <p className="text-lg text-[#94A3B8]/70 max-w-xl mx-auto">
                         Nous transformons vos défis municipaux en opportunités grâce à la technologie satellite
                     </p>
-                    <div className="mt-4 w-16 h-1 bg-[#6366F1] mx-auto rounded-full" />
+                    <div className="mt-4 w-16 h-1 bg-[#137fec] mx-auto rounded-full" />
                 </motion.div>
 
                 {/* Blobs grid */}
@@ -167,7 +167,7 @@ export default function WhyUs() {
                             key={stat.label}
                             className="text-center p-6 rounded-2xl bg-slate-900 border border-slate-700"
                         >
-                            <div className="text-3xl font-black text-[#6366F1] mb-2">{stat.value}</div>
+                            <div className="text-3xl font-black text-[#137fec] mb-2">{stat.value}</div>
                             <div className="text-sm text-[#94A3B8]/70">{stat.label}</div>
                         </div>
                     ))}

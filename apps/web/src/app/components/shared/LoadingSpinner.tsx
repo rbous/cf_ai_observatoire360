@@ -17,7 +17,7 @@ export function LoadingSpinner({ text, className, size = "md" }: LoadingSpinnerP
         <div className={cn("flex flex-col items-center justify-center gap-3", className)}>
             <div
                 className={cn(
-                    "rounded-full border-[#6366F1] border-t-transparent animate-spin",
+                    "rounded-full border-[#137fec] border-t-transparent animate-spin",
                     SIZE_CLASSES[size]
                 )}
                 style={{ borderWidth: size === "md" ? "3px" : undefined }}

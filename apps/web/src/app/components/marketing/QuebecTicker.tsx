@@ -13,7 +13,7 @@ export default function QuebecTicker() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 text-center">
                 <h3 className="text-xl sm:text-2xl font-black uppercase text-[#E2E8F0] tracking-wide">
                     ADAPTÉ AU{" "}
-                    <span className="text-[#6366F1]">QUÉBEC</span>
+                    <span className="text-[#137fec]">QUÉBEC</span>
                 </h3>
                 <div className="mt-2 w-12 h-1 bg-[#D4A843] mx-auto rounded-full" />
             </div>
@@ -30,7 +30,7 @@ export default function QuebecTicker() {
                             key={index}
                             className="inline-flex items-center gap-6 text-white text-sm font-semibold tracking-wide pr-12"
                         >
-                            <span className="text-[#6366F1] text-lg" aria-hidden="true">❄</span>
+                            <span className="text-[#137fec] text-lg" aria-hidden="true">❄</span>
                             {item}
                         </span>
                     ))}

@@ -53,12 +53,12 @@ export default function Footer() {
                     {/* Brand */}
                     <div className="lg:col-span-2">
                         <Link to="/" className="inline-flex items-center gap-2 mb-4 group">
-                            <div className="w-8 h-8 rounded-full bg-[#6366F1] flex items-center justify-center">
+                            <div className="w-8 h-8 rounded-full bg-[#137fec] flex items-center justify-center">
                                 <span className="text-white font-bold text-xs">O</span>
                             </div>
                             <span className="font-bold text-xl tracking-tight">
                                 Observatoire{" "}
-                                <span className="text-[#6366F1]">360</span>
+                                <span className="text-[#137fec]">360</span>
                             </span>
                         </Link>
 
@@ -85,14 +85,14 @@ export default function Footer() {
                                 href={`tel:${CONTACT_PHONE.replace(/\s/g, "")}`}
                                 className="flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors"
                             >
-                                <Phone className="w-4 h-4 text-[#6366F1] shrink-0" />
+                                <Phone className="w-4 h-4 text-[#137fec] shrink-0" />
                                 {CONTACT_PHONE}
                             </a>
                             <a
                                 href={`mailto:${CONTACT_EMAIL}`}
                                 className="flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors"
                             >
-                                <Mail className="w-4 h-4 text-[#6366F1] shrink-0" />
+                                <Mail className="w-4 h-4 text-[#137fec] shrink-0" />
                                 {CONTACT_EMAIL}
                             </a>
                         </div>
@@ -142,7 +142,7 @@ export default function Footer() {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     aria-label={label}
-                                    className="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center hover:bg-[#6366F1] hover:border-[#6366F1] transition-colors duration-200"
+                                    className="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center hover:bg-[#137fec] hover:border-[#137fec] transition-colors duration-200"
                                 >
                                     <Icon className="w-4 h-4" />
                                 </a>

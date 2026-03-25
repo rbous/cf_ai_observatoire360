@@ -86,7 +86,7 @@ export function LayersPanel() {
                 "flex items-center justify-between p-3 rounded-xl border transition-all",
                 applied
                     ? "bg-green-50 border-green-200"
-                    : "bg-[#6366F1]/5 border-[#6366F1]/20"
+                    : "bg-[#137fec]/5 border-[#137fec]/20"
             )}>
                 <div>
                     <p className="text-sm font-semibold text-[#E2E8F0]">
@@ -107,7 +107,7 @@ export function LayersPanel() {
                     <Card key={label}>
                         <CardHeader className="pb-2">
                             <CardTitle className="text-sm font-bold text-[#E2E8F0] flex items-center gap-2">
-                                <Icon className="w-4 h-4 text-[#6366F1]" />
+                                <Icon className="w-4 h-4 text-[#137fec]" />
                                 {label}
                             </CardTitle>
                         </CardHeader>
@@ -121,7 +121,7 @@ export function LayersPanel() {
                                         className={cn(
                                             "p-3 rounded-xl border transition-all",
                                             state.enabled
-                                                ? "bg-[#6366F1]/5 border-[#6366F1]/20"
+                                                ? "bg-[#137fec]/5 border-[#137fec]/20"
                                                 : "bg-slate-950 border-slate-800"
                                         )}
                                     >
@@ -130,7 +130,7 @@ export function LayersPanel() {
                                                 <div
                                                     className={cn(
                                                         "w-3 h-3 rounded-full border-2 border-white shadow-none",
-                                                        state.enabled ? "bg-[#6366F1]" : "bg-gray-300"
+                                                        state.enabled ? "bg-[#137fec]" : "bg-gray-300"
                                                     )}
                                                 />
                                                 <span className={cn(
@@ -146,7 +146,7 @@ export function LayersPanel() {
                                                 onClick={() => toggleLayer(key)}
                                                 className={cn(
                                                     "relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none",
-                                                    state.enabled ? "bg-[#6366F1]" : "bg-gray-300"
+                                                    state.enabled ? "bg-[#137fec]" : "bg-gray-300"
                                                 )}
                                                 role="switch"
                                                 aria-checked={state.enabled}
@@ -172,7 +172,7 @@ export function LayersPanel() {
                                                     max={100}
                                                     value={state.opacity}
                                                     onChange={(e) => setOpacity(key, Number(e.target.value))}
-                                                    className="flex-1 h-1.5 accent-[#6366F1] cursor-pointer"
+                                                    className="flex-1 h-1.5 accent-[#137fec] cursor-pointer"
                                                 />
                                                 <span className="text-[10px] text-[#94A3B8]/50 font-mono w-8 text-right shrink-0">
                                                     {state.opacity}%

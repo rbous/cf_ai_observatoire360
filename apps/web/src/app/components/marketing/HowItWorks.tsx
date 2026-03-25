@@ -16,7 +16,7 @@ const STEPS: Step[] = [
         id: 1,
         title: "SURVEILLANCE",
         icon: Satellite,
-        color: "#6366F1",
+        color: "#137fec",
         popupItems: [
             "Images satellite",
             "Imagerie haute définition",
@@ -27,7 +27,7 @@ const STEPS: Step[] = [
         id: 2,
         title: "DÉTECTION IA",
         icon: BrainCircuit,
-        color: "#4F46E5",
+        color: "#0D6BD6",
         popupItems: [
             "Dernière technologie",
             "Comparaison des imageries",
@@ -169,13 +169,13 @@ export default function HowItWorks() {
                     <p className="text-lg text-[#94A3B8]/70 max-w-xl mx-auto">
                         Une technologie simple, une valeur concrète
                     </p>
-                    <div className="mt-4 w-16 h-1 bg-[#6366F1] mx-auto rounded-full" />
+                    <div className="mt-4 w-16 h-1 bg-[#137fec] mx-auto rounded-full" />
                 </motion.div>
 
                 {/* Steps grid */}
                 <div className="relative">
                     {/* Dashed connecting line (desktop) */}
-                    <div className="hidden lg:block absolute top-[88px] left-[calc(12.5%+40px)] right-[calc(12.5%+40px)] h-0 border-t-2 border-dashed border-[#6366F1]/30 z-0" />
+                    <div className="hidden lg:block absolute top-[88px] left-[calc(12.5%+40px)] right-[calc(12.5%+40px)] h-0 border-t-2 border-dashed border-[#137fec]/30 z-0" />
 
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-4 relative z-10 pb-24">
                         {STEPS.map((step, index) => (

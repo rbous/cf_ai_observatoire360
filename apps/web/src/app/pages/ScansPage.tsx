@@ -190,7 +190,7 @@ export default function ScansPage() {
         return (
             <div className="p-4 md:p-6 flex items-center justify-center min-h-[300px]">
                 <div className="flex items-center gap-3 text-[#94A3B8]/60">
-                    <Loader2 className="w-5 h-5 animate-spin text-[#6366F1]" />
+                    <Loader2 className="w-5 h-5 animate-spin text-[#137fec]" />
                     <span className="text-sm font-medium">{t("scans_loading")}</span>
                 </div>
             </div>
@@ -245,8 +245,8 @@ export default function ScansPage() {
             {scans.length === 0 ? (
                 <Card>
                     <CardContent className="py-16 flex flex-col items-center gap-3 text-center">
-                        <div className="w-12 h-12 rounded-2xl bg-[#6366F1]/10 flex items-center justify-center">
-                            <Clock className="w-6 h-6 text-[#6366F1]" />
+                        <div className="w-12 h-12 rounded-2xl bg-[#137fec]/10 flex items-center justify-center">
+                            <Clock className="w-6 h-6 text-[#137fec]" />
                         </div>
                         <p className="text-sm font-medium text-[#94A3B8]/70">
                             {t("scans_empty")}
@@ -330,7 +330,7 @@ export default function ScansPage() {
                                                     <Button
                                                         size="sm"
                                                         variant="outline"
-                                                        className="h-7 text-xs px-2.5 border-[#6366F1]/40 text-[#6366F1] hover:bg-[#6366F1]/5"
+                                                        className="h-7 text-xs px-2.5 border-[#137fec]/40 text-[#137fec] hover:bg-[#137fec]/5"
                                                         onClick={() => setCompareScan(scan)}
                                                     >
                                                         <Layers className="w-3.5 h-3.5" />
@@ -375,7 +375,7 @@ export default function ScansPage() {
                                     onClick={() => setScanMode(opt.value)}
                                     className={`flex-1 text-xs font-medium py-2 px-3 rounded-md transition-colors ${
                                         scanMode === opt.value
-                                            ? "bg-slate-900 text-[#6366F1] shadow-none"
+                                            ? "bg-slate-900 text-[#137fec] shadow-none"
                                             : "text-[#94A3B8]/60 hover:text-[#94A3B8]"
                                     }`}
                                 >

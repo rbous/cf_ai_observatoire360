@@ -51,11 +51,11 @@ export default function ResetPasswordPage() {
             >
                 <div className="text-center mb-8">
                     <Link to="/" className="inline-flex items-center gap-2">
-                        <div className="w-10 h-10 rounded-full bg-[#6366F1] flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full bg-[#137fec] flex items-center justify-center">
                             <span className="text-white font-bold text-sm">O</span>
                         </div>
                         <span className="font-bold text-xl tracking-tight text-[#E2E8F0]">
-                            Observatoire <span className="text-[#6366F1]">360</span>
+                            Observatoire <span className="text-[#137fec]">360</span>
                         </span>
                     </Link>
                     <h1 className="mt-6 text-2xl font-black uppercase text-[#E2E8F0]">
@@ -95,7 +95,7 @@ export default function ResetPasswordPage() {
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-8 text-slate-400 hover:text-[#6366F1] transition-colors"
+                                    className="absolute right-3 top-8 text-slate-400 hover:text-[#137fec] transition-colors"
                                 >
                                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                 </button>
@@ -115,7 +115,7 @@ export default function ResetPasswordPage() {
                                 <button
                                     type="button"
                                     onClick={() => setShowConfirm(!showConfirm)}
-                                    className="absolute right-3 top-8 text-slate-400 hover:text-[#6366F1] transition-colors"
+                                    className="absolute right-3 top-8 text-slate-400 hover:text-[#137fec] transition-colors"
                                 >
                                     {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                 </button>
