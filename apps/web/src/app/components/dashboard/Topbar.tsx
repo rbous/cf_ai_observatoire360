@@ -52,15 +52,15 @@ export function Topbar({
 
     return (
         <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-white shadow-sm border-b border-gray-200 flex items-center px-4 gap-3">
-            {/* Logo */}
-            <div className="flex items-center gap-2 shrink-0">
+            {/* Logo — links to home */}
+            <a href="/" className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity">
                 <div className="w-8 h-8 rounded-full bg-[#008B8B] flex items-center justify-center">
                     <span className="text-white font-black text-sm">O</span>
                 </div>
                 <span className="font-black text-base text-[#1A2332] hidden md:block">
                     Observatoire <span className="text-[#008B8B]">360</span>
                 </span>
-            </div>
+            </a>
 
             <div className="w-px h-6 bg-gray-200 mx-1 hidden md:block" />
 
