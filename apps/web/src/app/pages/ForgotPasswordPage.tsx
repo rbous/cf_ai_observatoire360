@@ -31,7 +31,7 @@ export default function ForgotPasswordPage() {
                 <div className="text-center mb-8">
                     <Link to="/" className="inline-flex items-center gap-2">
                         <div className="w-10 h-10 rounded-full bg-[#137fec] flex items-center justify-center">
-                            <span className="text-white font-bold text-sm">O</span>
+                            <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                         </div>
                         <span className="font-bold text-xl tracking-tight text-[#E2E8F0]">
                             Observatoire <span className="text-[#137fec]">360</span>

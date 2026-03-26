@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Button } from "@/app/components/ui/button";
+import { SatelliteGlobe } from "./SatelliteGlobe";
 
 export default function Hero() {
     const handleDemoClick = () => {
@@ -30,89 +31,102 @@ export default function Hero() {
                 }}
             />
 
-            <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center py-20">
-                <motion.h1
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.7, ease: "easeOut" }}
-                    className="text-7xl sm:text-8xl lg:text-[9rem] font-black uppercase tracking-tight text-white leading-none mb-0"
-                >
-                    OBSERVATOIRE
-                </motion.h1>
-
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.7, delay: 0.08, ease: "easeOut" }}
-                    className="text-7xl sm:text-8xl lg:text-[9rem] font-black uppercase tracking-tight leading-none mb-6"
-                    style={{ color: "#137fec" }}
-                >
-                    360
-                </motion.div>
-
-                <motion.p
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.18, ease: "easeOut" }}
-                    className="text-base sm:text-lg text-slate-400 font-semibold tracking-widest mb-4 uppercase"
-                >
-                    — VOTRE SOLUTION DE SURVEILLANCE TERRITORIALE
-                </motion.p>
-
-                <motion.p
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.25, ease: "easeOut" }}
-                    className="text-sm sm:text-base text-slate-500 max-w-xl mb-10 leading-relaxed"
-                >
-                    Détectez automatiquement les constructions sans permis, recevez des alertes,
-                    récupérez vos revenus et libérez votre équipe.
-                </motion.p>
-
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.32, ease: "easeOut" }}
-                    className="flex flex-col sm:flex-row gap-3 justify-center"
-                >
-                    <Button
-                        variant="accent"
-                        size="xl"
-                        onClick={handleDemoClick}
-                        className="font-bold tracking-widest uppercase rounded-full px-8"
+            <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center gap-8 lg:gap-0 py-16 lg:py-20">
+                {/* Left: Text content */}
+                <div className="flex-1 text-center lg:text-left">
+                    <motion.p
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                        className="text-xs sm:text-sm text-[#137fec] font-semibold tracking-[0.3em] uppercase mb-4"
                     >
-                        DÉMO GRATUITE
-                    </Button>
-                    <Button
-                        variant="outline"
-                        size="xl"
-                        onClick={() => {
-                            const el = document.getElementById("comment-ca-marche");
-                            if (el) el.scrollIntoView({ behavior: "smooth" });
-                        }}
-                        className="rounded-full px-8"
-                    >
-                        Comment ça marche
-                    </Button>
-                </motion.div>
+                        TECHNOLOGIE SATELLITAIRE
+                    </motion.p>
 
-                {/* Stats row */}
+                    <motion.h1
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.7, delay: 0.05, ease: "easeOut" }}
+                        className="text-5xl sm:text-7xl lg:text-8xl font-black uppercase tracking-tight text-white leading-[0.9] mb-2"
+                    >
+                        OBSERVATOIRE
+                    </motion.h1>
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
+                        className="text-5xl sm:text-7xl lg:text-8xl font-black uppercase tracking-tight leading-[0.9] mb-6"
+                        style={{ color: "#137fec" }}
+                    >
+                        360
+                    </motion.div>
+
+                    <motion.p
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.18, ease: "easeOut" }}
+                        className="text-sm sm:text-base text-slate-400 max-w-lg mb-8 leading-relaxed lg:mx-0 mx-auto"
+                    >
+                        Détectez automatiquement les constructions sans permis, recevez des alertes,
+                        récupérez vos revenus et libérez votre équipe.
+                    </motion.p>
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.28, ease: "easeOut" }}
+                        className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start"
+                    >
+                        <Button
+                            variant="accent"
+                            size="xl"
+                            onClick={handleDemoClick}
+                            className="font-bold tracking-widest uppercase rounded-full px-8"
+                        >
+                            DÉMO GRATUITE
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="xl"
+                            onClick={() => {
+                                const el = document.getElementById("comment-ca-marche");
+                                if (el) el.scrollIntoView({ behavior: "smooth" });
+                            }}
+                            className="rounded-full px-8"
+                        >
+                            Comment ça marche
+                        </Button>
+                    </motion.div>
+
+                    {/* Stats row */}
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.7, delay: 0.45 }}
+                        className="mt-12 flex flex-wrap gap-0 justify-center lg:justify-start divide-x divide-slate-700"
+                    >
+                        {[
+                            { value: "100%", label: "COUVERTURE TERRITOIRE" },
+                            { value: "24/7", label: "SURVEILLANCE AUTOMATIQUE" },
+                            { value: "48h", label: "DÉLAI DE RÉPONSE" },
+                        ].map((stat) => (
+                            <div key={stat.label} className="text-center px-6 py-2">
+                                <div className="text-2xl font-black text-[#E2E8F0]">{stat.value}</div>
+                                <div className="text-[10px] text-slate-500 font-semibold mt-1 uppercase tracking-widest">{stat.label}</div>
+                            </div>
+                        ))}
+                    </motion.div>
+                </div>
+
+                {/* Right: Satellite Globe illustration */}
                 <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.7, delay: 0.52 }}
-                    className="mt-16 flex flex-wrap gap-0 justify-center divide-x divide-slate-700"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 1, delay: 0.3 }}
+                    className="flex-1 max-w-md lg:max-w-lg xl:max-w-xl"
                 >
-                    {[
-                        { value: "100%", label: "COUVERTURE TERRITOIRE" },
-                        { value: "24/7", label: "SURVEILLANCE AUTOMATIQUE" },
-                        { value: "48h", label: "DÉLAI DE RÉPONSE" },
-                    ].map((stat) => (
-                        <div key={stat.label} className="text-center px-8 py-2">
-                            <div className="text-2xl font-black text-[#E2E8F0]">{stat.value}</div>
-                            <div className="text-[10px] text-slate-500 font-semibold mt-1 uppercase tracking-widest">{stat.label}</div>
-                        </div>
-                    ))}
+                    <SatelliteGlobe className="w-full h-auto" />
                 </motion.div>
             </div>
 
