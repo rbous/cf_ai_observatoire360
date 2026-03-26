@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Loader2, AlertTriangle, ScanLine, CheckCircle2, Clock, ArrowRight, Layers } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
@@ -87,6 +87,22 @@ export default function ScansPage() {
 
     const { data: scansResponse, isLoading, error, refetch } =
         useApi<PaginatedResponse<ScanJob>>("/scans");
+
+    // Auto-poll every 5s when any scan is in progress
+    const hasActiveScans = scansResponse?.data?.some(
+        (s) => s.status === "pending" || s.status === "fetching" || s.status === "analyzing"
+    ) ?? false;
+
+    const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    useEffect(() => {
+        if (hasActiveScans) {
+            pollRef.current = setInterval(() => refetch(), 5000);
+        }
+        return () => {
+            if (pollRef.current) clearInterval(pollRef.current);
+        };
+    }, [hasActiveScans, refetch]);
 
     // -----------------------------------------------------------------------
     // Trigger dialog state
