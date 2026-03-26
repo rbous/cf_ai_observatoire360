@@ -15,7 +15,7 @@ import {
     hashRefreshToken,
 } from "../lib/auth.js";
 import { ulid } from "../lib/ulid.js";
-import { users, refreshTokens } from "../db/schema.js";
+import { users, refreshTokens, municipalities } from "../db/schema.js";
 import type { Bindings } from "../types.js";
 
 const ACCESS_TOKEN_TTL  = 60 * 15;           // 15 minutes
@@ -34,6 +34,11 @@ const DUMMY_HASH =
 
 function now(): number {
     return Math.floor(Date.now() / 1000);
+}
+
+async function getMunicipalityName(db: ReturnType<typeof drizzle>, municipalityId: string): Promise<string | undefined> {
+    const [row] = await db.select({ name: municipalities.name }).from(municipalities).where(eq(municipalities.id, municipalityId)).limit(1);
+    return row?.name ?? undefined;
 }
 
 function refreshCookieOptions(env: string) {
@@ -131,6 +136,7 @@ auth.post("/login", async (c) => {
             name: user.name,
             role: user.role,
             municipalityId: user.municipalityId,
+            municipalityName: await getMunicipalityName(db, user.municipalityId),
         },
     });
 });
