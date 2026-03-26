@@ -20,6 +20,7 @@ import meRouter        from "./routes/me.js";
 import notificationsRouter from "./routes/notifications.js";
 import scansRouter     from "./routes/scans.js";
 import imagesRouter    from "./routes/images.js";
+import chatRouter      from "./routes/chat.js";
 
 // Bindings — defined in types.ts to avoid circular imports
 import type { Bindings } from "./types.js";
@@ -68,6 +69,8 @@ app.use("/api/reports/*",      requireAuth());
 app.use("/api/users/*",        requireAuth());
 app.use("/api/notifications/*", requireAuth());
 app.use("/api/scans/*",        requireAuth());
+app.use("/api/chat",           requireAuth());
+app.use("/api/chat/*",         requireAuth());
 // Images are public — R2 keys are unguessable ULIDs, no auth needed for <img src>
 
 app.route("/api/me",            meRouter);
@@ -78,6 +81,7 @@ app.route("/api/users",         usersRouter);
 app.route("/api/notifications", notificationsRouter);
 app.route("/api/scans",         scansRouter);
 app.route("/api/images",        imagesRouter);
+app.route("/api/chat",          chatRouter);
 
 // ---------------------------------------------------------------------------
 // 404 handler — must come after all route registrations

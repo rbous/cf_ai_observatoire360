@@ -324,6 +324,20 @@ export const translations = {
         alert_loading: "Chargement de l'alerte…",
         alert_title: "Alerte",
 
+        // Chat
+        chat_title: "Assistant IA",
+        chat_subtitle: "Llama 3.3 · Workers AI",
+        chat_placeholder: "Posez une question...",
+        chat_welcome: "Bonjour! Je suis votre assistant IA.",
+        chat_welcome_help: "Je peux vous aider à :",
+        chat_suggestion_alerts: "Voir les alertes",
+        chat_suggestion_scan: "Lancer une analyse",
+        chat_suggestion_stats: "Statistiques du mois",
+        chat_suggestion_inspection: "Programmer une inspection",
+        chat_clear: "Effacer",
+        chat_tool_call: "Outil",
+        chat_thinking: "Réflexion...",
+
         // Language
         language: "Langue",
         language_fr: "Français",
@@ -653,6 +667,20 @@ export const translations = {
         alert_back_to_map: "Back to map",
         alert_loading: "Loading alert…",
         alert_title: "Alert",
+
+        // Chat
+        chat_title: "AI Assistant",
+        chat_subtitle: "Llama 3.3 · Workers AI",
+        chat_placeholder: "Ask a question...",
+        chat_welcome: "Hello! I'm your AI assistant.",
+        chat_welcome_help: "I can help you with:",
+        chat_suggestion_alerts: "View alerts",
+        chat_suggestion_scan: "Run an analysis",
+        chat_suggestion_stats: "Monthly statistics",
+        chat_suggestion_inspection: "Schedule an inspection",
+        chat_clear: "Clear",
+        chat_tool_call: "Tool",
+        chat_thinking: "Thinking...",
 
         // Language
         language: "Language",

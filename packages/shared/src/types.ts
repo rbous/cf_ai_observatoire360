@@ -144,6 +144,22 @@ export interface ScanJob {
     createdAt: number;
 }
 
+export interface ChatMessage {
+    id: string;
+    municipalityId: string;
+    userId: string;
+    role: "user" | "assistant" | "tool";
+    content: string;
+    toolName: string | null;
+    toolArgs: string | null;
+    createdAt: number;
+}
+
+export interface ChatResponse {
+    reply: string;
+    toolCalls?: { name: string; args: string; result: string }[];
+}
+
 export interface PaginatedResponse<T> {
     data: T[];
     total: number;

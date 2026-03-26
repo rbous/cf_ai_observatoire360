@@ -184,6 +184,26 @@ export const scanJobs = sqliteTable("scan_jobs", {
 });
 
 // ---------------------------------------------------------------------------
+// chat_messages
+// ---------------------------------------------------------------------------
+
+export const chatMessages = sqliteTable("chat_messages", {
+    id: text("id").primaryKey(),
+    municipalityId: text("municipality_id")
+        .notNull()
+        .references(() => municipalities.id),
+    userId: text("user_id")
+        .notNull()
+        .references(() => users.id),
+    /** One of: user | assistant | tool */
+    role: text("role").notNull(),
+    content: text("content").notNull(),
+    toolName: text("tool_name"),
+    toolArgs: text("tool_args"),
+    createdAt: integer("created_at").notNull(),
+});
+
+// ---------------------------------------------------------------------------
 // Type exports (Drizzle inferred types)
 // ---------------------------------------------------------------------------
 
