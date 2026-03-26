@@ -48,12 +48,13 @@ chat.post("/", async (c) => {
     const role = c.get("role");
     const db = drizzle(c.env.DB);
 
-    const body = await c.req.json().catch(() => null) as { message?: string } | null;
+    const body = await c.req.json().catch(() => null) as { message?: string; locale?: string } | null;
     if (!body?.message?.trim()) {
         return c.json({ error: "VALIDATION_ERROR", message: "Message requis.", statusCode: 422 }, 422);
     }
 
     const userMessage = body.message.trim();
+    const locale = body.locale ?? "fr";
 
     // 1. Fetch conversation history (last 20 messages)
     const history = await db.select()
@@ -65,9 +66,13 @@ chat.post("/", async (c) => {
     // Reverse to chronological order
     history.reverse();
 
-    // 2. Build messages array
+    // 2. Build messages array with locale instruction
+    const langInstruction = locale === "en"
+        ? "\n\nIMPORTANT: The user's interface is in English. You MUST respond in English."
+        : "\n\nIMPORTANT: L'interface de l'utilisateur est en français. Répondez en français.";
+
     const messages: { role: string; content: string }[] = [
-        { role: "system", content: TOOLS_PROMPT },
+        { role: "system", content: TOOLS_PROMPT + langInstruction },
     ];
 
     for (const msg of history) {

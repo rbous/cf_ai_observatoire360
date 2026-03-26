@@ -39,7 +39,7 @@ function ToolMessage({ toolName, content, label }: ToolMessageProps) {
 }
 
 export function ChatPanel({ isOpen, onClose }: ChatPanelProps) {
-    const { t } = useLanguage();
+    const { t, locale } = useLanguage();
     const { messages, isLoading, sendMessage, clearHistory, loadHistory } = useChat();
     const [inputValue, setInputValue] = useState("");
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -75,7 +75,7 @@ export function ChatPanel({ isOpen, onClose }: ChatPanelProps) {
         const text = inputValue.trim();
         if (!text || isLoading) return;
         setInputValue("");
-        sendMessage(text);
+        sendMessage(text, locale);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -86,7 +86,7 @@ export function ChatPanel({ isOpen, onClose }: ChatPanelProps) {
     };
 
     const handleSuggestion = (text: string) => {
-        sendMessage(text);
+        sendMessage(text, locale);
     };
 
     const suggestions = [

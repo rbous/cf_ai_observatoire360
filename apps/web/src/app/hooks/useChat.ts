@@ -27,7 +27,7 @@ export function useChat() {
         } catch { /* ignore */ }
     }, []);
 
-    const sendMessage = useCallback(async (text: string) => {
+    const sendMessage = useCallback(async (text: string, locale?: string) => {
         // Add optimistic user message
         const userMsg: ChatMessage = {
             id: "temp-" + Date.now(),
@@ -41,7 +41,7 @@ export function useChat() {
         setIsLoading(true);
 
         try {
-            const res = await api.post<{ reply: string; toolCalls?: ToolCall[] }>("/chat", { message: text });
+            const res = await api.post<{ reply: string; toolCalls?: ToolCall[] }>("/chat", { message: text, locale });
 
             // Add tool call messages if any
             const newMsgs: ChatMessage[] = [];
