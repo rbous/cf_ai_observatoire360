@@ -210,4 +210,4 @@ cf_ai_observatoire360/
 
 ## License
 
-MIT
+This project is shared publicly for portfolio and review purposes only. All rights reserved. No part of this repository may be copied, redistributed, or used for commercial purposes without explicit written permission from the author.
