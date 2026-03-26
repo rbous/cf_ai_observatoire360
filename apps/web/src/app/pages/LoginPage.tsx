@@ -157,17 +157,10 @@ export default function LoginPage() {
                 </div>
 
                 {/* Demo access */}
-                <div className="mt-6">
-                    <div className="relative mb-4">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-slate-700" />
-                        </div>
-                        <div className="relative flex justify-center text-xs uppercase">
-                            <span className="bg-transparent px-3 text-[#94A3B8]/40 font-semibold tracking-wider">
-                                {t("login_or_demo")}
-                            </span>
-                        </div>
-                    </div>
+                <div className="mt-8 bg-slate-800/50 rounded-2xl border border-slate-700/50 p-5">
+                    <p className="text-center text-xs font-semibold uppercase tracking-widest text-slate-500 mb-4">
+                        {t("login_or_demo")}
+                    </p>
 
                     <div className="grid grid-cols-2 gap-2">
                         {DEMO_CITIES.map((city) => (
@@ -175,21 +168,21 @@ export default function LoginPage() {
                                 key={city.email}
                                 onClick={() => handleDemoLogin(city.email)}
                                 disabled={demoLoading !== null}
-                                className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-slate-700 bg-slate-900 hover:border-[#137fec]/40 hover:bg-[#137fec]/5 transition-all text-left disabled:opacity-50"
+                                className="group flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700/50 hover:border-[#137fec]/50 hover:bg-[#137fec]/10 transition-all text-left disabled:opacity-40"
                             >
-                                <span className="text-lg">{city.flag}</span>
-                                <div className="min-w-0">
-                                    <p className="text-xs font-semibold text-[#E2E8F0] truncate">
-                                        {demoLoading === city.email ? t("login_submitting") : city.label}
+                                <span className="text-xl">{city.flag}</span>
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-sm font-semibold text-slate-200 group-hover:text-white truncate">
+                                        {demoLoading === city.email ? "..." : city.label}
                                     </p>
-                                    <p className="text-[10px] text-[#94A3B8]/40">{t("login_free_demo")}</p>
                                 </div>
+                                <svg className="w-4 h-4 text-slate-600 group-hover:text-[#137fec] transition-colors shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
                             </button>
                         ))}
                     </div>
                 </div>
 
-                <p className="text-center text-sm text-[#94A3B8]/60 mt-4">
+                <p className="text-center text-sm text-slate-500 mt-5">
                     {t("login_no_account")}{" "}
                     <a
                         href="#contact"
