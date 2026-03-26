@@ -1,8 +1,11 @@
 import { motion } from "framer-motion";
 import { Button } from "@/app/components/ui/button";
 import { SatelliteGlobe } from "./SatelliteGlobe";
+import { useLanguage } from "@/app/hooks/useLanguage";
 
 export default function Hero() {
+    const { t } = useLanguage();
+
     const handleDemoClick = () => {
         const el = document.getElementById("contact");
         if (el) el.scrollIntoView({ behavior: "smooth" });
@@ -40,7 +43,7 @@ export default function Hero() {
                         transition={{ duration: 0.5 }}
                         className="text-xs sm:text-sm text-[#137fec] font-semibold tracking-[0.3em] uppercase mb-4"
                     >
-                        TECHNOLOGIE SATELLITAIRE
+                        {t("hero_satellite_tech")}
                     </motion.p>
 
                     <motion.h1
@@ -68,8 +71,7 @@ export default function Hero() {
                         transition={{ duration: 0.6, delay: 0.18, ease: "easeOut" }}
                         className="text-sm sm:text-base text-slate-400 max-w-lg mb-8 leading-relaxed lg:mx-0 mx-auto"
                     >
-                        Détectez automatiquement les constructions sans permis, recevez des alertes,
-                        récupérez vos revenus et libérez votre équipe.
+                        {t("hero_subtitle")}
                     </motion.p>
 
                     <motion.div
@@ -84,7 +86,7 @@ export default function Hero() {
                             onClick={handleDemoClick}
                             className="font-bold tracking-widest uppercase rounded-full px-8"
                         >
-                            DÉMO GRATUITE
+                            {t("hero_cta_demo")}
                         </Button>
                         <Button
                             variant="outline"
@@ -95,7 +97,7 @@ export default function Hero() {
                             }}
                             className="rounded-full px-8"
                         >
-                            Comment ça marche
+                            {t("hero_cta_how")}
                         </Button>
                     </motion.div>
 
@@ -107,13 +109,13 @@ export default function Hero() {
                         className="mt-12 flex flex-wrap gap-0 justify-center lg:justify-start divide-x divide-slate-700"
                     >
                         {[
-                            { value: "100%", label: "COUVERTURE TERRITOIRE" },
-                            { value: "24/7", label: "SURVEILLANCE AUTOMATIQUE" },
-                            { value: "48h", label: "DÉLAI DE RÉPONSE" },
+                            { value: "100%", labelKey: "hero_stat_coverage" as const },
+                            { value: "24/7", labelKey: "hero_stat_monitoring" as const },
+                            { value: "48h", labelKey: "hero_stat_response" as const },
                         ].map((stat) => (
-                            <div key={stat.label} className="text-center px-6 py-2">
+                            <div key={stat.labelKey} className="text-center px-6 py-2">
                                 <div className="text-2xl font-black text-[#E2E8F0]">{stat.value}</div>
-                                <div className="text-[10px] text-slate-500 font-semibold mt-1 uppercase tracking-widest">{stat.label}</div>
+                                <div className="text-[10px] text-slate-500 font-semibold mt-1 uppercase tracking-widest">{t(stat.labelKey)}</div>
                             </div>
                         ))}
                     </motion.div>

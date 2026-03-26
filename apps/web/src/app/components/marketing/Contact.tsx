@@ -3,8 +3,9 @@ import { motion } from "framer-motion";
 import { Phone, Mail, Clock, MapPin, CheckCircle2 } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
-import { LAUNCH_OFFER_TEXT, CONTACT_PHONE, CONTACT_EMAIL, CONTACT_HOURS, CONTACT_ADDRESS, CONTACT_RESPONSE_TIME } from "@/app/lib/constants";
+import { CONTACT_PHONE, CONTACT_EMAIL, CONTACT_HOURS, CONTACT_ADDRESS, CONTACT_RESPONSE_TIME } from "@/app/lib/constants";
 import { api } from "@/app/lib/api";
+import { useLanguage } from "@/app/hooks/useLanguage";
 
 interface FormData {
     nom: string;
@@ -23,6 +24,7 @@ const INITIAL_FORM: FormData = {
 };
 
 export default function Contact() {
+    const { t } = useLanguage();
     const [form, setForm] = useState<FormData>(INITIAL_FORM);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
@@ -51,11 +53,18 @@ export default function Contact() {
             setIsSubmitted(true);
             setForm(INITIAL_FORM);
         } catch {
-            setError("Une erreur est survenue. Veuillez réessayer ou nous contacter directement.");
+            setError(t("contact_error"));
         } finally {
             setIsSubmitting(false);
         }
     };
+
+    const WHY_ITEMS = [
+        t("contact_why_item1"),
+        t("contact_why_item2"),
+        t("contact_why_item3"),
+        t("contact_why_item4"),
+    ];
 
     return (
         <section id="contact" className="py-24 lg:py-32" style={{ background: "#0F172A" }}>
@@ -71,7 +80,7 @@ export default function Contact() {
                 >
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 sm:px-8 py-5">
                         <p className="text-white font-bold text-sm sm:text-base text-center sm:text-left">
-                            {LAUNCH_OFFER_TEXT}
+                            {t("launch_offer_text")}
                         </p>
                         <Button
                             variant="accent"
@@ -82,7 +91,7 @@ export default function Contact() {
                                 if (el) el.scrollIntoView({ behavior: "smooth" });
                             }}
                         >
-                            [RÉSERVER MA DÉMO]
+                            {t("contact_banner_btn")}
                         </Button>
                     </div>
                 </motion.div>
@@ -96,10 +105,10 @@ export default function Contact() {
                     className="text-center mb-14"
                 >
                     <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black uppercase text-[#E2E8F0] mb-4">
-                        CONTACTEZ-NOUS
+                        {t("contact_title")}
                     </h2>
                     <p className="text-lg text-[#94A3B8]/70 max-w-xl mx-auto">
-                        Réservez votre démo gratuite et découvrez comment Observatoire 360 peut transformer votre municipalité
+                        {t("contact_subtitle")}
                     </p>
                     <div className="mt-4 w-16 h-1 bg-[#137fec] mx-auto rounded-full" />
                 </motion.div>
@@ -119,16 +128,16 @@ export default function Contact() {
                                     <CheckCircle2 className="w-10 h-10 text-[#10B981]" />
                                 </div>
                                 <div>
-                                    <h3 className="text-2xl font-black text-[#E2E8F0] mb-2">Message envoyé!</h3>
+                                    <h3 className="text-2xl font-black text-[#E2E8F0] mb-2">{t("contact_success_title")}</h3>
                                     <p className="text-[#94A3B8]/70">
-                                        Merci pour votre intérêt. Nous vous recontacterons sous {CONTACT_RESPONSE_TIME}.
+                                        {t("contact_success_body").replace("{time}", CONTACT_RESPONSE_TIME)}
                                     </p>
                                 </div>
                                 <Button
                                     variant="outline"
                                     onClick={() => setIsSubmitted(false)}
                                 >
-                                    Envoyer un autre message
+                                    {t("contact_send_another")}
                                 </Button>
                             </div>
                         ) : (
@@ -138,37 +147,37 @@ export default function Contact() {
                             >
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                     <Input
-                                        label="Nom"
+                                        label={t("contact_field_name")}
                                         name="nom"
                                         value={form.nom}
                                         onChange={handleChange}
-                                        placeholder="Jean Tremblay"
+                                        placeholder={t("contact_placeholder_name")}
                                         required
                                     />
                                     <Input
-                                        label="Poste"
+                                        label={t("contact_field_position")}
                                         name="poste"
                                         value={form.poste}
                                         onChange={handleChange}
-                                        placeholder="Inspecteur municipal"
+                                        placeholder={t("contact_placeholder_position")}
                                         required
                                     />
                                 </div>
                                 <Input
-                                    label="Municipalité représentée"
+                                    label={t("contact_field_municipality")}
                                     name="municipalite"
                                     value={form.municipalite}
                                     onChange={handleChange}
-                                    placeholder="Ex: Ville de Gatineau"
+                                    placeholder={t("contact_placeholder_municipality")}
                                     required
                                 />
                                 <Input
-                                    label="Courriel"
+                                    label={t("contact_field_email")}
                                     name="courriel"
                                     type="email"
                                     value={form.courriel}
                                     onChange={handleChange}
-                                    placeholder="jean@municipalite.qc.ca"
+                                    placeholder={t("contact_placeholder_email")}
                                     required
                                 />
                                 <div className="flex flex-col gap-1.5">
@@ -176,7 +185,7 @@ export default function Contact() {
                                         htmlFor="description"
                                         className="text-sm font-medium text-[#E2E8F0]"
                                     >
-                                        Description
+                                        {t("contact_field_description")}
                                     </label>
                                     <textarea
                                         id="description"
@@ -184,7 +193,7 @@ export default function Contact() {
                                         rows={4}
                                         value={form.description}
                                         onChange={handleChange}
-                                        placeholder="Décrivez votre municipalité et vos besoins..."
+                                        placeholder={t("contact_placeholder_description")}
                                         className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#137fec] focus:border-transparent resize-none transition-colors"
                                     />
                                 </div>
@@ -200,7 +209,7 @@ export default function Contact() {
                                     disabled={isSubmitting}
                                     className="w-full font-bold tracking-wide uppercase"
                                 >
-                                    {isSubmitting ? "Envoi en cours…" : "ENVOYER MA DEMANDE"}
+                                    {isSubmitting ? t("contact_submitting") : t("contact_submit")}
                                 </Button>
                             </form>
                         )}
@@ -217,7 +226,7 @@ export default function Contact() {
                         {/* Contact info card */}
                         <div className="bg-[#E2E8F0] rounded-3xl p-8 text-white">
                             <h3 className="font-black text-lg uppercase tracking-wide mb-6 text-[#D4A843]">
-                                Informations
+                                {t("contact_info_title")}
                             </h3>
                             <div className="space-y-5">
                                 <div className="flex items-start gap-3">
@@ -242,7 +251,7 @@ export default function Contact() {
                                     <Mail className="w-5 h-5 text-[#137fec] shrink-0 mt-0.5" />
                                     <div>
                                         <p className="font-semibold text-sm break-all">{CONTACT_EMAIL}</p>
-                                        <p className="text-xs text-white/50 mt-0.5">Réponse {CONTACT_RESPONSE_TIME}</p>
+                                        <p className="text-xs text-white/50 mt-0.5">{t("contact_response_label")} {CONTACT_RESPONSE_TIME}</p>
                                     </div>
                                 </div>
                             </div>
@@ -251,15 +260,10 @@ export default function Contact() {
                         {/* Why contact card */}
                         <div className="bg-gradient-to-br from-[#137fec] to-[#0D6BD6] rounded-3xl p-8 text-white">
                             <h3 className="font-black text-lg uppercase tracking-wide mb-4">
-                                Pourquoi nous contacter?
+                                {t("contact_why_title")}
                             </h3>
                             <ul className="space-y-3 text-sm">
-                                {[
-                                    "Démo gratuite personnalisée",
-                                    "Offre de lancement: 3 mois gratuits",
-                                    "Aucun engagement requis",
-                                    "Adapté à votre territoire",
-                                ].map((item) => (
+                                {WHY_ITEMS.map((item) => (
                                     <li key={item} className="flex items-center gap-2">
                                         <span className="text-[#D4A843] font-bold">✓</span>
                                         {item}

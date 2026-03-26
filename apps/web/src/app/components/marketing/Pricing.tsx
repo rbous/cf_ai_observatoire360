@@ -2,60 +2,61 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
-import { LAUNCH_OFFER_TEXT } from "@/app/lib/constants";
+import { useLanguage } from "@/app/hooks/useLanguage";
+import type { TranslationKey } from "@/app/i18n/translations";
 
-interface PricingTier {
-    name: string;
-    tagline: string;
+interface PricingTierDef {
+    nameKey: TranslationKey;
+    taglineKey: TranslationKey;
     color: string;
-    features: string[];
+    featureKeys: TranslationKey[];
     highlight?: boolean;
 }
 
-const TIERS: PricingTier[] = [
+const TIER_DEFS: PricingTierDef[] = [
     {
-        name: "ESSENTIEL",
-        tagline: "Pour les petites municipalités",
+        nameKey: "pricing_tier1_name",
+        taglineKey: "pricing_tier1_tagline",
         color: "#137fec",
-        features: [
-            "Surveillance satellite mensuelle",
-            "Détection automatique de constructions",
-            "Rapport mensuel",
-            "Jusqu'à 5 utilisateurs",
-            "Support par courriel",
-            "Tableau de bord de base",
+        featureKeys: [
+            "pricing_tier1_f1",
+            "pricing_tier1_f2",
+            "pricing_tier1_f3",
+            "pricing_tier1_f4",
+            "pricing_tier1_f5",
+            "pricing_tier1_f6",
         ],
     },
     {
-        name: "FUTUR",
-        tagline: "Fonctionnalités avancées avec analyse IA",
+        nameKey: "pricing_tier2_name",
+        taglineKey: "pricing_tier2_tagline",
         color: "#E2E8F0",
         highlight: true,
-        features: [
-            "Surveillance satellite bi-mensuelle",
-            "Analyse IA avancée",
-            "Alertes en temps réel",
-            "Jusqu'à 15 utilisateurs",
-            "Support prioritaire",
-            "Tableau de bord avancé",
-            "Exportation des rapports",
-            "Intégration SIG",
+        featureKeys: [
+            "pricing_tier2_f1",
+            "pricing_tier2_f2",
+            "pricing_tier2_f3",
+            "pricing_tier2_f4",
+            "pricing_tier2_f5",
+            "pricing_tier2_f6",
+            "pricing_tier2_f7",
+            "pricing_tier2_f8",
         ],
     },
     {
-        name: "ADMINISTRATIF",
-        tagline: "Suite complète avec utilisateurs illimités",
+        nameKey: "pricing_tier3_name",
+        taglineKey: "pricing_tier3_tagline",
         color: "#D4A843",
-        features: [
-            "Surveillance satellite hebdomadaire",
-            "IA de dernière génération",
-            "Alertes instantanées avec preuves",
-            "Utilisateurs illimités",
-            "Support dédié 24/7",
-            "Tableau de bord complet",
-            "API & intégrations personnalisées",
-            "Formation de l'équipe incluse",
-            "Données historiques complètes",
+        featureKeys: [
+            "pricing_tier3_f1",
+            "pricing_tier3_f2",
+            "pricing_tier3_f3",
+            "pricing_tier3_f4",
+            "pricing_tier3_f5",
+            "pricing_tier3_f6",
+            "pricing_tier3_f7",
+            "pricing_tier3_f8",
+            "pricing_tier3_f9",
         ],
     },
 ];
@@ -67,6 +68,7 @@ interface ROIValues {
 }
 
 function ROICalculator() {
+    const { t, locale } = useLanguage();
     const [values, setValues] = useState<ROIValues>({
         constructions: 10,
         amendes: 3,
@@ -83,16 +85,16 @@ function ROICalculator() {
     return (
         <div className="bg-slate-900 rounded-3xl shadow-none border border-[#137fec]/10 p-8 max-w-2xl mx-auto mt-16">
             <h3 className="text-xl font-black uppercase text-[#E2E8F0] mb-2 text-center">
-                CALCULATEUR DE ROI
+                {t("pricing_roi_title")}
             </h3>
             <p className="text-sm text-[#94A3B8]/60 text-center mb-8">
-                Estimez les revenus que vous pourriez récupérer
+                {t("pricing_roi_subtitle")}
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
                 <div className="flex flex-col gap-1.5">
                     <label className="text-sm font-semibold text-[#E2E8F0]">
-                        Constructions illégales évitées / an
+                        {t("pricing_roi_constructions")}
                     </label>
                     <input
                         type="number"
@@ -105,7 +107,7 @@ function ROICalculator() {
                 </div>
                 <div className="flex flex-col gap-1.5">
                     <label className="text-sm font-semibold text-[#E2E8F0]">
-                        Nombre d'amendes moyennes
+                        {t("pricing_roi_fines")}
                     </label>
                     <input
                         type="number"
@@ -118,7 +120,7 @@ function ROICalculator() {
                 </div>
                 <div className="flex flex-col gap-1.5">
                     <label className="text-sm font-semibold text-[#E2E8F0]">
-                        Estimation par dossier ($)
+                        {t("pricing_roi_estimation")}
                     </label>
                     <input
                         type="number"
@@ -133,12 +135,12 @@ function ROICalculator() {
             </div>
 
             <div className="rounded-2xl p-6 text-center" style={{ background: "linear-gradient(135deg, #137fec, #0D6BD6)" }}>
-                <p className="text-white/80 text-sm mb-2">Estimation de gains annuels</p>
+                <p className="text-white/80 text-sm mb-2">{t("pricing_roi_annual")}</p>
                 <p className="text-4xl font-black text-white">
-                    {roi.toLocaleString("fr-CA", { style: "currency", currency: "CAD", maximumFractionDigits: 0 })}
+                    {roi.toLocaleString(locale === "fr" ? "fr-CA" : "en-CA", { style: "currency", currency: "CAD", maximumFractionDigits: 0 })}
                 </p>
                 <p className="text-white/60 text-xs mt-2">
-                    * Estimation basée sur les données fournies. Résultats réels peuvent varier.
+                    {t("pricing_roi_disclaimer")}
                 </p>
             </div>
         </div>
@@ -146,11 +148,13 @@ function ROICalculator() {
 }
 
 interface TierCardProps {
-    tier: PricingTier;
+    tierDef: PricingTierDef;
     index: number;
 }
 
-function TierCard({ tier, index }: TierCardProps) {
+function TierCard({ tierDef, index }: TierCardProps) {
+    const { t } = useLanguage();
+
     const handleDemoClick = () => {
         const el = document.getElementById("contact");
         if (el) el.scrollIntoView({ behavior: "smooth" });
@@ -164,12 +168,12 @@ function TierCard({ tier, index }: TierCardProps) {
             transition={{ duration: 0.6, delay: index * 0.15 }}
             className="relative"
         >
-            {tier.highlight && (
+            {tierDef.highlight && (
                 <div
                     className="absolute -top-4 left-1/2 -translate-x-1/2 z-10 px-4 py-1 rounded-full text-xs font-black uppercase tracking-wide text-white"
-                    style={{ background: tier.color }}
+                    style={{ background: tierDef.color }}
                 >
-                    POPULAIRE
+                    {t("pricing_popular")}
                 </div>
             )}
 
@@ -177,24 +181,24 @@ function TierCard({ tier, index }: TierCardProps) {
             <div
                 className="h-full rounded-3xl p-8 flex flex-col transition-transform duration-300 hover:-translate-y-2"
                 style={{
-                    background: tier.highlight
-                        ? `linear-gradient(145deg, ${tier.color}ee, ${tier.color})`
+                    background: tierDef.highlight
+                        ? `linear-gradient(145deg, ${tierDef.color}ee, ${tierDef.color})`
                         : "#1E293B",
-                    border: tier.highlight ? "none" : `1px solid rgb(51 65 85)`,
+                    border: tierDef.highlight ? "none" : `1px solid rgb(51 65 85)`,
                 }}
             >
                 <div className="mb-6">
                     <h3
                         className="text-xl font-black uppercase tracking-wide mb-2"
-                        style={{ color: tier.highlight ? "white" : tier.color }}
+                        style={{ color: tierDef.highlight ? "white" : tierDef.color }}
                     >
-                        {tier.name}
+                        {t(tierDef.nameKey)}
                     </h3>
                     <p
                         className="text-sm"
-                        style={{ color: tier.highlight ? "rgba(255,255,255,0.8)" : "#94A3B8" }}
+                        style={{ color: tierDef.highlight ? "rgba(255,255,255,0.8)" : "#94A3B8" }}
                     >
-                        {tier.tagline}
+                        {t(tierDef.taglineKey)}
                     </p>
                 </div>
 
@@ -202,38 +206,38 @@ function TierCard({ tier, index }: TierCardProps) {
                 <div className="mb-6">
                     <p
                         className="text-2xl font-black"
-                        style={{ color: tier.highlight ? "white" : "#E2E8F0" }}
+                        style={{ color: tierDef.highlight ? "white" : "#E2E8F0" }}
                     >
-                        Contactez-nous
+                        {t("pricing_contact_us")}
                     </p>
                     <p
                         className="text-xs mt-1"
-                        style={{ color: tier.highlight ? "rgba(255,255,255,0.6)" : "#94A3B880" }}
+                        style={{ color: tierDef.highlight ? "rgba(255,255,255,0.6)" : "#94A3B880" }}
                     >
-                        Tarification personnalisée selon votre territoire
+                        {t("pricing_custom_pricing")}
                     </p>
                 </div>
 
                 {/* Features */}
                 <ul className="flex-1 space-y-3 mb-8">
-                    {tier.features.map((feature) => (
-                        <li key={feature} className="flex items-start gap-2.5">
+                    {tierDef.featureKeys.map((key) => (
+                        <li key={key} className="flex items-start gap-2.5">
                             <div
                                 className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5"
                                 style={{
-                                    background: tier.highlight ? "rgba(255,255,255,0.2)" : `${tier.color}15`,
+                                    background: tierDef.highlight ? "rgba(255,255,255,0.2)" : `${tierDef.color}15`,
                                 }}
                             >
                                 <Check
                                     className="w-3 h-3"
-                                    style={{ color: tier.highlight ? "white" : tier.color }}
+                                    style={{ color: tierDef.highlight ? "white" : tierDef.color }}
                                 />
                             </div>
                             <span
                                 className="text-sm"
-                                style={{ color: tier.highlight ? "rgba(255,255,255,0.9)" : "#94A3B8" }}
+                                style={{ color: tierDef.highlight ? "rgba(255,255,255,0.9)" : "#94A3B8" }}
                             >
-                                {feature}
+                                {t(key)}
                             </span>
                         </li>
                     ))}
@@ -243,13 +247,13 @@ function TierCard({ tier, index }: TierCardProps) {
                     onClick={handleDemoClick}
                     className="w-full font-bold tracking-wide uppercase"
                     style={{
-                        background: tier.highlight ? "#D4A843" : tier.color,
+                        background: tierDef.highlight ? "#D4A843" : tierDef.color,
                         color: "white",
                         border: "none",
                     }}
                     size="lg"
                 >
-                    RÉSERVER UNE DÉMO
+                    {t("pricing_cta_demo")}
                 </Button>
             </div>
         </motion.div>
@@ -257,10 +261,21 @@ function TierCard({ tier, index }: TierCardProps) {
 }
 
 function MRCCard() {
+    const { t } = useLanguage();
+
     const handleDemoClick = () => {
         const el = document.getElementById("contact");
         if (el) el.scrollIntoView({ behavior: "smooth" });
     };
+
+    const MRC_FEATURES: TranslationKey[] = [
+        "pricing_mrc_f1",
+        "pricing_mrc_f2",
+        "pricing_mrc_f3",
+        "pricing_mrc_f4",
+        "pricing_mrc_f5",
+        "pricing_mrc_f6",
+    ];
 
     return (
         <motion.div
@@ -273,26 +288,18 @@ function MRCCard() {
             <div className="rounded-3xl overflow-hidden" style={{ background: "linear-gradient(135deg, #E2E8F0, #94A3B8)" }}>
                 <div className="p-8 sm:p-10">
                     <h3 className="text-2xl font-black uppercase tracking-wide text-white mb-3">
-                        VOUS ÊTES UNE MRC?{" "}
-                        <span className="text-[#D4A843]">PAS DE PROBLÈME</span>
+                        {t("pricing_mrc_title")}{" "}
+                        <span className="text-[#D4A843]">{t("pricing_mrc_highlight")}</span>
                     </h3>
                     <p className="text-white/70 mb-6">
-                        Solution spécialement adaptée pour les MRC avec plusieurs municipalités.
-                        Gestion centralisée, tarification groupée et support dédié.
+                        {t("pricing_mrc_desc")}
                     </p>
 
                     <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
-                        {[
-                            "Toutes les municipalités de la MRC",
-                            "Tableau de bord centralisé",
-                            "Rapport consolidé mensuel",
-                            "Tarification groupée avantageuse",
-                            "Formateur dédié sur site",
-                            "Intégration avec vos systèmes",
-                        ].map((feature) => (
-                            <li key={feature} className="flex items-center gap-2 text-sm text-white/80">
+                        {MRC_FEATURES.map((key) => (
+                            <li key={key} className="flex items-center gap-2 text-sm text-white/80">
                                 <span className="text-[#D4A843] font-bold shrink-0">✓</span>
-                                {feature}
+                                {t(key)}
                             </li>
                         ))}
                     </ul>
@@ -303,7 +310,7 @@ function MRCCard() {
                         onClick={handleDemoClick}
                         className="font-bold tracking-wide uppercase"
                     >
-                        CONTACTEZ-NOUS POUR LES MRC
+                        {t("pricing_mrc_cta")}
                     </Button>
                 </div>
             </div>
@@ -312,6 +319,8 @@ function MRCCard() {
 }
 
 export default function Pricing() {
+    const { t } = useLanguage();
+
     return (
         <section id="forfaits" className="py-24 lg:py-32" style={{ background: "#0F172A" }}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -326,7 +335,7 @@ export default function Pricing() {
                 >
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 sm:px-8 py-5">
                         <p className="text-white font-bold text-sm sm:text-base text-center sm:text-left">
-                            {LAUNCH_OFFER_TEXT}
+                            {t("launch_offer_text")}
                         </p>
                         <Button
                             variant="accent"
@@ -337,7 +346,7 @@ export default function Pricing() {
                                 if (el) el.scrollIntoView({ behavior: "smooth" });
                             }}
                         >
-                            [RÉSERVER MA DÉMO]
+                            {t("pricing_banner_btn")}
                         </Button>
                     </div>
                 </motion.div>
@@ -351,19 +360,19 @@ export default function Pricing() {
                     className="text-center mb-16"
                 >
                     <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black uppercase text-[#E2E8F0] mb-4">
-                        FORFAITS:{" "}
-                        <span className="text-[#137fec]">UN INVESTISSEMENT RENTABLE!</span>
+                        {t("pricing_title")}{" "}
+                        <span className="text-[#137fec]">{t("pricing_title_highlight")}</span>
                     </h2>
                     <p className="text-lg text-[#94A3B8]/70 max-w-xl mx-auto">
-                        Choisissez le forfait adapté à la taille et aux besoins de votre municipalité
+                        {t("pricing_subtitle")}
                     </p>
                     <div className="mt-4 w-16 h-1 bg-[#137fec] mx-auto rounded-full" />
                 </motion.div>
 
                 {/* Pricing cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
-                    {TIERS.map((tier, index) => (
-                        <TierCard key={tier.name} tier={tier} index={index} />
+                    {TIER_DEFS.map((tierDef, index) => (
+                        <TierCard key={tierDef.nameKey} tierDef={tierDef} index={index} />
                     ))}
                 </div>
 

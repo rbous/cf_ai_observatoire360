@@ -5,8 +5,10 @@ import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import { api } from "@/app/lib/api";
+import { useLanguage } from "@/app/hooks/useLanguage";
 
 export default function ForgotPasswordPage() {
+    const { t } = useLanguage();
     const [email, setEmail] = useState("");
     const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -38,10 +40,10 @@ export default function ForgotPasswordPage() {
                         </span>
                     </Link>
                     <h1 className="mt-6 text-2xl font-black uppercase text-[#E2E8F0]">
-                        MOT DE PASSE OUBLIÉ
+                        {t("forgot_title")}
                     </h1>
                     <p className="text-sm text-[#94A3B8]/60 mt-1">
-                        Entrez votre courriel pour recevoir un lien de réinitialisation
+                        {t("forgot_subtitle")}
                     </p>
                 </div>
 
@@ -51,19 +53,19 @@ export default function ForgotPasswordPage() {
                             <div className="w-16 h-16 rounded-full bg-[#10B981]/10 flex items-center justify-center mx-auto mb-4">
                                 <CheckCircle2 className="w-8 h-8 text-[#10B981]" />
                             </div>
-                            <h3 className="font-bold text-[#E2E8F0] mb-2">Courriel envoyé!</h3>
+                            <h3 className="font-bold text-[#E2E8F0] mb-2">{t("forgot_success_title")}</h3>
                             <p className="text-sm text-[#94A3B8]/70">
-                                Si un compte existe pour {email}, vous recevrez un lien de réinitialisation sous peu.
+                                {t("forgot_success_body").replace("{email}", email)}
                             </p>
                         </div>
                     ) : (
                         <form onSubmit={handleSubmit} className="space-y-5">
                             <Input
-                                label="Courriel"
+                                label={t("forgot_email_label")}
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                placeholder="vous@municipalite.qc.ca"
+                                placeholder={t("forgot_email_placeholder")}
                                 required
                             />
                             <Button
@@ -72,7 +74,7 @@ export default function ForgotPasswordPage() {
                                 size="lg"
                                 className="w-full font-bold tracking-wide uppercase"
                             >
-                                ENVOYER LE LIEN
+                                {t("forgot_submit")}
                             </Button>
                         </form>
                     )}
@@ -84,7 +86,7 @@ export default function ForgotPasswordPage() {
                         className="inline-flex items-center gap-1.5 text-sm text-[#137fec] hover:underline font-medium"
                     >
                         <ArrowLeft className="w-4 h-4" />
-                        Retour à la connexion
+                        {t("forgot_back")}
                     </Link>
                 </div>
             </motion.div>

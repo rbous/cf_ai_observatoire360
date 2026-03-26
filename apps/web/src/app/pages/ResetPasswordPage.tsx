@@ -5,8 +5,10 @@ import { Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import { api } from "@/app/lib/api";
+import { useLanguage } from "@/app/hooks/useLanguage";
 
 export default function ResetPasswordPage() {
+    const { t } = useLanguage();
     const [searchParams] = useSearchParams();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
@@ -23,15 +25,15 @@ export default function ResetPasswordPage() {
         e.preventDefault();
         const token = searchParams.get("token");
         if (!token) {
-            setError("Lien de réinitialisation invalide ou manquant.");
+            setError(t("reset_error_invalid_token"));
             return;
         }
         if (form.password !== form.confirm) {
-            setError("Les mots de passe ne correspondent pas.");
+            setError(t("reset_error_mismatch"));
             return;
         }
         if (form.password.length < 8) {
-            setError("Le mot de passe doit contenir au moins 8 caractères.");
+            setError(t("reset_error_too_short"));
             return;
         }
         await api.post("/auth/reset-password", { token, password: form.password });
@@ -59,7 +61,7 @@ export default function ResetPasswordPage() {
                         </span>
                     </Link>
                     <h1 className="mt-6 text-2xl font-black uppercase text-[#E2E8F0]">
-                        RÉINITIALISER LE MOT DE PASSE
+                        {t("reset_title")}
                     </h1>
                 </div>
 
@@ -69,13 +71,13 @@ export default function ResetPasswordPage() {
                             <div className="w-16 h-16 rounded-full bg-[#10B981]/10 flex items-center justify-center mx-auto mb-4">
                                 <CheckCircle2 className="w-8 h-8 text-[#10B981]" />
                             </div>
-                            <h3 className="font-bold text-[#E2E8F0] mb-2">Mot de passe réinitialisé!</h3>
+                            <h3 className="font-bold text-[#E2E8F0] mb-2">{t("reset_success_title")}</h3>
                             <p className="text-sm text-[#94A3B8]/70 mb-6">
-                                Votre mot de passe a été mis à jour avec succès.
+                                {t("reset_success_body")}
                             </p>
                             <Link to="/connexion">
                                 <Button variant="default" size="lg" className="w-full font-bold uppercase">
-                                    SE CONNECTER
+                                    {t("reset_sign_in")}
                                 </Button>
                             </Link>
                         </div>
@@ -83,13 +85,13 @@ export default function ResetPasswordPage() {
                         <form onSubmit={handleSubmit} className="space-y-5">
                             <div className="relative">
                                 <Input
-                                    label="Nouveau mot de passe"
+                                    label={t("reset_new_password")}
                                     name="password"
                                     type={showPassword ? "text" : "password"}
                                     value={form.password}
                                     onChange={handleChange}
                                     placeholder="••••••••"
-                                    hint="Au moins 8 caractères"
+                                    hint={t("reset_hint")}
                                     required
                                 />
                                 <button
@@ -103,7 +105,7 @@ export default function ResetPasswordPage() {
 
                             <div className="relative">
                                 <Input
-                                    label="Confirmer le mot de passe"
+                                    label={t("reset_confirm_password")}
                                     name="confirm"
                                     type={showConfirm ? "text" : "password"}
                                     value={form.confirm}
@@ -127,7 +129,7 @@ export default function ResetPasswordPage() {
                                 size="lg"
                                 className="w-full font-bold tracking-wide uppercase"
                             >
-                                METTRE À JOUR
+                                {t("reset_submit")}
                             </Button>
                         </form>
                     )}

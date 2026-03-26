@@ -57,11 +57,15 @@ export default function Navbar() {
                         <div className="hidden lg:flex items-center gap-6">
                             {NAV_LINKS.map((link) => (
                                 <button
-                                    key={link.label}
+                                    key={link.href}
                                     onClick={() => handleNavClick(link.href)}
                                     className="text-xs font-semibold tracking-wide text-[#E2E8F0] hover:text-[#137fec] transition-colors cursor-pointer whitespace-nowrap"
                                 >
-                                    {link.label}
+                                    {link.href === "#comment-ca-marche" && t("nav_link_how_it_works")}
+                                    {link.href === "#forfaits" && t("nav_link_pricing")}
+                                    {link.href === "#a-propos" && t("nav_link_about")}
+                                    {link.href === "#ressources" && t("nav_link_resources")}
+                                    {link.href === "#contact" && t("nav_link_contact")}
                                 </button>
                             ))}
                         </div>
@@ -108,11 +112,15 @@ export default function Navbar() {
                         <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-1">
                             {NAV_LINKS.map((link) => (
                                 <button
-                                    key={link.label}
+                                    key={link.href}
                                     onClick={() => handleNavClick(link.href)}
                                     className="text-left px-4 py-3 text-sm font-semibold text-[#E2E8F0] hover:text-[#137fec] hover:bg-[#137fec]/5 rounded-lg transition-colors tracking-wide"
                                 >
-                                    {link.label}
+                                    {link.href === "#comment-ca-marche" && t("nav_link_how_it_works")}
+                                    {link.href === "#forfaits" && t("nav_link_pricing")}
+                                    {link.href === "#a-propos" && t("nav_link_about")}
+                                    {link.href === "#ressources" && t("nav_link_resources")}
+                                    {link.href === "#contact" && t("nav_link_contact")}
                                 </button>
                             ))}
                             <div className="pt-2 border-t border-slate-800 mt-2 flex flex-col gap-2">

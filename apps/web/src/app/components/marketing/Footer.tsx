@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Instagram, Facebook, Linkedin, Twitter, Phone, Mail } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
+import { useLanguage } from "@/app/hooks/useLanguage";
 import {
     CONTACT_PHONE,
     CONTACT_EMAIL,
@@ -9,24 +10,6 @@ import {
     SOCIAL_LINKEDIN,
     SOCIAL_X,
 } from "@/app/lib/constants";
-
-const FOOTER_LINKS = {
-    PRODUIT: [
-        { label: "Accueil", href: "/" },
-        { label: "Comment ça marche", href: "#comment-ca-marche" },
-        { label: "Forfaits", href: "#forfaits" },
-        { label: "Ressources", href: "#ressources" },
-    ],
-    ENTREPRISE: [
-        { label: "À propos", href: "#a-propos" },
-    ],
-    SUPPORT: [
-        { label: "Centre d'aide", href: "#" },
-        { label: "Documentation", href: "#" },
-        { label: "Contact", href: "#contact" },
-        { label: "FAQ", href: "#ressources" },
-    ],
-};
 
 const SOCIALS = [
     { icon: Instagram, href: SOCIAL_INSTAGRAM, label: "Instagram" },
@@ -45,6 +28,26 @@ function handleAnchorClick(e: React.MouseEvent<HTMLAnchorElement>, href: string)
 }
 
 export default function Footer() {
+    const { t } = useLanguage();
+
+    const FOOTER_LINKS = {
+        [t("footer_section_product")]: [
+            { label: t("footer_link_home"), href: "/" },
+            { label: t("footer_link_how_it_works"), href: "#comment-ca-marche" },
+            { label: t("footer_link_pricing"), href: "#forfaits" },
+            { label: t("footer_link_resources"), href: "#ressources" },
+        ],
+        [t("footer_section_company")]: [
+            { label: t("footer_link_about"), href: "#a-propos" },
+        ],
+        [t("footer_section_support")]: [
+            { label: t("footer_link_help"), href: "#" },
+            { label: t("footer_link_docs"), href: "#" },
+            { label: t("footer_link_contact"), href: "#contact" },
+            { label: t("footer_link_faq"), href: "#ressources" },
+        ],
+    };
+
     return (
         <footer style={{ background: "#0F172A" }} className="text-slate-200 border-t border-slate-800">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8">
@@ -63,8 +66,7 @@ export default function Footer() {
                         </Link>
 
                         <p className="text-white/60 text-sm leading-relaxed mb-6 max-w-xs">
-                            Essayez et voyez par vous-même comment la détection satellite peut transformer
-                            la gestion de votre territoire.
+                            {t("footer_tagline")}
                         </p>
 
                         <Button
@@ -76,7 +78,7 @@ export default function Footer() {
                                 if (el) el.scrollIntoView({ behavior: "smooth" });
                             }}
                         >
-                            DÉMO GRATUITE
+                            {t("footer_cta_demo")}
                         </Button>
 
                         {/* Contact info */}
@@ -106,7 +108,7 @@ export default function Footer() {
                             </h4>
                             <ul className="space-y-2.5">
                                 {links.map((link) => (
-                                    <li key={link.label}>
+                                    <li key={link.href}>
                                         {link.href.startsWith("#") ? (
                                             <a
                                                 href={link.href}
@@ -152,17 +154,17 @@ export default function Footer() {
                         {/* Legal links */}
                         <div className="flex items-center gap-4 text-xs text-white/40">
                             <a href="#" className="hover:text-white/70 transition-colors">
-                                Politique de confidentialité
+                                {t("footer_privacy")}
                             </a>
                             <span>|</span>
                             <a href="#" className="hover:text-white/70 transition-colors">
-                                Conditions d'utilisation
+                                {t("footer_terms")}
                             </a>
                         </div>
                     </div>
 
                     <p className="text-center text-xs text-white/30 mt-6">
-                        © 2026 OBSERVATOIRE 360. Conçu par un inspecteur pour les municipalités.
+                        {t("footer_copyright")}
                     </p>
                 </div>
             </div>

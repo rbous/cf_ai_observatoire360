@@ -1,18 +1,21 @@
 import { useRef } from "react";
+import { useLanguage } from "@/app/hooks/useLanguage";
+import type { TranslationKey } from "@/app/i18n/translations";
 
-const TICKER_ITEMS = [
-    "Sentinel-2 + données québec",
-    "Intelligence artificielle",
-    "Détection automatique",
-    "Système d'Information Géographique (SIG)",
-    "Portail citoyen et démarches en ligne",
+const TICKER_KEYS: TranslationKey[] = [
+    "tech_ticker1",
+    "tech_ticker2",
+    "tech_ticker3",
+    "tech_ticker4",
+    "tech_ticker5",
 ];
 
-// Duplicate items for seamless infinite loop
-const ITEMS_DOUBLED = [...TICKER_ITEMS, ...TICKER_ITEMS, ...TICKER_ITEMS];
-
 export default function TechTicker() {
+    const { t } = useLanguage();
     const trackRef = useRef<HTMLDivElement>(null);
+
+    const items = TICKER_KEYS.map((key) => t(key));
+    const itemsDoubled = [...items, ...items, ...items];
 
     return (
         <div className="w-full bg-[#137fec] py-4 overflow-hidden select-none" aria-hidden="true">
@@ -23,7 +26,7 @@ export default function TechTicker() {
                 }}
                 ref={trackRef}
             >
-                {ITEMS_DOUBLED.map((item, index) => (
+                {itemsDoubled.map((item, index) => (
                     <span
                         key={index}
                         className="inline-flex items-center gap-6 text-white text-sm font-semibold tracking-wide pr-12"

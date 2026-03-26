@@ -1,9 +1,11 @@
 import { motion } from "framer-motion";
 import { Button } from "@/app/components/ui/button";
+import { useLanguage } from "@/app/hooks/useLanguage";
+import type { TranslationKey } from "@/app/i18n/translations";
 
-interface BlobData {
-    problem: string;
-    solution: string;
+interface BlobDef {
+    problemKey: TranslationKey;
+    solutionKey: TranslationKey;
     color: string;
     delay: number;
     floatY: number[];
@@ -11,10 +13,10 @@ interface BlobData {
     rotate: number[];
 }
 
-const BLOBS: BlobData[] = [
+const BLOB_DEFS: BlobDef[] = [
     {
-        problem: "Inspections manuelles coûteuses",
-        solution: "Détection automatique par satellite",
+        problemKey: "why_blob1_problem",
+        solutionKey: "why_blob1_solution",
         color: "#137fec",
         delay: 0,
         floatY: [0, -16, 0],
@@ -22,8 +24,8 @@ const BLOBS: BlobData[] = [
         rotate: [0, 3, 0],
     },
     {
-        problem: "Constructions illégales non détectées",
-        solution: "Alertes en temps réel avec preuves",
+        problemKey: "why_blob2_problem",
+        solutionKey: "why_blob2_solution",
         color: "#0D6BD6",
         delay: 0.4,
         floatY: [0, -12, 0],
@@ -31,8 +33,8 @@ const BLOBS: BlobData[] = [
         rotate: [0, -4, 0],
     },
     {
-        problem: "Perte de revenus municipaux",
-        solution: "Récupération des revenus perdus",
+        problemKey: "why_blob3_problem",
+        solutionKey: "why_blob3_solution",
         color: "#3B9AFF",
         delay: 0.8,
         floatY: [0, -20, 0],
@@ -40,8 +42,8 @@ const BLOBS: BlobData[] = [
         rotate: [0, 5, 0],
     },
     {
-        problem: "Surcharge de travail des inspecteurs",
-        solution: "Libération de votre équipe",
+        problemKey: "why_blob4_problem",
+        solutionKey: "why_blob4_solution",
         color: "#D4A843",
         delay: 1.2,
         floatY: [0, -10, 0],
@@ -55,11 +57,13 @@ const BLOB_CLIP =
     "polygon(50% 0%, 80% 10%, 100% 35%, 85% 65%, 65% 85%, 35% 90%, 10% 75%, 0% 45%, 15% 20%)";
 
 interface FloatingBlobProps {
-    data: BlobData;
+    data: BlobDef;
     index: number;
 }
 
 function FloatingBlob({ data, index }: FloatingBlobProps) {
+    const { t } = useLanguage();
+
     return (
         <motion.div
             initial={{ opacity: 0, scale: 0.7 }}
@@ -95,19 +99,19 @@ function FloatingBlob({ data, index }: FloatingBlobProps) {
                     <div className="relative z-10">
                         <div className="mb-2">
                             <span className="text-white/60 text-xs font-semibold uppercase tracking-wide block mb-1">
-                                Problème
+                                {t("why_problem_label")}
                             </span>
                             <p className="text-white font-bold text-sm leading-tight">
-                                {data.problem}
+                                {t(data.problemKey)}
                             </p>
                         </div>
                         <div className="w-8 h-px bg-slate-900/40 mx-auto my-2" />
                         <div>
                             <span className="text-white/60 text-xs font-semibold uppercase tracking-wide block mb-1">
-                                Solution
+                                {t("why_solution_label")}
                             </span>
                             <p className="text-white font-black text-sm leading-tight">
-                                {data.solution}
+                                {t(data.solutionKey)}
                             </p>
                         </div>
                     </div>
@@ -118,10 +122,18 @@ function FloatingBlob({ data, index }: FloatingBlobProps) {
 }
 
 export default function WhyUs() {
+    const { t } = useLanguage();
+
     const handleDemoClick = () => {
         const el = document.getElementById("contact");
         if (el) el.scrollIntoView({ behavior: "smooth" });
     };
+
+    const STATS: { value: string; labelKey: TranslationKey }[] = [
+        { value: "10x", labelKey: "why_stat1_label" },
+        { value: "3 mois", labelKey: "why_stat2_label" },
+        { value: "ROI +", labelKey: "why_stat3_label" },
+    ];
 
     return (
         <section className="py-24 lg:py-32 overflow-hidden" style={{ background: "#0F172A" }}>
@@ -135,18 +147,18 @@ export default function WhyUs() {
                     className="text-center mb-16"
                 >
                     <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black uppercase text-[#E2E8F0] mb-4">
-                        PKOI NOUS?
+                        {t("why_title")}
                     </h2>
                     <p className="text-lg text-[#94A3B8]/70 max-w-xl mx-auto">
-                        Nous transformons vos défis municipaux en opportunités grâce à la technologie satellite
+                        {t("why_subtitle")}
                     </p>
                     <div className="mt-4 w-16 h-1 bg-[#137fec] mx-auto rounded-full" />
                 </motion.div>
 
                 {/* Blobs grid */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-4 justify-items-center mb-16">
-                    {BLOBS.map((blob, index) => (
-                        <FloatingBlob key={blob.problem} data={blob} index={index} />
+                    {BLOB_DEFS.map((blob, index) => (
+                        <FloatingBlob key={blob.problemKey} data={blob} index={index} />
                     ))}
                 </div>
 
@@ -158,17 +170,13 @@ export default function WhyUs() {
                     transition={{ duration: 0.6, delay: 0.3 }}
                     className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto mb-12"
                 >
-                    {[
-                        { value: "10x", label: "Plus efficace que les inspections manuelles" },
-                        { value: "3 mois", label: "Pour voir les premiers résultats" },
-                        { value: "ROI +", label: "Récupérez des revenus perdus" },
-                    ].map((stat) => (
+                    {STATS.map((stat) => (
                         <div
-                            key={stat.label}
+                            key={stat.labelKey}
                             className="text-center p-6 rounded-2xl bg-slate-900 border border-slate-700"
                         >
                             <div className="text-3xl font-black text-[#137fec] mb-2">{stat.value}</div>
-                            <div className="text-sm text-[#94A3B8]/70">{stat.label}</div>
+                            <div className="text-sm text-[#94A3B8]/70">{t(stat.labelKey)}</div>
                         </div>
                     ))}
                 </motion.div>
@@ -187,7 +195,7 @@ export default function WhyUs() {
                         onClick={handleDemoClick}
                         className="font-bold tracking-wide uppercase shadow-none shadow-[#D4A843]/30"
                     >
-                        DÉMO GRATUITE
+                        {t("why_cta_demo")}
                     </Button>
                 </motion.div>
             </div>

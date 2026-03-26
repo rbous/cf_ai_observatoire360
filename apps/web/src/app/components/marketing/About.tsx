@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Instagram, Facebook, Linkedin, Twitter } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
+import { useLanguage } from "@/app/hooks/useLanguage";
 import {
     SOCIAL_INSTAGRAM,
     SOCIAL_FACEBOOK,
@@ -16,6 +17,8 @@ const SOCIALS = [
 ];
 
 export default function About() {
+    const { t } = useLanguage();
+
     const handleDemoClick = () => {
         const el = document.getElementById("contact");
         if (el) el.scrollIntoView({ behavior: "smooth" });
@@ -33,7 +36,7 @@ export default function About() {
                     className="text-center mb-16"
                 >
                     <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black uppercase text-[#E2E8F0] mb-4">
-                        À PROPOS
+                        {t("about_title")}
                     </h2>
                     <div className="mt-4 w-16 h-1 bg-[#137fec] mx-auto rounded-full" />
                 </motion.div>
@@ -73,16 +76,15 @@ export default function About() {
                                 </div>
 
                                 <blockquote className="text-lg text-[#94A3B8] leading-relaxed mb-6 italic">
-                                    Ancien inspecteur pendant plusieurs années, j'ai créé l'outil
-                                    que j'aurais voulu avoir. Parlons-en!
+                                    {t("about_founder_quote")}
                                 </blockquote>
 
                                 <div className="mb-6">
                                     <p className="text-[#E2E8F0] font-black text-lg uppercase tracking-wide">
-                                        WALID BENARBIA
+                                        {t("about_founder_name")}
                                     </p>
                                     <p className="text-[#137fec] font-semibold text-sm tracking-widest">
-                                        — FONDATEUR
+                                        {t("about_founder_role")}
                                     </p>
                                 </div>
 
@@ -108,7 +110,7 @@ export default function About() {
                                     onClick={handleDemoClick}
                                     className="self-start font-bold tracking-wide uppercase"
                                 >
-                                    PARLONS-EN
+                                    {t("about_cta")}
                                 </Button>
                             </div>
                         </div>
