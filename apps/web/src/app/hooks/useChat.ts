@@ -73,7 +73,7 @@ export function useChat() {
             setMessages(prev => [...prev, {
                 id: "err-" + Date.now(),
                 role: "assistant",
-                content: "Désolé, une erreur s'est produite.",
+                content: locale === "en" ? "Sorry, an error occurred." : "Désolé, une erreur s'est produite.",
                 toolName: null,
                 toolArgs: null,
                 createdAt: Math.floor(Date.now() / 1000),

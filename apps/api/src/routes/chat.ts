@@ -112,12 +112,16 @@ chat.post("/", async (c) => {
             aiText = extractAIText(response);
         } catch (err) {
             console.error("[chat] AI call failed:", err);
-            finalAnswer = "Désolé, une erreur s'est produite lors du traitement de votre message. Veuillez réessayer.";
+            finalAnswer = locale === "en"
+                ? "Sorry, an error occurred while processing your message. Please try again."
+                : "Désolé, une erreur s'est produite lors du traitement de votre message. Veuillez réessayer.";
             break;
         }
 
         if (!aiText) {
-            finalAnswer = "Désolé, je n'ai pas pu générer de réponse.";
+            finalAnswer = locale === "en"
+                ? "Sorry, I could not generate a response."
+                : "Désolé, je n'ai pas pu générer de réponse.";
             break;
         }
 

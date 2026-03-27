@@ -280,7 +280,7 @@ ${Object.entries(TOOLS).map(([name, t]) => `- ${name}: ${t.description}. Args: $
 RULES:
 1. Use ONE tool at a time. Wait for the result before using another.
 2. After receiving a tool result, analyze it and respond in natural language.
-3. Use French by default unless the user writes in English.
+3. Respond in the language specified by the system instruction below.
 4. Be concise and helpful. Format numbers and lists clearly.
 5. If the user asks something that doesn't need a tool, just answer directly.
 6. Never expose internal IDs unless the user specifically asks for them.

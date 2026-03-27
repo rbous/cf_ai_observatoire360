@@ -8,33 +8,13 @@ AI-powered territorial surveillance platform that detects unpermitted constructi
 
 ## Quick Start — Try It Now
 
-### Option 1: Live demo (no setup)
+### Live demo (no setup)
 
 1. Go to [observatoire360.pages.dev/connexion](https://observatoire360.pages.dev/connexion)
 2. Click any demo city button (Gatineau, Austin, London, or Lisbon)
 3. You're in the dashboard — explore the map, alerts, and reports
 4. **Click the blue chat bubble** (bottom-right) to talk to the AI assistant
 5. Try: *"How many alerts do I have?"*, *"Show me the stats"*, *"List users"*
-
-### Option 2: Run locally
-
-```bash
-git clone https://github.com/rbous/cf_ai_observatoire360.git
-cd cf_ai_observatoire360
-pnpm install
-pnpm --filter @observatoire360/shared build
-
-# Terminal 1 — API
-cd apps/api
-pnpm run db:migrate && pnpm run db:seed
-pnpm dev
-
-# Terminal 2 — Frontend
-cd apps/web
-pnpm dev
-```
-
-Open http://localhost:5173 → click a demo city to log in.
 
 ---
 
