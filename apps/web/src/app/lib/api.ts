@@ -119,17 +119,27 @@ async function request<T>(
         headers["Authorization"] = `Bearer ${accessToken}`;
     }
 
+    // Abort after 60s to avoid hanging indefinitely (e.g. Worker timeout)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60_000);
+
     const init: RequestInit = {
         method,
         credentials: "include",
         headers,
+        signal: controller.signal,
     };
 
     if (body !== undefined) {
         init.body = JSON.stringify(body);
     }
 
-    const response = await fetch(url, init);
+    let response: Response;
+    try {
+        response = await fetch(url, init);
+    } finally {
+        clearTimeout(timeoutId);
+    }
 
     // On 401, attempt a single token refresh then retry the original request
     if (response.status === 401 && !isRetry) {

@@ -69,6 +69,7 @@ app.use("/api/reports/*",      requireAuth());
 app.use("/api/users/*",        requireAuth());
 app.use("/api/notifications/*", requireAuth());
 app.use("/api/scans/*",        requireAuth());
+app.use("/api/chat",           rateLimit(15, 60 * 1000)); // 15 msgs / minute
 app.use("/api/chat",           requireAuth());
 app.use("/api/chat/*",         requireAuth());
 // Images are public — R2 keys are unguessable ULIDs, no auth needed for <img src>

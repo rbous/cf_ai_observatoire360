@@ -13,13 +13,41 @@ import type { AuthVariables } from "../middleware/auth.js";
 
 const chat = new Hono<{ Bindings: Bindings; Variables: AuthVariables }>();
 
-const TOOL_CALL_REGEX = /\[TOOL:(\w+)\]\s*(\{[\s\S]*?\})/;
+const TOOL_NAME_REGEX = /\[TOOL:(\w+)\]\s*\{/;
 const MAX_ITERATIONS = 5;
 const MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+/** Extract the balanced JSON object after a [TOOL:name] tag. Handles nested braces. */
+function extractToolCall(text: string): { name: string; argsStr: string } | null {
+    const nameMatch = text.match(TOOL_NAME_REGEX);
+    if (!nameMatch) return null;
+
+    const name = nameMatch[1];
+    // Find the opening brace position
+    const braceStart = text.indexOf("{", nameMatch.index! + nameMatch[0].length - 1);
+    if (braceStart === -1) return null;
+
+    let depth = 0;
+    for (let i = braceStart; i < text.length; i++) {
+        if (text[i] === "{") depth++;
+        else if (text[i] === "}") depth--;
+        if (depth === 0) {
+            return { name, argsStr: text.slice(braceStart, i + 1) };
+        }
+    }
+
+    // Unbalanced — fall back to everything from brace to end
+    return { name, argsStr: text.slice(braceStart) };
+}
+
+/** Strip [TOOL:...]{...} syntax from a string so history doesn't poison the LLM. */
+function stripToolCallSyntax(text: string): string {
+    return text.replace(/\[TOOL:\w+\]\s*\{[\s\S]*$/, "").trim();
+}
 
 function extractAIText(response: unknown): string {
     if (typeof response === "string") return response;
@@ -78,6 +106,14 @@ chat.post("/", async (c) => {
     for (const msg of history) {
         if (msg.role === "tool") {
             messages.push({ role: "user", content: `[Tool result for ${msg.toolName}]: ${msg.content}` });
+        } else if (msg.role === "assistant") {
+            // Strip raw [TOOL:...] syntax so the LLM doesn't mimic the pattern
+            const cleaned = stripToolCallSyntax(msg.content);
+            if (cleaned) {
+                messages.push({ role: "assistant", content: cleaned });
+            }
+            // If cleaned is empty (message was only a tool call), skip it —
+            // the tool result already provides context.
         } else {
             messages.push({ role: msg.role, content: msg.content });
         }
@@ -125,19 +161,22 @@ chat.post("/", async (c) => {
             break;
         }
 
-        // Check for tool call
-        const toolMatch = aiText.match(TOOL_CALL_REGEX);
+        // Check for tool call (bracket-matching handles nested JSON)
+        const toolCall = extractToolCall(aiText);
 
-        if (toolMatch) {
-            const toolName = toolMatch[1];
-            const toolArgsStr = toolMatch[2];
+        if (toolCall) {
+            const toolName = toolCall.name;
+            const toolArgsStr = toolCall.argsStr;
             let toolArgs: Record<string, unknown> = {};
 
             try {
                 toolArgs = JSON.parse(toolArgsStr);
             } catch {
-                // If JSON parse fails, try to extract what we can
                 console.warn("[chat] Failed to parse tool args:", toolArgsStr);
+                // Tell the LLM the JSON was malformed so it can retry correctly
+                messages.push({ role: "assistant", content: aiText });
+                messages.push({ role: "user", content: `[Tool error]: Invalid JSON arguments for ${toolName}. Please retry with valid JSON.` });
+                continue;
             }
 
             const tool = TOOLS[toolName];
@@ -186,7 +225,18 @@ chat.post("/", async (c) => {
         break;
     }
 
-    // 6. Save final answer
+    // 6. Fallback if loop exhausted without a final answer
+    if (!finalAnswer && toolCalls.length > 0) {
+        finalAnswer = locale === "en"
+            ? "I've gathered the information above. Let me know if you need anything else."
+            : "J'ai rassemblé les informations ci-dessus. N'hésitez pas si vous avez d'autres questions.";
+    } else if (!finalAnswer) {
+        finalAnswer = locale === "en"
+            ? "Sorry, I could not generate a response. Please try again."
+            : "Désolé, je n'ai pas pu générer de réponse. Veuillez réessayer.";
+    }
+
+    // 7. Save final answer
     if (finalAnswer) {
         await db.insert(chatMessages).values({
             id: ulid(), municipalityId, userId,
