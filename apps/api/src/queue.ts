@@ -83,7 +83,17 @@ export async function handleQueue(
                 `[queue] Unhandled error processing message ${message.id}:`,
                 errorMsg,
             );
-            // Do not call message.ack() — let the Queue retry this message.
+
+            // Mark the job as failed so it doesn't stay stuck in an
+            // intermediate status (fetching/analyzing) forever.
+            const body = message.body as ScanJobMessage;
+            if (body?.jobId) {
+                try {
+                    await markJobFailed(db, body.jobId, errorMsg);
+                } catch (markErr) {
+                    console.error(`[queue] Failed to mark job ${body.jobId} as failed:`, markErr);
+                }
+            }
         }
     }
 }
