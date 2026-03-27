@@ -144,9 +144,30 @@ export const TOOLS: Record<string, ToolDef> = {
                 .where(eq(municipalities.id, ctx.municipalityId)).limit(1);
             if (!muni) return JSON.stringify({ error: "Municipality not found" });
 
+            // Geocode address to lat/lng if address provided without coordinates
+            let lat = args.latitude ? Number(args.latitude) : undefined;
+            let lng = args.longitude ? Number(args.longitude) : undefined;
+
+            if (!lat && !lng && args.address) {
+                try {
+                    const geoRes = await fetch(
+                        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(String(args.address))}&limit=1`,
+                        { headers: { "User-Agent": "Observatoire360/1.0" } },
+                    );
+                    const geoData = await geoRes.json() as Array<{ lat: string; lon: string }>;
+                    if (geoData.length > 0) {
+                        lat = parseFloat(geoData[0].lat);
+                        lng = parseFloat(geoData[0].lon);
+                    } else {
+                        return JSON.stringify({ error: "Address not found. Please try a more specific address or use coordinates." });
+                    }
+                } catch {
+                    return JSON.stringify({ error: "Geocoding failed. Please try again or use coordinates." });
+                }
+            }
+
             let bounds = muni.bounds ? JSON.parse(muni.bounds) : null;
-            if (args.latitude && args.longitude) {
-                const lat = Number(args.latitude), lng = Number(args.longitude);
+            if (lat && lng) {
                 const r = 200 / 111000;
                 const lngR = r / Math.cos(lat * Math.PI / 180);
                 bounds = { north: lat + r, south: lat - r, east: lng + lngR, west: lng - lngR };
@@ -158,15 +179,14 @@ export const TOOLS: Record<string, ToolDef> = {
                 id: jobId, municipalityId: ctx.municipalityId, status: "pending",
                 startDate: args.startDate ? String(args.startDate) : null,
                 endDate: args.endDate ? String(args.endDate) : null,
-                latitude: args.latitude ? Number(args.latitude) : null,
-                longitude: args.longitude ? Number(args.longitude) : null,
+                latitude: lat ?? null,
+                longitude: lng ?? null,
                 address: args.address ? String(args.address) : null,
                 createdAt: now,
             });
             await ctx.queue.send({ jobId, municipalityId: ctx.municipalityId, bounds,
                 startDate: args.startDate, endDate: args.endDate,
-                latitude: args.latitude ? Number(args.latitude) : undefined,
-                longitude: args.longitude ? Number(args.longitude) : undefined,
+                latitude: lat, longitude: lng,
             });
             return JSON.stringify({ success: true, jobId, message: "Scan triggered" });
         },
