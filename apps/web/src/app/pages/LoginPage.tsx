@@ -29,7 +29,7 @@ export default function LoginPage() {
         setError(null);
         setDemoLoading(email);
         try {
-            await login(email, "REDACTED_DEMO_PASSWORD");
+            await login(email, "Demo1234!");
             navigate(DASHBOARD_ROUTES.HOME, { replace: true });
         } catch (err) {
             setError(err instanceof Error ? err.message : "Demo login failed.");
