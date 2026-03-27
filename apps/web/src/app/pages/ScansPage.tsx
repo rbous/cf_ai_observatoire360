@@ -17,9 +17,9 @@ import { useAuth } from "@/app/hooks/useAuth";
 import { api, ApiRequestError } from "@/app/lib/api";
 import { API_BASE_URL } from "@/app/lib/constants";
 import type { ScanJob, PaginatedResponse } from "@observatoire360/shared";
-import { SCAN_JOB_STATUS_LABELS } from "@observatoire360/shared";
 import type { ScanJobStatus } from "@observatoire360/shared";
 import { useLanguage } from "@/app/hooks/useLanguage";
+import type { TranslationKey } from "@/app/i18n/translations";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -307,7 +307,7 @@ export default function ScansPage() {
                                             </td>
                                             <td className="px-5 py-3.5">
                                                 <Badge variant={statusBadgeVariant(scan.status)}>
-                                                    {SCAN_JOB_STATUS_LABELS[scan.status]}
+                                                    {t(`scans_status_${scan.status}` as TranslationKey)}
                                                 </Badge>
                                             </td>
                                             <td className="px-5 py-3.5 whitespace-nowrap">
