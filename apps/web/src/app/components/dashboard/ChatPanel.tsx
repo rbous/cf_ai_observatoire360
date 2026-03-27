@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { BrainCircuit, Trash2, X, ArrowUp, Wrench, MessageCircle } from "lucide-react";
+import { BrainCircuit, Trash2, X, ArrowUp, Wrench, MessageCircle, ChevronRight } from "lucide-react";
 import { useChat } from "@/app/hooks/useChat";
 import { useLanguage } from "@/app/hooks/useLanguage";
 
@@ -19,21 +19,25 @@ function ToolMessage({ toolName, content, label }: ToolMessageProps) {
 
     return (
         <div
-            className="my-1 cursor-pointer rounded-lg border border-slate-700 bg-slate-850 p-2 text-xs"
+            className="my-1 cursor-pointer rounded-lg border border-slate-700 p-2 text-xs"
             style={{ backgroundColor: "#1a2744" }}
             onClick={() => setExpanded(prev => !prev)}
         >
             <div className="flex items-center gap-2">
+                <ChevronRight
+                    size={12}
+                    className={`text-slate-400 flex-shrink-0 transition-transform duration-200 ${expanded ? "rotate-90" : ""}`}
+                />
                 <Wrench size={12} className="text-slate-400 flex-shrink-0" />
-                <span className="rounded bg-blue-600 px-1.5 py-0.5 text-[10px] font-medium text-white">
-                    {label}: {toolName}
+                <span className="text-[11px] text-slate-400">
+                    {label}: <span className="font-medium text-slate-300">{toolName}</span>
                 </span>
             </div>
-            <p
-                className={`mt-1.5 text-slate-500 leading-relaxed ${expanded ? "" : "line-clamp-2"}`}
-            >
-                {content}
-            </p>
+            {expanded && (
+                <p className="mt-2 text-slate-500 leading-relaxed border-t border-slate-700 pt-2">
+                    {content}
+                </p>
+            )}
         </div>
     );
 }
