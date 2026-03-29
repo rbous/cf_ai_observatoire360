@@ -4,86 +4,68 @@ Built with Claude Code (Opus 4.6). Prompts listed in chronological order.
 
 ---
 
-## Phase 1: Architecture & Initial Build
+> this repo was a quick copilot job so its not great. i need you to build a better version based on the instructions in the `new_instructions` directory. plan it all out first, think about security and edge cases, then build it. needs to run locally but the end goal is to run it on cloudflare through github actions
 
-> Look at the current repo. This was made quickly with Copilot, so it's not too good. I want you to create your own version of this app, using the new instructions uploaded in the `new_instructions` directory. Ask any clarifying questions and I will answer. Do this in a new git repo so I can upload it to a new GitHub repository. Must include a way to run it locally, but the end goal is to run it through GitHub Actions to Cloudflare. Start by making a complete plan, then implement it once every detail is planned and makes sense. Account for edge cases, and make sure security is top notch.
+> show me how to run it locally
 
-> Run it locally so I can see it.
+> the demo user password isnt working, fix it so i can log in
 
-> Fix the demo user password so I can login.
+> ok so how do i deploy this thing
 
-## Phase 2: Deployment
+> i need to enable R2 but i dont want to get charged. how can i make sure i stay in the free tier
 
-> How do I deploy it?
+> the site is live but will the detection pipeline run async as-is or does it need work
 
-> R2 needs to be enabled — how can I ensure I never go over the free limit before enabling it?
+> lets plan the actual features - satellite scanning, the ai detection part, notifications, and emails. map it out
 
-## Phase 3: Async Detection Pipeline
+> sentinel hub is only a 30-day trial, find me something thats actually free to use long-term
 
-> The website is up and running. Will it work asynchronously in its current state?
+> switch the config over to use gatineau
 
-> Plan out the next steps — satellite scanning, AI detection, notifications, emails.
+> the city-wide comparison is useless, it needs to be for specific addresses
 
-> Sentinel Hub says "free 30-day trial, not free forever." Can you switch to something that's actually free?
+> add options so the user can pick between the whole town, one address, or a lat/long
 
-> Can we configure it for Gatineau?
+> why is it asking for lat/long when i give it an address, just geocode it automatically
 
-## Phase 4: Data Sources & Imagery
+> the images are super pixelated, what is this? we need better quality
 
-> The comparison feature should only be for specific addresses. It's useless for the entire city.
+> the change detection is not working well at all. do whatever you need to do to get a high-res version working
 
-> You need to include an option for the entire municipality, or a specific address, or a latitude/longitude.
+> wayback only updates every few weeks right? how are we supposed to do daily checks
 
-> Why does the address option still show latitude and longitude fields? Just geocode the address automatically.
+> is the ai even running? it just says 0 detections every time
 
-> The images are extremely pixelated. What is this?
+> can we do a simple pixel-diff first and then only run the real ai if it finds something? seems more efficient
 
-> The top comparison is clearly not working well. Do whatever you must to have a working AI change detection that is high resolution.
+> do a full security audit, i want this to be top notch. no exposed env vars, no plaintext passwords, no pii in the frontend. triple check everything
 
-> But isn't Wayback only updated every few weeks? How will we do the daily one?
+> im going to make this repo public. scan everything and make sure theres no sensitive info. be super careful, check it multiple times
 
-## Phase 5: AI Detection
+> can you write some playwright tests for this
 
-> Does the AI actually run? It keeps showing 0 detections.
+> the "se connecter" button is dead, does nothing
 
-> Can we do pixel-diff first, then fine-tuned AI only if it detects something?
+> why does it still say "sherbrooke" everywhere, find all the hardcoded text and fix it
 
-## Phase 6: Security
+> refreshing the page logs me out, thats not right
 
-> Is security top notch? I don't want any environments exposed in the repo, or passwords stored as plain text, or PII in the frontend. Triple check.
+> i get "Alerte introuvable" when i click an alert
 
-> I'm thinking of making my repo public. Can you scan it and make sure nothing bad is there? Be very very careful, do it in detail, multiple times. I don't want anything going out to the world.
+> the /utilisateurs endpoint is broken
 
-## Phase 7: Testing
+> when i click an alert, there are no images. the "analyser cette zone" button starts a new analysis but it doesnt get linked back to the alert
 
-> Can you use Playwright to test it out?
+> block future dates in the analysis date picker
 
-## Phase 8: UX & Bug Fixes
+> clicking "analyser cette zone" still doesnt link the analysis to the alert
 
-> The "Se connecter" button doesn't do anything.
+> its still showing those same pixelated sentinel-2 images
 
-> Why does it still show "Sherbrooke"? Is there anything else hardcoded?
+> fix the formatting on the results page, and you can delete the bottom picture its a duplicate
 
-> Why does refreshing the page sign me out?
+> write a good readme
 
-> It says this when I click on an alert. (Alerte introuvable)
+> i need 3 playbooks: one for a tech admin, one for a non-tech admin, and one for other cities on how to use/deploy/maintain this thing
 
-> The /utilisateurs endpoint is not working.
-
-> When I click on an alert, there are still no images. The "Analyser cette zone" button launches an analysis but doesn't link it back to the alert.
-
-> For the analysis feature, you need to block future dates.
-
-> Even when I click "Analyser cette zone", it launches an analysis but doesn't link it.
-
-> It keeps only showing these images. (pixelated Sentinel-2)
-
-> Can you also fix the formatting? You can remove the bottom pic, it's duplicated.
-
-## Phase 9: Documentation
-
-> Create a good README.
-
-> Write 3 complete playbooks — one for a technical admin, one for a non-technical admin, and one for municipalities on how to deploy/maintain/use the app.
-
-> Write all prompts in PROMPTS.md.
+> put all the prompts we used into a PROMPTS.md file
